@@ -1,36 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-Our Chengdu Story — single-file Streamlit family travel companion
-===============================================================
+Our Chengdu Story — V2
+Single-file Streamlit family travel companion.
 
-Target: Streamlit >= 1.61 (uses inline Components v2 for a one-file app)
+V2 focus:
+- mobile-first UI that closely follows the frozen warm travel-journal preview
+- realistic photographic landing (no stick-figure panda)
+- Today page: iconic hero image -> cute route overview -> tasteful image timeline
+- refined Home / Food / Explore / Trip / Memories
+- no external API keys required for this visual V2
 
-Optional keys (set in Streamlit Cloud Secrets OR environment variables):
-    AMAP_WEB_KEY          = Web Service API key (live Nearby Food / Explore POIs)
-    AMAP_JS_KEY           = Web JS API key (live interactive Explore map)
-    AMAP_SECURITY_CODE    = JS API securityJsCode
-
-The app still runs without keys: itinerary, landing animation, Today page,
-route overview, Memories, and weather UI remain available; food / explore
-show demo/fallback content until AMap is connected.
+Run:
+    streamlit run app.py
 """
 
-from __future__ import annotations
-
-import json
-import math
-import os
-from datetime import datetime, date, time
-from zoneinfo import ZoneInfo
-from urllib.parse import quote
-
-import requests
 import streamlit as st
+import streamlit.components.v1 as components
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
-
-# -----------------------------------------------------------------------------
-# App + configuration
-# -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="Our Chengdu Story",
     page_icon="🐼",
@@ -38,750 +26,532 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# Keep Streamlit itself invisible; the app UI is rendered inside one controlled component.
 st.markdown(
     """
     <style>
-      [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
-      #MainMenu, footer {display:none !important;}
-      .block-container {padding:0 !important; max-width:100% !important;}
-      [data-testid="stAppViewContainer"] {background:#f4f0e6;}
-      iframe {border:0 !important;}
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+        background:#eee9dd !important;
+    }
+    [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
+    #MainMenu, footer {display:none !important;}
+    .block-container{
+        padding:0 !important;
+        max-width:100% !important;
+    }
+    iframe{
+        border:0 !important;
+        display:block !important;
+        margin:0 auto !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-if not hasattr(st.components, "v2"):
-    st.error("This single-file build needs Streamlit 1.61 or newer. Please update Streamlit and rerun.")
-    st.stop()
+now = datetime.now(ZoneInfo("Asia/Shanghai"))
+today_iso = now.strftime("%Y-%m-%d")
 
-TZ = ZoneInfo("Asia/Shanghai")
-TRIP_START = date(2026, 10, 15)
-TRIP_END = date(2026, 10, 20)
-
-
-def secret(name: str, default: str = "") -> str:
-    """Read from Streamlit Secrets first, then environment, without requiring a secrets file."""
-    try:
-        val = st.secrets.get(name, None)
-        if val:
-            return str(val)
-    except Exception:
-        pass
-    return os.getenv(name, default)
-
-
-AMAP_WEB_KEY = secret("AMAP_WEB_KEY")
-AMAP_JS_KEY = secret("AMAP_JS_KEY")
-AMAP_SECURITY_CODE = secret("AMAP_SECURITY_CODE")
-
-
-# -----------------------------------------------------------------------------
-# Editable trip data — keep travel content separate from rendering logic
-# -----------------------------------------------------------------------------
+# Images are deliberately chosen by day-theme rather than reused randomly.
+# They are remote photographs so the single-file build stays easy to deploy.
 IMG = {
-    "panda": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=1100&q=82",
-    "lake": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1100&q=82",
-    "temple": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1100&q=82",
-    "street": "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1100&q=82",
-    "coffee": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=82",
-    "food": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=82",
-    "museum": "https://images.unsplash.com/photo-1564399579883-451a5d44ec08?auto=format&fit=crop&w=900&q=82",
-    "city": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1100&q=82",
+    "landing_panda": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=1000&q=90",
+    "chengdu_city": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=88",
+    "old_street": "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=88",
+    "temple": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=88",
+    "panda": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=1200&q=90",
+    "jiuzhai": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=88",
+    "mountain_lake": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=88",
+    "museum": "https://images.unsplash.com/photo-1564399579883-451a5d44ec08?auto=format&fit=crop&w=1200&q=88",
+    "tea": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=900&q=86",
+    "food1": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=88",
+    "food2": "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=900&q=88",
+    "food3": "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=900&q=88",
+    "coffee": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=86",
+    "airport": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=86",
 }
 
-# lat/lng are WGS84-ish anchor coordinates for weather / overview only.
-# AMap live search uses browser GPS converted to GCJ-02 before query.
 DAYS = [
     {
-        "day": 1,
-        "date": "2026-10-15",
-        "weekday": "Thu",
-        "city": "Chengdu",
-        "lat": 30.5728,
-        "lng": 104.0668,
-        "hero": IMG["street"],
-        "hero_cn": "成都，刚刚好。",
-        "hero_en": "Arrive softly. Let the story begin.",
-        "route_title": "Arrival · City Walk",
+        "day": 1, "date": "15 Oct", "weekday": "Thu", "city": "Chengdu",
+        "hero": IMG["old_street"], "title": "成都初印象", "hero_en": "Arrive softly. Let the story begin.",
+        "route": [("春熙路","Chunxi Road"),("太古里","Taikoo Li"),("人民公园","People's Park"),("晚餐","Dinner")],
         "events": [
-            {"start":"00:05","end":"05:25","title":"Penang → Shanghai","cn":"槟城 → 上海","subtitle":"HO1366 · PVG T2","type":"flight","image":IMG["city"],"time_sensitive":True},
-            {"start":"05:25","end":"08:10","title":"Shanghai Transit","cn":"上海转机","subtitle":"Transit only · PVG T2","type":"transit","image":IMG["coffee"],"time_sensitive":True},
-            {"start":"08:10","end":"11:25","title":"Shanghai → Chengdu","cn":"上海 → 成都","subtitle":"HO1119 · TFU T2","type":"flight","image":IMG["city"],"time_sensitive":True},
-            {"start":"12:00","end":"14:00","title":"Airport → Hotel","cn":"机场前往酒店","subtitle":"Settle in · Leave bags","type":"transfer","image":IMG["street"]},
-            {"start":"15:00","end":"17:00","title":"Chunxi Road · Taikoo Li","cn":"春熙路 · 太古里","subtitle":"Slow city walk","type":"place","image":IMG["street"]},
-            {"start":"17:00","end":"19:00","title":"People's Park · Kuanzhai Alley","cn":"人民公园 · 宽窄巷子","subtitle":"Tea, alleys and evening light","type":"place","image":IMG["temple"]},
-            {"start":"19:00","end":"20:00","title":"Dinner · Flexible","cn":"晚餐 · 自由安排","subtitle":"Search nearby when hungry","type":"meal","image":IMG["food"]},
-            {"start":"20:00","end":"21:00","title":"Twin Towers · Optional","cn":"双子塔 · Optional","subtitle":"Only if everyone still has energy","type":"place","image":IMG["city"]},
+            ("00:05","Penang → Shanghai","槟城 → 上海","HO1366 · PVG T2",IMG["airport"],1),
+            ("05:25","Shanghai Transit","上海转机","Transit only · PVG T2",IMG["coffee"],1),
+            ("08:10","Shanghai → Chengdu","上海 → 成都","HO1119 · TFU T2",IMG["airport"],1),
+            ("12:00","Airport → Hotel","机场前往酒店","Settle in · Leave bags",IMG["chengdu_city"],0),
+            ("15:00","Chunxi Road · Taikoo Li","春熙路 · 太古里","Slow city walk",IMG["old_street"],0),
+            ("17:00","People's Park · Kuanzhai Alley","人民公园 · 宽窄巷子","Tea, alleys and evening light",IMG["tea"],0),
+            ("19:00","Dinner · Flexible","晚餐 · 自由安排","Search nearby when hungry",IMG["food1"],0),
         ],
     },
     {
-        "day": 2,
-        "date": "2026-10-16",
-        "weekday": "Fri",
-        "city": "Chengdu / Jiuzhaigou",
-        "lat": 30.5728,
-        "lng": 104.0668,
-        "hero": IMG["temple"],
-        "hero_cn": "慢下来，一起感受成都。",
-        "hero_en": "Slower steps, richer memories.",
-        "route_title": "Culture · Transfer North",
+        "day": 2, "date": "16 Oct", "weekday": "Fri", "city": "Chengdu",
+        "hero": IMG["panda"], "title": "熊猫与千年成都", "hero_en": "A softer pace, a fuller day.",
+        "route": [("酒店","Hotel"),("熊猫基地","Panda Base"),("都江堰","Dujiangyan"),("回程","Return")],
         "events": [
-            {"start":"08:00","end":"09:00","title":"Hotel Breakfast","cn":"酒店早餐","subtitle":"Take it easy","type":"meal","image":IMG["coffee"]},
-            {"start":"09:00","end":"10:00","title":"Wenshu Monastery","cn":"文殊院","subtitle":"Morning temple atmosphere","type":"place","image":IMG["temple"]},
-            {"start":"10:00","end":"12:00","title":"Wuhou Shrine","cn":"武侯祠","subtitle":"Three Kingdoms history","type":"place","image":IMG["temple"]},
-            {"start":"12:00","end":"13:00","title":"Lunch · Flexible","cn":"午餐 · 自由安排","subtitle":"Search nearby when hungry","type":"meal","image":IMG["food"]},
-            {"start":"13:00","end":"16:00","title":"Du Fu Thatched Cottage","cn":"杜甫草堂","subtitle":"Gardens · poetry · slow walk","type":"place","image":IMG["street"]},
-            {"start":"16:00","end":"19:00","title":"Transfer toward Jiuzhaigou","cn":"前往九寨沟方向","subtitle":"Private transfer · relax on the way","type":"transfer","image":IMG["lake"]},
-            {"start":"19:00","end":"20:00","title":"Dinner · Flexible","cn":"晚餐 · 自由安排","subtitle":"Something warm after the ride","type":"meal","image":IMG["food"]},
+            ("08:00","Hotel Breakfast","酒店早餐","慢慢吃，养足精神",IMG["coffee"],0),
+            ("09:00","Chengdu Research Base","成都大熊猫繁育研究基地","今天先去看最可爱的成都居民",IMG["panda"],0),
+            ("12:30","Lunch · Flexible","午餐 · 灵活安排","Search nearby when hungry",IMG["food1"],0),
+            ("14:00","Dujiangyan","都江堰","古老水利工程 · 慢慢走",IMG["temple"],0),
+            ("18:30","Return to hotel","返回酒店","Rest well for tomorrow",IMG["old_street"],0),
         ],
     },
     {
-        "day": 3,
-        "date": "2026-10-17",
-        "weekday": "Sat",
-        "city": "Jiuzhaigou",
-        "lat": 33.2600,
-        "lng": 103.9186,
-        "hero": IMG["lake"],
-        "hero_cn": "九寨沟，是今天的主角。",
-        "hero_en": "Slow down to see more.",
-        "route_title": "Jiuzhaigou · Full Day",
+        "day": 3, "date": "17 Oct", "weekday": "Sat", "city": "Jiuzhaigou",
+        "hero": IMG["mountain_lake"], "title": "九寨沟", "hero_en": "Nature at its most beautiful.",
+        "route": [("酒店","Hotel"),("九寨沟","Jiuzhaigou"),("午餐","Lunch"),("回酒店","Return")],
         "events": [
-            {"start":"07:00","end":"08:00","title":"Hotel Breakfast","cn":"酒店早餐","subtitle":"Warm up for a beautiful day","type":"meal","image":IMG["coffee"]},
-            {"start":"08:00","end":"13:00","title":"Jiuzhaigou Scenic Area","cn":"九寨沟景区","subtitle":"自由游览 · Explore at your own pace","type":"place","image":IMG["lake"]},
-            {"start":"13:00","end":"14:00","title":"Lunch · Flexible","cn":"午餐 · 自由安排","subtitle":"Find something nearby","type":"meal","image":IMG["food"]},
-            {"start":"14:00","end":"18:00","title":"Scenic transfer / sightseeing","cn":"沿途游览 · 返回方向","subtitle":"Keep the pace gentle","type":"transfer","image":IMG["lake"]},
-            {"start":"19:00","end":"20:00","title":"Dinner · Flexible","cn":"晚餐 · 自由安排","subtitle":"A warm meal together","type":"meal","image":IMG["food"]},
+            ("07:00","Hotel Breakfast","酒店早餐","Warm up for a beautiful day",IMG["coffee"],0),
+            ("08:00","Jiuzhaigou Scenic Area","九寨沟景区","自由游览 · Explore at your own pace",IMG["mountain_lake"],0),
+            ("13:00","Lunch · Flexible","午餐 · 灵活安排","Find something nearby",IMG["food1"],0),
+            ("14:00","Continue Exploration","继续游览","Keep the pace gentle",IMG["jiuzhai"],0),
+            ("18:00","Return to hotel","返回酒店","A slow evening together",IMG["mountain_lake"],0),
         ],
     },
     {
-        "day": 4,
-        "date": "2026-10-18",
-        "weekday": "Sun",
-        "city": "Dujiangyan",
-        "lat": 30.9884,
-        "lng": 103.6469,
-        "hero": IMG["panda"],
-        "hero_cn": "今天，看熊猫也看千年水利。",
-        "hero_en": "A little cute, a little ancient.",
-        "route_title": "Pandas · Dujiangyan",
+        "day": 4, "date": "18 Oct", "weekday": "Sun", "city": "Dujiangyan",
+        "hero": IMG["panda"], "title": "熊猫谷 · 都江堰", "hero_en": "A little cute, a little ancient.",
+        "route": [("熊猫谷","Panda Valley"),("仰天窝","Yangtianwo"),("午餐","Lunch"),("古城","Ancient City")],
         "events": [
-            {"start":"07:00","end":"08:00","title":"Hotel Breakfast","cn":"酒店早餐","subtitle":"Easy morning","type":"meal","image":IMG["coffee"]},
-            {"start":"08:00","end":"10:00","title":"Panda Valley","cn":"熊猫谷","subtitle":"Meet the sleepy locals 🐼","type":"place","image":IMG["panda"]},
-            {"start":"11:00","end":"12:00","title":"Yangtianwo Square","cn":"仰天窝广场","subtitle":"Giant panda photo stop","type":"place","image":IMG["panda"]},
-            {"start":"12:00","end":"13:00","title":"Lunch · Flexible","cn":"午餐 · 自由安排","subtitle":"Search nearby when hungry","type":"meal","image":IMG["food"]},
-            {"start":"14:00","end":"18:00","title":"Dujiangyan Ancient City","cn":"都江堰 · 灌县古城","subtitle":"钟书阁 · 南桥 · 蓝眼泪夜景","type":"place","image":IMG["temple"]},
-            {"start":"18:00","end":"19:00","title":"Dinner · Flexible","cn":"晚餐 · 自由安排","subtitle":"Dinner before heading back","type":"meal","image":IMG["food"]},
+            ("08:00","Panda Valley","熊猫谷","Meet the sleepy locals",IMG["panda"],0),
+            ("11:00","Yangtianwo Square","仰天窝广场","Giant panda photo stop",IMG["panda"],0),
+            ("12:30","Lunch · Flexible","午餐 · 灵活安排","Search nearby when hungry",IMG["food2"],0),
+            ("14:00","Dujiangyan Ancient City","都江堰 · 灌县古城","钟书阁 · 南桥 · 夜景",IMG["temple"],0),
+            ("19:00","Dinner · Flexible","晚餐 · 灵活安排","Eat well, rest well",IMG["food1"],0),
         ],
     },
     {
-        "day": 5,
-        "date": "2026-10-19",
-        "weekday": "Mon",
-        "city": "Chengdu",
-        "lat": 30.5728,
-        "lng": 104.0668,
-        "hero": IMG["museum"],
-        "hero_cn": "古蜀、街区与成都夜色。",
-        "hero_en": "Old stories, new memories.",
-        "route_title": "Sanxingdui · Chengdu Night",
+        "day": 5, "date": "19 Oct", "weekday": "Mon", "city": "Chengdu",
+        "hero": IMG["museum"], "title": "三星堆与成都夜色", "hero_en": "Old stories, new memories.",
+        "route": [("三星堆","Sanxingdui"),("东郊记忆","Eastern Memory"),("玉林路","Yulin Road"),("九眼桥","Jiuyan Bridge")],
         "events": [
-            {"start":"08:00","end":"09:00","title":"Hotel Breakfast","cn":"酒店早餐","subtitle":"Start slowly","type":"meal","image":IMG["coffee"]},
-            {"start":"09:00","end":"12:00","title":"Sanxingdui Museum","cn":"三星堆博物馆","subtitle":"Ancient Shu civilization","type":"place","image":IMG["museum"]},
-            {"start":"12:00","end":"13:00","title":"Lunch · Flexible","cn":"午餐 · 自由安排","subtitle":"Nearby food when ready","type":"meal","image":IMG["food"]},
-            {"start":"14:00","end":"17:00","title":"Eastern Suburb Memory","cn":"东郊记忆","subtitle":"Industrial art district","type":"place","image":IMG["street"]},
-            {"start":"17:00","end":"19:00","title":"Yulin Road","cn":"玉林路","subtitle":"Neighborhood wandering","type":"place","image":IMG["street"]},
-            {"start":"19:00","end":"20:00","title":"Dinner · Flexible","cn":"晚餐 · 自由安排","subtitle":"Pick what looks good nearby","type":"meal","image":IMG["food"]},
-            {"start":"20:00","end":"21:00","title":"Anshun Bridge · Jiuyan Bridge","cn":"安顺廊桥 · 九眼桥","subtitle":"A gentle last Chengdu night","type":"place","image":IMG["city"]},
+            ("09:00","Sanxingdui Museum","三星堆博物馆","Ancient Shu civilization",IMG["museum"],0),
+            ("12:30","Lunch · Flexible","午餐 · 灵活安排","Nearby food when ready",IMG["food1"],0),
+            ("14:00","Eastern Suburb Memory","东郊记忆","Industrial art district",IMG["old_street"],0),
+            ("17:00","Yulin Road","玉林路","Neighborhood wandering",IMG["tea"],0),
+            ("20:00","Anshun Bridge · Jiuyan Bridge","安顺廊桥 · 九眼桥","A gentle last Chengdu night",IMG["chengdu_city"],0),
         ],
     },
     {
-        "day": 6,
-        "date": "2026-10-20",
-        "weekday": "Tue",
-        "city": "Chengdu / Shanghai",
-        "lat": 30.3120,
-        "lng": 104.4410,
-        "hero": IMG["city"],
-        "hero_cn": "回家的路，也是一段旅程。",
-        "hero_en": "Take the memories home.",
-        "route_title": "Homeward",
+        "day": 6, "date": "20 Oct", "weekday": "Tue", "city": "Chengdu / Shanghai",
+        "hero": IMG["airport"], "title": "把成都带回家", "hero_en": "Take the memories home.",
+        "route": [("酒店","Hotel"),("天府机场","TFU"),("上海","Shanghai"),("槟城","Penang")],
         "events": [
-            {"start":"08:00","end":"09:00","title":"Hotel → Tianfu Airport","cn":"酒店 → 天府机场","subtitle":"Leave with a comfortable buffer","type":"transfer","image":IMG["city"],"time_sensitive":True},
-            {"start":"09:00","end":"11:00","title":"Check-in · Rest","cn":"值机 · 休息","subtitle":"TFU T2","type":"transit","image":IMG["coffee"],"time_sensitive":True},
-            {"start":"12:30","end":"15:15","title":"Chengdu → Shanghai","cn":"成都 → 上海","subtitle":"HO1120 · TFU T2 → PVG T2","type":"flight","image":IMG["city"],"time_sensitive":True},
-            {"start":"15:15","end":"17:30","title":"Shanghai Transit","cn":"上海转机","subtitle":"PVG T2 · Transit only","type":"transit","image":IMG["coffee"],"time_sensitive":True},
-            {"start":"17:30","end":"23:00","title":"Shanghai → Penang","cn":"上海 → 槟城","subtitle":"HO1365 · Home sweet home","type":"flight","image":IMG["city"],"time_sensitive":True},
+            ("08:00","Hotel → Tianfu Airport","酒店 → 天府机场","Leave with a comfortable buffer",IMG["airport"],1),
+            ("09:00","Check-in · Rest","值机 · 休息","TFU T2",IMG["coffee"],1),
+            ("12:30","Chengdu → Shanghai","成都 → 上海","HO1120 · TFU T2 → PVG T2",IMG["airport"],1),
+            ("15:15","Shanghai Transit","上海转机","PVG T2 · Transit only",IMG["coffee"],1),
+            ("17:30","Shanghai → Penang","上海 → 槟城","HO1365 · Home sweet home",IMG["airport"],1),
         ],
     },
 ]
 
-LANDING_MESSAGES = {
-    "before": {"cn": "我在成都等着你哦 ♡", "en": "I'll be waiting for you in Chengdu."},
-    1: {"cn": "今天轻轻落地成都呀，别急着赶路 ♡", "en": "Arrive softly. Let Chengdu say hello."},
-    2: {"cn": "今天有古老成都，也有一路向北的小期待。", "en": "Old stories first, new scenery next."},
-    3: {"cn": "九寨沟是今天的主角，记得多看几眼哦 ♡", "en": "Today belongs to Jiuzhaigou."},
-    4: {"cn": "今天有熊猫、有山水，应该会很可爱。", "en": "Pandas, water and a very good day."},
-    5: {"cn": "把三星堆和成都夜色，都装进回忆里吧。", "en": "One more day of stories to keep."},
-    6: {"cn": "回家路上别太想我哦，成都记得你来过 ♡", "en": "Take the memories home with you."},
-    "after": {"cn": "我在成都很想你。下次再回来，好不好？♡", "en": "Chengdu misses you. Come back someday."},
-}
+# Serialize only simple data for JS.
+import json
+payload = json.dumps({"days": DAYS, "images": IMG, "today": today_iso}, ensure_ascii=False)
 
-
-# -----------------------------------------------------------------------------
-# Live helpers
-# -----------------------------------------------------------------------------
-WEATHER_CODES = {
-    0:("☀️","Clear"), 1:("🌤️","Mostly clear"), 2:("⛅","Partly cloudy"), 3:("☁️","Cloudy"),
-    45:("🌫️","Fog"), 48:("🌫️","Fog"), 51:("🌦️","Drizzle"), 53:("🌦️","Drizzle"), 55:("🌧️","Drizzle"),
-    61:("🌦️","Light rain"), 63:("🌧️","Rain"), 65:("🌧️","Heavy rain"), 71:("🌨️","Light snow"),
-    73:("🌨️","Snow"), 75:("❄️","Heavy snow"), 80:("🌦️","Showers"), 81:("🌧️","Showers"),
-    82:("⛈️","Heavy showers"), 95:("⛈️","Thunderstorm"), 96:("⛈️","Thunderstorm"), 99:("⛈️","Thunderstorm"),
-}
-
-
-@st.cache_data(ttl=600, show_spinner=False)
-def get_weather(lat: float, lng: float) -> dict:
-    try:
-        r = requests.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
-                "latitude": lat,
-                "longitude": lng,
-                "current": "temperature_2m,apparent_temperature,weather_code,precipitation",
-                "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code",
-                "timezone": "Asia/Shanghai",
-                "forecast_days": 7,
-            },
-            timeout=7,
-        )
-        r.raise_for_status()
-        j = r.json()
-        cur = j.get("current", {})
-        daily = j.get("daily", {})
-        code = int(cur.get("weather_code", 3) or 3)
-        icon, desc = WEATHER_CODES.get(code, ("☁️", "Weather"))
-        return {
-            "ok": True,
-            "temp": round(float(cur.get("temperature_2m", 0))),
-            "feels": round(float(cur.get("apparent_temperature", 0))),
-            "precip": float(cur.get("precipitation", 0) or 0),
-            "icon": icon,
-            "desc": desc,
-            "high": round(float((daily.get("temperature_2m_max") or [0])[0])),
-            "low": round(float((daily.get("temperature_2m_min") or [0])[0])),
-            "rain_prob": int(float((daily.get("precipitation_probability_max") or [0])[0] or 0)),
-        }
-    except Exception:
-        return {"ok": False, "temp": 16, "feels": 16, "precip": 0, "icon":"⛅", "desc":"Weather unavailable", "high":20, "low":12, "rain_prob":0}
-
-
-def _transform_lat(x: float, y: float) -> float:
-    ret = -100.0 + 2.0*x + 3.0*y + 0.2*y*y + 0.1*x*y + 0.2*math.sqrt(abs(x))
-    ret += (20.0*math.sin(6.0*x*math.pi) + 20.0*math.sin(2.0*x*math.pi))*2.0/3.0
-    ret += (20.0*math.sin(y*math.pi) + 40.0*math.sin(y/3.0*math.pi))*2.0/3.0
-    ret += (160.0*math.sin(y/12.0*math.pi) + 320*math.sin(y*math.pi/30.0))*2.0/3.0
-    return ret
-
-
-def _transform_lng(x: float, y: float) -> float:
-    ret = 300.0 + x + 2.0*y + 0.1*x*x + 0.1*x*y + 0.1*math.sqrt(abs(x))
-    ret += (20.0*math.sin(6.0*x*math.pi) + 20.0*math.sin(2.0*x*math.pi))*2.0/3.0
-    ret += (20.0*math.sin(x*math.pi) + 40.0*math.sin(x/3.0*math.pi))*2.0/3.0
-    ret += (150.0*math.sin(x/12.0*math.pi) + 300.0*math.sin(x/30.0*math.pi))*2.0/3.0
-    return ret
-
-
-def wgs84_to_gcj02(lat: float, lng: float) -> tuple[float, float]:
-    # China offset conversion used only so browser GPS aligns with domestic AMap POIs.
-    if not (72.004 <= lng <= 137.8347 and 0.8293 <= lat <= 55.8271):
-        return lat, lng
-    a = 6378245.0
-    ee = 0.00669342162296594323
-    dlat = _transform_lat(lng - 105.0, lat - 35.0)
-    dlng = _transform_lng(lng - 105.0, lat - 35.0)
-    radlat = lat / 180.0 * math.pi
-    magic = math.sin(radlat)
-    magic = 1 - ee * magic * magic
-    sqrtmagic = math.sqrt(magic)
-    dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * math.pi)
-    dlng = (dlng * 180.0) / (a / sqrtmagic * math.cos(radlat) * math.pi)
-    return lat + dlat, lng + dlng
-
-
-@st.cache_data(ttl=300, show_spinner=False)
-def amap_around(lat_gcj: float, lng_gcj: float, radius: int, keyword: str, page_size: int = 12) -> list[dict]:
-    if not AMAP_WEB_KEY:
-        return []
-    try:
-        r = requests.get(
-            "https://restapi.amap.com/v5/place/around",
-            params={
-                "key": AMAP_WEB_KEY,
-                "location": f"{lng_gcj:.6f},{lat_gcj:.6f}",
-                "radius": int(radius),
-                "keywords": keyword,
-                "show_fields": "business,photos,navi",
-                "page_size": min(max(page_size, 1), 25),
-                "page_num": 1,
-            },
-            timeout=8,
-        )
-        j = r.json()
-        if str(j.get("status")) != "1":
-            return []
-        out = []
-        for p in j.get("pois", []) or []:
-            biz = p.get("business") or {}
-            photos = p.get("photos") or []
-            loc = (p.get("location") or "").split(",")
-            out.append({
-                "id": p.get("id", ""),
-                "name": p.get("name", ""),
-                "type": p.get("type", ""),
-                "address": p.get("address", ""),
-                "distance": int(float(p.get("distance", 0) or 0)),
-                "lng": float(loc[0]) if len(loc) == 2 else None,
-                "lat": float(loc[1]) if len(loc) == 2 else None,
-                "rating": biz.get("rating") or "",
-                "cost": biz.get("cost") or "",
-                "tag": biz.get("tag") or "",
-                "open_today": biz.get("opentime_today") or "",
-                "photo": (photos[0].get("url") if photos and isinstance(photos[0], dict) else "") or "",
-            })
-        return out
-    except Exception:
-        return []
-
-
-DEMO_FOOD = [
-    {"name":"陈麻婆豆腐","type":"川菜","distance":450,"rating":"4.6","cost":"68","open_today":"11:00-22:00","photo":IMG["food"],"lat":30.572,"lng":104.066,"demo":True},
-    {"name":"蜀大侠火锅","type":"火锅","distance":600,"rating":"4.5","cost":"110","open_today":"10:00-23:00","photo":IMG["food"],"lat":30.575,"lng":104.068,"demo":True},
-    {"name":"明婷饭店","type":"川菜","distance":1100,"rating":"4.4","cost":"75","open_today":"10:30-21:30","photo":IMG["food"],"lat":30.570,"lng":104.071,"demo":True},
-    {"name":"建设路小吃街","type":"小吃","distance":1800,"rating":"4.6","cost":"35","open_today":"10:00-23:30","photo":IMG["street"],"lat":30.590,"lng":104.098,"demo":True},
-]
-
-
-# -----------------------------------------------------------------------------
-# Determine current / selected day and live backend payload
-# -----------------------------------------------------------------------------
-now = datetime.now(TZ)
-if TRIP_START <= now.date() <= TRIP_END:
-    default_day = (now.date() - TRIP_START).days + 1
-elif now.date() < TRIP_START:
-    default_day = 1
-else:
-    default_day = 6
-
-state = st.session_state.get("chengdu_story_ui")
-getstate = lambda name, default: getattr(state, name, default) if state is not None else default
-page = getstate("page", "home") or "home"
-selected_day = int(getstate("selected_day", default_day) or default_day)
-selected_day = max(1, min(6, selected_day))
-radius = int(getstate("radius", 1000) or 1000)
-food_category = str(getstate("food_category", "全部") or "全部")
-explore_category = str(getstate("explore_category", "景点") or "景点")
-location = getstate("location", None)
-
-loc_wgs = None
-if isinstance(location, dict) and location.get("lat") is not None and location.get("lng") is not None:
-    try:
-        loc_wgs = (float(location["lat"]), float(location["lng"]))
-    except Exception:
-        loc_wgs = None
-
-selected = DAYS[selected_day - 1]
-weather = get_weather(selected["lat"], selected["lng"])
-
-food_keyword_map = {"全部":"餐饮", "川菜":"川菜", "火锅":"火锅", "小吃":"小吃", "面":"面馆", "咖啡":"咖啡", "甜品":"甜品"}
-explore_keyword_map = {"景点":"景点", "便利店":"便利店", "厕所":"公共厕所", "咖啡":"咖啡", "药房":"药房", "商场":"商场", "酒店":"酒店"}
-
-food_results = []
-explore_results = []
-loc_gcj = None
-if loc_wgs:
-    glat, glng = wgs84_to_gcj02(*loc_wgs)
-    loc_gcj = {"lat": glat, "lng": glng}
-    food_results = amap_around(glat, glng, radius, food_keyword_map.get(food_category, food_category), 12)
-    explore_results = amap_around(glat, glng, 2500, explore_keyword_map.get(explore_category, explore_category), 20)
-
-if not food_results:
-    food_results = DEMO_FOOD
-
-# compact source status: never fake sources we do not actually query
-for p in food_results:
-    p["sources"] = {
-        "amap": bool(AMAP_WEB_KEY and not p.get("demo")),
-        "dianping": None,
-        "xiaohongshu": None,
-    }
-    # Internal trust matrix hook: rating + fresh structured POI fields + source breadth.
-    # Multi-platform adapters can be added later without changing the UI.
-    score = 0
-    try:
-        score += 45 if float(p.get("rating") or 0) >= 4.3 else 30 if float(p.get("rating") or 0) >= 4.0 else 15
-    except Exception:
-        score += 10
-    score += 25 if p.get("open_today") else 10
-    score += 15 if p.get("photo") else 5
-    score += 15 if p["sources"]["amap"] else 0
-    p["trust_score"] = score
-
-payload = {
-    "now_iso": now.isoformat(),
-    "trip_start": TRIP_START.isoformat(),
-    "trip_end": TRIP_END.isoformat(),
-    "days": DAYS,
-    "selected_day": selected_day,
-    "page": page,
-    "weather": weather,
-    "landing_messages": LANDING_MESSAGES,
-    "food": food_results,
-    "food_live": bool(AMAP_WEB_KEY and loc_wgs),
-    "explore": explore_results,
-    "location_wgs": {"lat":loc_wgs[0], "lng":loc_wgs[1]} if loc_wgs else None,
-    "location_gcj": loc_gcj,
-    "amap_js_key": AMAP_JS_KEY,
-    "amap_security_code": AMAP_SECURITY_CODE,
-    "amap_web_connected": bool(AMAP_WEB_KEY),
-    "images": IMG,
-}
-
-
-# -----------------------------------------------------------------------------
-# Single inline UI component
-# -----------------------------------------------------------------------------
-APP_HTML = r"""
-<div id="app-root" class="app-shell"></div>
-"""
-
-APP_CSS = r"""
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
-
+html = r"""
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@500;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+<style>
 :root{
-  --paper:#f8f5ec; --paper2:#f2eee2; --ink:#24302a; --muted:#7d8278; --green:#596d52;
-  --green2:#77866c; --sage:#dce3d3; --gold:#ba8a50; --red:#9a493b; --line:#dad4c6;
-  --shadow:0 8px 26px rgba(54,58,47,.10); --radius:24px;
+  --paper:#f7f2e7;
+  --paper2:#fbf8f0;
+  --ink:#1d2a2d;
+  --muted:#72776f;
+  --green:#476853;
+  --green2:#6f8c73;
+  --sage:#dce3d2;
+  --sage2:#edf1e6;
+  --line:#d8d3c7;
+  --red:#a75d4b;
+  --gold:#b88445;
+  --shadow:0 8px 28px rgba(47,50,43,.08);
 }
-*{box-sizing:border-box}
-body{margin:0}
-.app-shell{width:100%;min-height:100vh;background:var(--paper);color:var(--ink);font-family:'Noto Sans SC',system-ui,-apple-system,sans-serif;overflow-x:hidden}
-.screen{max-width:480px;margin:0 auto;min-height:100vh;padding:16px 16px 92px;position:relative;background:
- radial-gradient(circle at 100% 0%,rgba(129,143,109,.08),transparent 27%),var(--paper)}
-.serif{font-family:'Cormorant Garamond','Noto Serif SC',serif}.muted{color:var(--muted)}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px}.topbar h1{font-size:25px;margin:0;font-weight:600}.sub{font-size:12px;color:var(--muted)}
-.card{background:rgba(255,255,255,.58);border:1px solid rgba(93,105,84,.14);border-radius:20px;box-shadow:0 5px 16px rgba(43,48,39,.055)}
-.hero{height:238px;border-radius:24px;overflow:hidden;position:relative;background:#d9ddce;box-shadow:var(--shadow)}
-.hero img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.86) contrast(.96)}
-.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,28,24,.02) 30%,rgba(19,24,20,.55) 100%)}
-.hero-copy{position:absolute;z-index:2;left:20px;right:20px;bottom:18px;color:#fff}.hero-copy .cn{font-family:'Cormorant Garamond','Noto Sans SC';font-size:28px;line-height:1.15;font-weight:600}.hero-copy .en{font-family:'Cormorant Garamond';font-style:italic;font-size:16px;margin-top:6px;opacity:.94}
-.quote{font-family:'Cormorant Garamond','Noto Sans SC';font-size:17px;font-style:italic;color:#5d6659;line-height:1.4}
-.greeting{display:flex;justify-content:space-between;align-items:flex-start;margin:6px 4px 14px}.greeting h2{font:600 32px/1 'Cormorant Garamond';margin:0 0 6px}.greeting .weather{font-size:26px;text-align:right}.greeting .weather small{display:block;font-size:11px;color:var(--muted);font-family:'Noto Sans SC'}
-.now-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.mini-card{padding:14px 14px 12px;min-height:116px}.label{font-size:11px;letter-spacing:.08em;color:var(--red);font-weight:600}.mini-card h3{font-size:15px;margin:7px 0 4px;line-height:1.28}.mini-card p{font-size:11px;color:var(--muted);margin:0;line-height:1.45}.timebig{font:600 20px 'Cormorant Garamond';color:var(--green)}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0}.quick button{border:0;background:transparent;padding:0;cursor:pointer}.quick .qbox{height:66px;border-radius:18px;background:rgba(255,255,255,.58);border:1px solid rgba(93,105,84,.13);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px}.quick span{font-size:10px;color:#565f55;margin-top:5px;display:block}.quick .qbox:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.section-title{display:flex;justify-content:space-between;align-items:end;margin:20px 2px 9px}.section-title h3{font:600 22px 'Cormorant Garamond','Noto Sans SC';margin:0}.section-title small{font-size:11px;color:var(--muted)}
-.day-strip{display:flex;gap:8px;overflow:auto;padding:2px 1px 7px;scrollbar-width:none}.day-chip{flex:0 0 auto;border:1px solid var(--line);border-radius:16px;padding:9px 12px;background:#faf8f0;font-size:11px;color:#5e655b;cursor:pointer}.day-chip.active{background:var(--green);color:#fff;border-color:var(--green);transform:translateY(-1px)}
-.route-card{padding:13px;margin:10px 0 12px;background:linear-gradient(145deg,#fcfaf4,#f1eee3);position:relative;overflow:hidden}.route-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.route-head strong{font:600 18px 'Cormorant Garamond','Noto Sans SC'}.route-head small{color:var(--muted);font-size:10px}.route-svg{width:100%;height:166px;display:block}.route-note{text-align:center;font:italic 14px 'Cormorant Garamond','Noto Sans SC';color:#667060;margin-top:-5px}
-.route-node circle{fill:#6f8067;stroke:#f8f5ec;stroke-width:4}.route-node text.num{fill:#fff;font:600 10px sans-serif;text-anchor:middle;dominant-baseline:middle}.route-node text.name{fill:#4b5549;font:500 8.5px 'Noto Sans SC';text-anchor:middle}.route-node.past{opacity:.42}.route-node.next circle{fill:#b08b55}.route-node.current circle{fill:#9d4d3f;filter:drop-shadow(0 3px 5px rgba(118,58,48,.3));animation:pulse 1.8s ease-in-out infinite;transform-origin:center}.route-node.current text.name{font-weight:700;fill:#803f36}.route-path{fill:none;stroke:#87957d;stroke-width:3;stroke-dasharray:6 7;stroke-linecap:round}.route-decor{font-size:17px;opacity:.72}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
-.timeline{position:relative;padding-left:22px}.timeline:before{content:"";position:absolute;left:8px;top:11px;bottom:14px;width:1.5px;background:#8b987f}.event{position:relative;display:grid;grid-template-columns:58px 1fr 74px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(92,99,84,.10)}.event:before{content:"";position:absolute;left:-18px;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--paper)}.event.past{opacity:.48}.event.current{background:linear-gradient(90deg,rgba(220,227,211,.52),transparent);border-radius:12px;padding-left:7px;margin-left:-7px}.event.current:before{background:var(--red);box-shadow:0 0 0 4px rgba(154,73,59,.13)}.event.next:before{background:var(--gold)}.event .tm{font:600 14px 'Cormorant Garamond';color:#5a6157}.event h4{margin:0 0 2px;font-size:13px}.event p{font-size:10px;line-height:1.38;color:var(--muted);margin:0}.event img{width:68px;height:58px;border-radius:12px;object-fit:cover;filter:saturate(.88)}.event .urgent{display:inline-block;font-size:9px;color:#8b4439;background:#f3e3dd;border-radius:999px;padding:2px 6px;margin-top:4px}
-.soft-note{margin:14px 0;padding:15px 17px;border-radius:18px;background:linear-gradient(135deg,#f8efe0,#f5f2e7);font:italic 16px/1.5 'Cormorant Garamond','Noto Sans SC';color:#6c6356}
-.nav{position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:0;width:min(480px,100vw);height:72px;background:rgba(248,245,236,.94);backdrop-filter:blur(14px);border-top:1px solid rgba(84,95,76,.12);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 7px 10px}.nav button{border:0;background:none;color:#7d837b;font-size:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center}.nav button b{font-size:20px;font-weight:400}.nav button.active{color:#3f6048;font-weight:600}
-.filters{display:flex;gap:7px;overflow:auto;scrollbar-width:none;padding:4px 0 9px}.pill{border:1px solid var(--line);background:#f9f7ef;border-radius:999px;padding:8px 12px;font-size:11px;white-space:nowrap;cursor:pointer}.pill.active{background:var(--green);color:white;border-color:var(--green)}
-.location-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 13px;margin-bottom:10px}.loc-left{display:flex;align-items:center;gap:8px}.loc-dot{width:9px;height:9px;border-radius:50%;background:#2d7cdc;box-shadow:0 0 0 4px rgba(45,124,220,.12)}.loc-text{font-size:11px}.loc-btn{border:0;border-radius:999px;background:#e7ecdf;color:#465a42;padding:7px 10px;font-size:10px;cursor:pointer}
-.poi-list{display:flex;flex-direction:column;gap:9px}.poi{display:grid;grid-template-columns:82px 1fr;gap:11px;padding:9px}.poi img{width:82px;height:78px;border-radius:14px;object-fit:cover}.poi h4{font-size:14px;margin:1px 0 3px}.meta{font-size:10px;color:var(--muted);line-height:1.55}.rating{color:#b16d34;font-weight:600;font-size:12px}.sources{display:flex;gap:5px;margin-top:5px}.src{width:21px;height:21px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}.src.amap{background:#e7f0e6;color:#3e7042}.src.dp{background:#fbe6df;color:#c44d2d}.src.xhs{background:#f5e2e4;color:#b9414a}.src.unknown{opacity:.35;filter:grayscale(1)}.trust{margin-left:auto;font-size:9px;color:#64725f}.poi-top{display:flex;align-items:center;gap:6px}.open{color:#44845a;font-size:10px}.demo-flag{font-size:9px;color:#9b7c51;background:#f4ead9;border-radius:999px;padding:2px 6px}
-.map-card{height:390px;border-radius:24px;overflow:hidden;position:relative;background:linear-gradient(145deg,#e7ede0,#dce8e9);border:1px solid #d7dacd}.map-canvas{position:absolute;inset:0;background:
- linear-gradient(22deg,transparent 0 45%,rgba(255,255,255,.68) 46% 49%,transparent 50%),
- linear-gradient(-26deg,transparent 0 40%,rgba(255,255,255,.74) 41% 44%,transparent 45%),
- repeating-linear-gradient(90deg,rgba(119,151,171,.12) 0 2px,transparent 2px 90px),
- repeating-linear-gradient(0deg,rgba(119,151,171,.10) 0 2px,transparent 2px 88px)}.river{position:absolute;width:140%;height:70px;background:rgba(112,180,196,.24);transform:rotate(-21deg);left:-25%;top:42%;border-radius:55%}.you{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border:5px solid white;border-radius:50%;background:#2c7fd1;box-shadow:0 0 0 14px rgba(44,127,209,.14),0 3px 12px rgba(44,80,110,.25)}.map-pin{position:absolute;width:26px;height:26px;border-radius:50% 50% 50% 0;background:#5a7651;transform:rotate(-45deg);box-shadow:0 4px 9px rgba(52,66,47,.18)}.map-pin span{display:block;transform:rotate(45deg);font-size:11px;text-align:center;line-height:26px;color:white}.map-overlay{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(250,248,240,.92);backdrop-filter:blur(10px);border-radius:18px;padding:11px 12px;font-size:11px}.map-overlay strong{display:block;font-size:13px}.map-live{width:100%;height:100%;}
-.explore-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 12px}.explore-btn{border:1px solid rgba(90,105,82,.13);background:#faf8f0;border-radius:16px;padding:10px 3px;text-align:center;font-size:10px;cursor:pointer}.explore-btn b{display:block;font-size:20px;margin-bottom:3px}.explore-btn.active{background:#e7ecdf;color:#3f6149}
-.trip-hero{height:245px}.tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin:10px 0 14px;padding:0 3px}.tabs span{font:600 15px 'Cormorant Garamond';padding:6px 0}.tabs .active{border-bottom:2px solid var(--green);color:var(--green)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{text-align:center;padding:13px 6px}.stat b{display:block;font:600 20px 'Cormorant Garamond';color:#4d6549}.trip-day{display:grid;grid-template-columns:48px 1fr auto;gap:9px;align-items:center;padding:11px 12px;border-bottom:1px solid rgba(80,91,76,.09);cursor:pointer}.trip-day .badge{background:#e7ecdf;border-radius:12px;text-align:center;padding:6px 4px;font-size:10px;color:#4e654b}.trip-day strong{font-size:12px}.trip-day small{display:block;color:var(--muted);font-size:9px;margin-top:2px}
-.memory-head{padding:14px}.memory-actions{display:flex;gap:8px;margin-top:9px}.action-btn{flex:1;border:1px solid var(--line);background:#faf8ef;border-radius:14px;padding:9px;font-size:11px;cursor:pointer}.memory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.memory-item{aspect-ratio:1;border-radius:12px;overflow:hidden;position:relative;background:#e6e0d4}.memory-item img{width:100%;height:100%;object-fit:cover}.memory-item.selected:after{content:'✓';position:absolute;right:6px;top:6px;background:#4f704f;color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px}.memory-item input{display:none}.memory-empty{text-align:center;color:var(--muted);padding:35px 10px;font:italic 16px 'Cormorant Garamond'}.day-summary{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 14px;margin:10px 0}.day-summary h3{margin:0;font:600 20px 'Cormorant Garamond','Noto Sans SC'}.day-summary p{font-size:10px;color:var(--muted);margin:3px 0 0}
-.landing{position:fixed;z-index:999;inset:0;background:linear-gradient(180deg,#faf7ef,#f1eee4);display:flex;align-items:center;justify-content:center;overflow:hidden}.landing.hidden{animation:fadeOut .55s ease forwards}.land-inner{width:min(430px,94vw);height:min(760px,94vh);position:relative;border-radius:32px;overflow:hidden;background:
- radial-gradient(circle at 75% 15%,rgba(133,151,115,.16),transparent 28%),linear-gradient(180deg,#fbf8f0,#eee8da)}.bamboo{position:absolute;font-size:110px;opacity:.15;top:-15px;left:-28px;transform:rotate(-12deg)}.mountains{position:absolute;bottom:0;left:0;right:0;height:35%;opacity:.22;background:linear-gradient(155deg,transparent 0 24%,#7b8d79 25% 42%,transparent 43%),linear-gradient(25deg,transparent 0 31%,#8d9d87 32% 49%,transparent 50%)}.land-title{position:absolute;top:70px;left:20px;right:20px;text-align:center}.land-title h1{font:600 42px/1 'Cormorant Garamond';margin:0;color:#26342b}.land-title small{font:500 10px/2 'Noto Sans SC';letter-spacing:.28em;color:#7b8177}.panda{position:absolute;width:112px;height:150px;left:-120px;bottom:120px;animation:walkIn 2.45s cubic-bezier(.25,.75,.25,1) .25s forwards}.panda-body{position:absolute;width:88px;height:100px;background:#fff;border-radius:50% 50% 45% 45%;left:12px;top:42px;box-shadow:inset 0 -5px 0 #e8e5dd}.panda-head{position:absolute;width:92px;height:84px;background:#fff;border-radius:48% 48% 45% 45%;left:10px;top:0;z-index:3}.ear{position:absolute;width:30px;height:30px;background:#202522;border-radius:50%;top:-7px}.ear.l{left:4px}.ear.r{right:4px}.eye{position:absolute;width:23px;height:31px;background:#202522;border-radius:55% 45% 55% 45%;top:27px}.eye.l{left:15px;transform:rotate(25deg)}.eye.r{right:15px;transform:rotate(-25deg)}.eye:after{content:'';position:absolute;width:6px;height:8px;background:#fff;border-radius:50%;left:9px;top:8px}.nose{position:absolute;width:15px;height:10px;background:#202522;border-radius:50%;left:39px;top:54px}.arm{position:absolute;width:28px;height:72px;background:#202522;border-radius:20px;top:56px;z-index:2}.arm.l{left:5px;transform:rotate(16deg)}.arm.r{right:2px;transform-origin:top center;transform:rotate(-8deg)}.leg{position:absolute;width:28px;height:50px;background:#202522;border-radius:18px;top:115px}.leg.l{left:19px}.leg.r{right:19px}.panda.wave .arm.r{animation:wave .55s ease-in-out 4}.bubble{position:absolute;left:50%;transform:translateX(-50%) scale(.88);bottom:300px;width:82%;background:rgba(255,255,255,.88);border:1px solid #ded8ca;border-radius:24px;padding:18px 20px;text-align:center;box-shadow:var(--shadow);opacity:0;animation:bubbleIn .45s ease 2.9s forwards}.bubble .cn{font-size:17px;font-weight:500}.bubble .en{font:italic 15px 'Cormorant Garamond';color:#70766d;margin-top:5px}.enter-btn{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);border:0;background:#4f654c;color:#fff;border-radius:999px;padding:12px 28px;font-size:12px;opacity:0;animation:bubbleIn .45s ease 3.35s forwards;cursor:pointer}.skip{position:absolute;right:20px;top:20px;border:0;background:transparent;color:#8c9188;font-size:11px;cursor:pointer}
-@keyframes walkIn{0%{left:-120px;transform:scale(.58)}70%{left:50%;transform:translateX(-50%) scale(.78)}100%{left:50%;transform:translateX(-50%) scale(1)}}
-@keyframes wave{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(-58deg)}}@keyframes bubbleIn{to{opacity:1;transform:translateX(-50%) scale(1)}}@keyframes fadeOut{to{opacity:0;visibility:hidden}}
-@media(max-width:390px){.screen{padding-left:12px;padding-right:12px}.event{grid-template-columns:52px 1fr 66px}.event img{width:62px;height:54px}.hero{height:222px}.route-svg{height:158px}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#eee9dd;color:var(--ink);font-family:"Noto Sans SC",sans-serif}
+body{display:flex;justify-content:center}
+#app{
+  width:min(100vw,460px);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(119,140,111,.12),transparent 22%),
+    radial-gradient(circle at 4% 18%,rgba(190,162,112,.08),transparent 22%),
+    var(--paper);
+  position:relative;
+  overflow-x:hidden;
+}
+.page{display:none;padding:14px 14px 92px;min-height:100vh}
+.page.active{display:block}
+.serif{font-family:"Cormorant Garamond","Noto Serif SC",serif}
+.cnserif{font-family:"Noto Serif SC",serif}
+.hand{font-family:"ZCOOL XiaoWei","Noto Serif SC",serif}
+.topline{display:flex;align-items:flex-start;justify-content:space-between;margin:6px 3px 12px}
+.greeting{font:700 31px/1 "Cormorant Garamond",serif;letter-spacing:.2px}
+.poem{font-family:"Noto Serif SC";font-style:italic;font-size:14px;color:#786a59;margin-top:7px}
+.weather-mini{text-align:right;padding-top:2px}
+.weather-mini .deg{font:600 27px "Cormorant Garamond";white-space:nowrap}
+.weather-mini small{color:var(--muted);font-size:10px}
+.hero{
+  position:relative;height:240px;border-radius:25px;overflow:hidden;background:#ddd;
+  box-shadow:var(--shadow);isolation:isolate
+}
+.hero:after{
+  content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(7,18,16,.64) 100%);
+}
+.hero img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.01)}
+.hero-copy{position:absolute;z-index:2;left:22px;bottom:20px;color:#fff;text-shadow:0 1px 7px rgba(0,0,0,.24)}
+.hero-copy .cn{font:700 28px/1.12 "Noto Serif SC";letter-spacing:1px}
+.hero-copy .en{font:italic 14px/1.4 "Cormorant Garamond";margin-top:7px}
+.datebar{
+  margin:14px 0 0;padding:12px 15px;border-radius:18px;background:rgba(255,255,255,.52);
+  border:1px solid rgba(130,125,111,.14);display:flex;justify-content:space-between;align-items:center
+}
+.datebar b{font-family:"Noto Serif SC";font-size:14px}
+.badge{padding:5px 10px;border-radius:999px;background:var(--green);color:#fff;font-size:10px}
+.now-next{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.mini-card{
+  background:rgba(255,255,255,.72);border:1px solid rgba(130,125,111,.15);border-radius:20px;padding:14px;min-height:113px;
+  box-shadow:0 4px 14px rgba(57,59,52,.04)
+}
+.mini-card .lab{font:700 10px "Noto Sans SC";letter-spacing:1px;color:#455b4a}
+.mini-card h3{margin:8px 0 3px;font:700 18px/1.15 "Noto Serif SC"}
+.mini-card .sub{font-size:11px;line-height:1.45;color:#666}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0 19px}
+.quick button{
+  appearance:none;border:1px solid rgba(130,125,111,.14);background:rgba(255,255,255,.58);border-radius:18px;height:74px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:10px;color:#555
+}
+.quick .ico{font-size:22px}
+.section-title{display:flex;align-items:end;justify-content:space-between;margin:8px 2px 10px}
+.section-title h2{margin:0;font:700 26px "Cormorant Garamond","Noto Serif SC"}
+.section-title span{font-size:10px;color:var(--muted)}
+.daychips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.daychip{min-width:54px;border:0;background:#fff9;border-radius:14px;padding:8px 5px;font-size:10px;color:#6c6c66}
+.daychip.active{background:var(--green);color:#fff}
+.quote{
+  margin-top:18px;padding:18px 18px 20px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(255,255,255,.38),rgba(234,229,214,.58));
+  font-family:"Noto Serif SC";font-size:13px;color:#665a4d
+}
+.quote .big{font:italic 18px "Cormorant Garamond";margin-bottom:6px}
+
+/* Today */
+.today-head{display:grid;grid-template-columns:36px 1fr 60px;align-items:center;margin:4px 0 10px}
+.back{border:0;background:rgba(255,255,255,.6);width:34px;height:34px;border-radius:50%;font-size:20px}
+.today-title{text-align:center}.today-title h1{margin:0;font:700 25px "Cormorant Garamond"}.today-title div{font-size:11px}
+.today-temp{text-align:right;font-size:12px;color:#556}
+.today-hero{height:210px;border-radius:0 0 24px 24px;margin:0 -14px 0;box-shadow:none}
+.today-hero .hero-copy{left:24px;bottom:16px}
+.today-hero .hero-copy .cn{font-size:26px}
+.route-card{
+  background:rgba(255,255,255,.72);border:1px solid rgba(130,125,111,.15);border-radius:22px;padding:14px 14px 12px;
+  margin-top:11px;box-shadow:0 5px 16px rgba(51,53,47,.04)
+}
+.route-top{display:flex;justify-content:space-between;align-items:center}
+.route-top h3{margin:0;font:700 17px "Noto Serif SC"}
+.route-top small{font-size:9px;color:#777}
+.route-art{position:relative;height:178px;margin-top:6px;overflow:hidden}
+.route-art:before{
+  content:"";position:absolute;left:8%;right:7%;top:41%;height:42%;
+  border-top:4px dashed #82927d;border-radius:48% 52% 54% 46%;transform:rotate(4deg);opacity:.9
+}
+.route-art .hill{position:absolute;width:85px;height:38px;border-radius:50% 50% 12% 12%;background:linear-gradient(#cdd9c6,#eaf0e1);filter:blur(.1px)}
+.route-art .hill.h1{left:-9px;bottom:8px}.route-art .hill.h2{right:4px;top:23px;width:92px}
+.stop{position:absolute;display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;z-index:2}
+.stop .n{width:26px;height:26px;border-radius:50%;background:var(--green);border:3px solid #f8f5ec;color:#fff;font:bold 12px/20px sans-serif;box-shadow:0 3px 8px #0002}
+.stop b{font:600 12px "Noto Serif SC";margin-top:3px}.stop small{font-size:8px;color:#777}
+.stop.current .n{transform:scale(1.26);box-shadow:0 0 0 6px rgba(112,140,115,.18),0 5px 13px #0003}
+.stop.s1{left:0;top:72px}.stop.s2{left:28%;top:110px}.stop.s3{left:56%;top:41px}.stop.s4{right:0;top:84px}
+.route-mascot{position:absolute;right:15px;bottom:5px;font-size:36px;transform:rotate(-5deg)}
+.route-note{text-align:center;font:italic 13px "Cormorant Garamond";color:#746558;margin-top:-4px}
+.timeline{margin:18px 0 0 3px;border-left:2px solid #80927d;padding-left:14px}
+.event{display:grid;grid-template-columns:54px 1fr 68px;gap:10px;align-items:center;min-height:96px;border-bottom:1px solid rgba(120,118,107,.16);position:relative}
+.event:before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#526f5a;left:-19px;top:41px;border:2px solid var(--paper)}
+.event.current:before{width:13px;height:13px;left:-21px;top:39px;box-shadow:0 0 0 5px rgba(83,111,90,.13)}
+.event .time{font:600 13px "Cormorant Garamond";color:#4d514b}
+.event h4{margin:0 0 3px;font:700 13px/1.35 "Noto Serif SC"}
+.event .cn{font-size:10px;color:#686b64}
+.event .desc{font-size:9px;color:#7b7b75;margin-top:2px;line-height:1.4}
+.event img{width:66px;height:66px;object-fit:cover;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.event .urgent{display:inline-block;margin-top:5px;background:#f4e4df;color:#a25546;border-radius:99px;font-size:7px;padding:3px 7px;letter-spacing:.3px}
+
+/* Food */
+.page-head{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 11px}
+.page-head h1{margin:0;font:700 25px "Cormorant Garamond","Noto Serif SC";text-align:center}
+.search{background:rgba(255,255,255,.65);border:1px solid #ded8cb;border-radius:15px;padding:11px 13px;color:#888;font-size:11px}
+.filters{display:flex;gap:7px;overflow-x:auto;margin:11px 0 13px;scrollbar-width:none}
+.filter{white-space:nowrap;border:0;background:#f1ede3;padding:7px 11px;border-radius:99px;font-size:10px;color:#6d6b66}
+.filter.active{background:var(--green);color:#fff}
+.food-card{display:grid;grid-template-columns:88px 1fr;gap:12px;background:rgba(255,255,255,.64);border:1px solid rgba(120,118,107,.13);border-radius:18px;padding:8px;margin-bottom:9px}
+.food-card img{width:88px;height:88px;border-radius:14px;object-fit:cover}
+.food-card h3{font:700 13px "Noto Serif SC";margin:3px 0}
+.food-card .meta{font-size:9px;color:#777;line-height:1.7}
+.rating{color:#b87c25;font-weight:600;font-size:11px}
+.platforms{display:flex;gap:5px;margin-top:7px}
+.platforms i{font-style:normal;width:18px;height:18px;border-radius:6px;background:#e9eee8;color:#42634e;display:grid;place-items:center;font-size:9px;font-weight:700}
+.platforms i.warn{background:#f3ece0;color:#b07c43}
+
+/* Explore */
+.mapbox{height:520px;margin:0 -14px;background:
+ linear-gradient(rgba(241,242,235,.20),rgba(241,242,235,.20)),
+ url('https://tile.openstreetmap.org/12/3241/1698.png') center/cover;
+ position:relative;border-top:1px solid #ddd;border-bottom:1px solid #ddd;overflow:hidden}
+.mapbox:before{
+ content:"";position:absolute;inset:0;background:
+ linear-gradient(90deg,transparent 49%,rgba(255,255,255,.38) 50%,transparent 51%),
+ linear-gradient(transparent 49%,rgba(255,255,255,.32) 50%,transparent 51%);
+ background-size:100px 100px;opacity:.55
+}
+.pin{position:absolute;transform:translate(-50%,-100%);font-size:24px;filter:drop-shadow(0 2px 3px #0003)}
+.pin.you{font-size:34px}
+.mapcats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.cat{background:#fff8;border-radius:16px;padding:10px 2px;text-align:center;font-size:9px;border:1px solid #ddd8ca}
+.cat b{display:block;font-size:18px;margin-bottom:4px}
+
+/* Trip */
+.trip-cover{height:280px;border-radius:24px;position:relative;overflow:hidden;margin-top:8px;box-shadow:var(--shadow)}
+.trip-cover img{width:100%;height:100%;object-fit:cover}
+.trip-cover:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(9,20,18,.76))}
+.trip-cover .txt{position:absolute;left:20px;bottom:20px;color:#fff;z-index:2}
+.trip-cover .txt h2{margin:0;font:700 30px "Cormorant Garamond"}.trip-cover .txt p{margin:5px 0 0;font-size:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}
+.stat{background:#fff9;border-radius:16px;padding:13px;text-align:center;border:1px solid #e2ddd2}
+.stat b{display:block;font:700 22px "Cormorant Garamond"}.stat span{font-size:9px;color:#777}
+.highlight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.highlight-grid img{width:100%;aspect-ratio:1;border-radius:12px;object-fit:cover}
+
+/* Memories */
+.memory-top{background:#fff8;border-radius:18px;padding:14px;margin-bottom:10px;border:1px solid #ded8cc}
+.memory-top h3{font:700 18px "Noto Serif SC";margin:0 0 6px}
+.memory-top .meta{font-size:10px;color:#777;display:flex;gap:12px}
+.masonry{columns:2;column-gap:8px}
+.masonry img{width:100%;margin:0 0 8px;border-radius:14px;break-inside:avoid;box-shadow:0 3px 10px #0001}
+
+/* Bottom nav */
+.nav{
+  position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);
+  width:min(100vw,460px);height:72px;padding:8px 12px max(8px,env(safe-area-inset-bottom));
+  background:rgba(250,248,241,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(115,112,101,.14);
+  display:grid;grid-template-columns:repeat(5,1fr)
+}
+.nav button{border:0;background:transparent;color:#7a8077;font-size:9px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center}
+.nav button b{font-size:18px;font-weight:400}
+.nav button.active{color:#355943;font-weight:600}
+
+/* Landing */
+#landing{
+ position:fixed;z-index:100;inset:0;margin:auto;width:min(100vw,460px);height:100vh;overflow:hidden;background:#0d1914;color:white;
+ transition:opacity .65s ease,visibility .65s
+}
+#landing.hide{opacity:0;visibility:hidden}
+.land-photo{position:absolute;inset:0}
+.land-photo img{
+ width:100%;height:100%;object-fit:cover;object-position:center 48%;
+ animation:cinematic 4.2s ease-out forwards;
+}
+.land-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,14,11,.07),rgba(5,14,11,.10) 38%,rgba(5,14,11,.78) 100%)}
+@keyframes cinematic{0%{transform:scale(1.10) translateX(-3%)}55%{transform:scale(1.03) translateX(0)}100%{transform:scale(1.00)}}
+.land-top{position:absolute;z-index:2;top:22px;left:20px;right:20px;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.3px}
+.land-title{position:absolute;z-index:2;left:25px;bottom:142px}
+.land-title h1{font:600 51px/.88 "Cormorant Garamond";margin:0;max-width:270px}
+.land-title .cap{font-size:10px;letter-spacing:4px;margin-top:17px}
+.bubble{
+ position:absolute;z-index:3;right:18px;top:26%;max-width:215px;background:rgba(250,247,239,.94);color:#2b342d;
+ padding:13px 15px;border-radius:20px 20px 5px 20px;font:500 13px/1.45 "Noto Serif SC";
+ box-shadow:0 10px 28px rgba(0,0,0,.16);opacity:0;transform:translateY(10px);
+ animation:bubbleIn .55s 2.35s ease forwards
+}
+.bubble small{display:block;color:#777;margin-top:4px;font:italic 11px "Cormorant Garamond"}
+@keyframes bubbleIn{to{opacity:1;transform:none}}
+.land-cta{position:absolute;z-index:2;left:25px;right:25px;bottom:35px;display:flex;align-items:center;justify-content:space-between}
+.land-cta .line{height:2px;flex:1;background:rgba(255,255,255,.65);margin-right:18px}
+.land-cta button{width:52px;height:52px;border-radius:50%;border:1px solid #ffffff55;background:#ffffff20;color:#fff;font-size:24px;backdrop-filter:blur(8px)}
+.skip{border:0;background:transparent;color:#fff;font-size:10px}
+
+/* Fine tune for short mobile */
+@media (max-height:760px){
+  .hero{height:220px}.today-hero{height:190px}.route-art{height:155px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="landing">
+  <div class="land-photo"><img src="__LANDING__" alt="realistic panda"/></div>
+  <div class="land-top"><span>Sichuan, China</span><button class="skip" onclick="enterApp()">Skip</button></div>
+  <div class="bubble" id="landBubble">我在成都等着你哦 ♡<small>I'll be waiting for you in Chengdu.</small></div>
+  <div class="land-title">
+    <h1>Our<br>Chengdu<br>Story</h1>
+    <div class="cap">A FAMILY JOURNEY · 15–20 OCT 2026</div>
+  </div>
+  <div class="land-cta"><div class="line"></div><button onclick="enterApp()">→</button></div>
+</div>
+
+<section id="home" class="page active"></section>
+<section id="today" class="page"></section>
+<section id="food" class="page"></section>
+<section id="explore" class="page"></section>
+<section id="trip" class="page"></section>
+<section id="memories" class="page"></section>
+
+<nav class="nav">
+  <button data-page="home" class="active"><b>⌂</b>Home</button>
+  <button data-page="today"><b>▣</b>Today</button>
+  <button data-page="explore"><b>◎</b>Explore</button>
+  <button data-page="trip"><b>♧</b>Trip</button>
+  <button data-page="memories"><b>▧</b>Memories</button>
+</nav>
+</div>
+
+<script>
+const DATA = __DATA__;
+const days = DATA.days;
+let selectedDay = 1;
+
+function enterApp(){ document.getElementById('landing').classList.add('hide'); localStorage.setItem('chengduSeen','1');}
+if(localStorage.getItem('chengduSeen')==='1'){setTimeout(()=>document.getElementById('landing').classList.add('hide'),160);}
+
+function page(name){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>page(b.dataset.page));
+
+function currentDayByDate(){
+  const t = new Date();
+  const mo=t.getMonth()+1, d=t.getDate();
+  if(mo===10 && d>=15 && d<=20) return d-14;
+  if(mo<10 || (mo===10&&d<15)) return 1;
+  return 6;
+}
+selectedDay=currentDayByDate();
+
+function eventState(day,event){
+  const now = new Date();
+  const targetDate = new Date(`2026-10-${String(14+day.day).padStart(2,'0')}T${event[0]}:00+08:00`);
+  const next = new Date(targetDate.getTime()+90*60000);
+  if(now<targetDate) return 'future';
+  if(now<=next) return 'current';
+  return 'past';
+}
+function routeCurrentIndex(day){
+  const now = new Date(), tripdate=new Date(`2026-10-${String(14+day.day).padStart(2,'0')}T00:00:00+08:00`);
+  if(now.toDateString()!==tripdate.toDateString()) return Math.min(1,day.route.length-1);
+  const hour=now.getHours()+now.getMinutes()/60;
+  if(hour<10)return 0;if(hour<13)return 1;if(hour<17)return 2;return 3;
+}
+function tripPhaseText(){
+  const now=new Date(), start=new Date('2026-10-15T00:00:00+08:00'), end=new Date('2026-10-21T00:00:00+08:00');
+  if(now<start) return ['Trip begins soon','行李慢慢收，期待慢慢长。'];
+  if(now>=end) return ['See you again, Chengdu','成都还在这里，等下一次回来。'];
+  return ['Enjoy today','慢慢走，今天也会有好故事。'];
+}
+function nextEvent(){
+  const d=days[selectedDay-1]; return d.events[0];
+}
+function home(){
+ const d=days[Math.max(0,currentDayByDate()-1)];
+ const phase=tripPhaseText();
+ let chips=days.map(x=>`<button class="daychip ${x.day===d.day?'active':''}" onclick="selectedDay=${x.day};today();page('today')">Day ${x.day}<br><span>${x.date}</span></button>`).join('');
+ document.getElementById('home').innerHTML=`
+ <div class="topline">
+   <div><div class="greeting">Good evening,</div><div class="poem">好好旅行，是让一家人更靠近。</div></div>
+   <div class="weather-mini"><div class="deg">☁ 20°C</div><small>Chengdu · Cloudy</small></div>
+ </div>
+ <div class="hero"><img src="${d.hero}"><div class="hero-copy"><div class="cn">成都，刚刚好。</div><div class="en">Arrive softly. Let the story begin.</div></div></div>
+ <div class="datebar"><b>15–20 Oct 2026<br><span style="font-size:10px;font-weight:400;color:#777">Chengdu Family Trip</span></b><span>›</span></div>
+ <div class="now-next">
+   <div class="mini-card"><div class="lab">NOW</div><h3>${phase[0]}</h3><div class="sub">${phase[1]}</div></div>
+   <div class="mini-card"><div class="lab">NEXT</div><h3>00:05</h3><div class="sub">Penang → Shanghai<br>HO1366 · 00:05</div></div>
+ </div>
+ <div class="quick">
+   <button onclick="page('today')"><div class="ico">▣</div>Today 今日行程</button>
+   <button onclick="page('food')"><div class="ico">♨</div>Nearby Food</button>
+   <button onclick="page('explore')"><div class="ico">◎</div>Explore 探索</button>
+   <button onclick="page('memories')"><div class="ico">▧</div>Memories 相册</button>
+ </div>
+ <div class="section-title"><h2>Our Journey</h2><span>15–20 Oct 2026</span></div>
+ <div class="daychips">${chips}</div>
+ <div class="quote"><div class="big">“Not just places, but moments together.”</div>旅行的意义，是和重要的人一起。</div>`;
+}
+function today(){
+ const d=days[selectedDay-1], ci=routeCurrentIndex(d);
+ let stops=d.route.slice(0,4).map((s,i)=>`<div class="stop s${i+1} ${i===ci?'current':''}"><div class="n">${i+1}</div><b>${s[0]}</b><small>${s[1]}</small></div>`).join('');
+ let ev=d.events.map(e=>{
+   const st=eventState(d,e), urgent=e[5]?'<span class="urgent">TIME-SENSITIVE</span>':'';
+   return `<div class="event ${st==='current'?'current':''}" style="${st==='past'?'opacity:.55':''}">
+     <div class="time">${e[0]}</div><div><h4>${e[1]}</h4><div class="cn">${e[2]}</div><div class="desc">${e[3]}</div>${urgent}</div><img src="${e[4]}" loading="lazy"></div>`;
+ }).join('');
+ document.getElementById('today').innerHTML=`
+ <div class="today-head"><button class="back" onclick="selectedDay=Math.max(1,selectedDay-1);today()">‹</button><div class="today-title"><h1>Today</h1><div>${d.date} · ${d.weekday}</div></div><div class="today-temp">☁ 16°C<br><small>12–20°C</small></div></div>
+ <div class="hero today-hero"><img src="${d.hero}"><div class="hero-copy"><div class="cn">${d.title}</div><div class="en">${d.hero_en}</div></div></div>
+ <div class="route-card">
+   <div class="route-top"><h3>Today's Route　今日路线</h3><small>${d.route.length} stops · gentle pace</small></div>
+   <div class="route-art"><div class="hill h1"></div><div class="hill h2"></div>${stops}<div class="route-mascot">🐼</div></div>
+   <div class="route-note">Good food. Good company. That’s the day. ♡</div>
+ </div>
+ <div class="timeline">${ev}</div>
+ <div class="quote"><div class="big">“今天不用赶，慢慢玩。”</div>Take your time. You’re exactly where you need to be.</div>`;
+}
+const foods=[
+ [DATA.images.food1,'陈麻婆豆腐','川菜 · 450 m · 6 min','4.6','大众点评 / 高德 / 小红书'],
+ [DATA.images.food3,'蜀大侠火锅','火锅 · 600 m · 8 min','4.5','大众点评 / 高德'],
+ [DATA.images.coffee,'% Arabica 成都太古里','咖啡 · 750 m · 9 min','4.6','高德 / Google'],
+ [DATA.images.food2,'建设路小吃街','小吃 · 1.1 km · 14 min','4.4','大众点评 / 高德 / 小红书']
+];
+function food(){
+ let list=foods.map((f,i)=>`<div class="food-card"><img src="${f[0]}"><div><h3>${f[1]}</h3><div class="meta">${f[2]} · Open<br><span class="rating">★ ${f[3]}</span></div><div class="platforms"><i>DP</i><i>高</i><i class="${i===2?'warn':''}">RED</i><i>✓</i></div></div></div>`).join('');
+ document.getElementById('food').innerHTML=`
+ <div class="page-head"><button class="back" onclick="page('home')">‹</button><h1>附近美食<br><span style="font:400 11px Noto Sans SC">Nearby Food</span></h1><button class="back">⌕</button></div>
+ <div class="search">⌕ Search nearby · 当前附近</div>
+ <div class="filters"><button class="filter active">全部</button><button class="filter">川菜</button><button class="filter">火锅</button><button class="filter">小吃</button><button class="filter">咖啡</button><button class="filter">更多</button></div>
+ ${list}
+ <div class="quote">平台验证只做轻量提示；详细评分逻辑留在后台，不占你的视线。</div>`;
+}
+function explore(){
+ document.getElementById('explore').innerHTML=`
+ <div class="page-head"><button class="back" onclick="page('home')">‹</button><h1>探索周边<br><span style="font:400 11px Noto Sans SC">Explore</span></h1><button class="back">⌕</button></div>
+ <div class="search">⌕ Search places, attractions…</div>
+ <div class="mapcats"><div class="cat"><b>⛩</b>景点</div><div class="cat"><b>♨</b>美食</div><div class="cat"><b>☕</b>咖啡</div><div class="cat"><b>▣</b>便利店</div></div>
+ <div class="mapbox"><div class="pin you" style="left:51%;top:45%">●</div><div class="pin" style="left:24%;top:32%">⌖</div><div class="pin" style="left:72%;top:26%">⌖</div><div class="pin" style="left:38%;top:66%">⌖</div><div class="pin" style="left:78%;top:72%">⌖</div></div>
+ <div class="quote"><div class="big">“发现更多身边的美好。”</div>到了成都后，这一页再接实时 GPS 与高德附近搜索。</div>`;
+}
+function trip(){
+ document.getElementById('trip').innerHTML=`
+ <div class="page-head"><button class="back" onclick="page('home')">‹</button><h1>Trip Overview</h1><button class="back">⋯</button></div>
+ <div class="trip-cover"><img src="${DATA.images.mountain_lake}"><div class="txt"><h2>Chengdu, China</h2><p>15–20 Oct 2026<br>Mountains, pandas, good food, and better company.</p></div></div>
+ <div class="stats"><div class="stat"><b>6</b><span>Days</span></div><div class="stat"><b>4+</b><span>Key areas</span></div><div class="stat"><b>∞</b><span>Memories</span></div></div>
+ <div class="section-title"><h2>Trip Highlights</h2><span>See all</span></div>
+ <div class="highlight-grid"><img src="${DATA.images.panda}"><img src="${DATA.images.mountain_lake}"><img src="${DATA.images.temple}"><img src="${DATA.images.museum}"></div>
+ <div class="quote"><div class="big">“More time together, less rush.”</div>这趟旅行，不只是抵达目的地，也是一起走过的时间。</div>`;
+}
+function memories(){
+ const imgs=[DATA.images.panda,DATA.images.old_street,DATA.images.mountain_lake,DATA.images.food1,DATA.images.temple,DATA.images.tea,DATA.images.museum,DATA.images.chengdu_city];
+ document.getElementById('memories').innerHTML=`
+ <div class="page-head"><button class="back" onclick="page('home')">‹</button><h1>旅行相册<br><span style="font:400 11px Noto Sans SC">Memories</span></h1><button class="back">＋</button></div>
+ <div class="filters"><button class="filter active">全部 All</button><button class="filter">Day 1</button><button class="filter">Day 2</button><button class="filter">Day 3</button><button class="filter">Day 4</button></div>
+ <div class="memory-top"><h3>A Little Happiness</h3><div class="meta"><span>📷 24 Photos</span><span>⌖ 4 Places</span><span>☁ 16°C</span></div></div>
+ <div class="masonry">${imgs.map((x,i)=>`<img src="${x}" style="height:${i%3===0?210:150}px;object-fit:cover">`).join('')}</div>
+ <div class="quote" style="text-align:center"><div class="big">Collect moments, not things. ♡</div>这些瞬间，是我们的故事。</div>`;
+}
+home(); today(); food(); explore(); trip(); memories();
+</script>
+</body>
+</html>
 """
 
-APP_JS = r"""
-export default function(component) {
-  const { data, parentElement, setStateValue } = component;
-  const root = parentElement.querySelector('#app-root');
-  const D = data;
-  const state = {
-    page: D.page || 'home',
-    day: Number(D.selected_day || 1),
-    radius: Number(D.radius || 1000),
-    foodCategory: D.food_category || '全部',
-    exploreCategory: D.explore_category || '景点',
-    location: D.location_wgs || null,
-  };
-  const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const dayData = () => D.days[state.day - 1];
-  const eventToMinutes = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
-  const localNow = new Date();
-  const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const todayStr = ymd(localNow);
+html = html.replace("__DATA__", payload).replace("__LANDING__", IMG["landing_panda"])
 
-  function currentEventIndex(day) {
-    if (day.date !== todayStr) return -1;
-    const min = localNow.getHours()*60 + localNow.getMinutes();
-    for (let i=0;i<day.events.length;i++) {
-      const e = day.events[i];
-      if (min >= eventToMinutes(e.start) && min < eventToMinutes(e.end)) return i;
-    }
-    return -1;
-  }
-  function nextEventIndex(day) {
-    const min = localNow.getHours()*60 + localNow.getMinutes();
-    if (day.date !== todayStr) return 0;
-    for (let i=0;i<day.events.length;i++) if (eventToMinutes(day.events[i].start) > min) return i;
-    return -1;
-  }
-  function phaseForEvent(day, i) {
-    if (day.date !== todayStr) return '';
-    const ci = currentEventIndex(day), ni = nextEventIndex(day);
-    if (ci === i) return 'current';
-    if (ni === i) return 'next';
-    const min = localNow.getHours()*60 + localNow.getMinutes();
-    if (eventToMinutes(day.events[i].end) <= min) return 'past';
-    return '';
-  }
-  function hhmmDiff(t) {
-    const [h,m]=t.split(':').map(Number); const target=new Date(localNow); target.setHours(h,m,0,0);
-    const diff=Math.max(0,target-localNow); const mins=Math.round(diff/60000); const hh=Math.floor(mins/60), mm=mins%60;
-    return hh ? `${hh}h ${mm}m` : `${mm} min`;
-  }
-  function iconFor(e){ return e.type==='flight'?'✈️':e.type==='meal'?'🍜':e.type==='place'?'◉':e.type==='transfer'?'🚗':'☕'; }
-  function shortName(e){
-    let s=e.cn || e.title; s=s.replace(' · 自由安排','').replace(' · Optional','');
-    if(s.length>8) s=s.slice(0,8); return s;
-  }
-  function greeting(){ const h=localNow.getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
-  function atmosphere(){ const lines=['慢慢走，今天也会有好故事。','Good days are better when shared.','好好旅行，是让一家人更靠近。','Collect moments, not things.']; return lines[(localNow.getDate()+state.day)%lines.length]; }
-
-  function landingMessage(){
-    const now=todayStr, start=D.trip_start, end=D.trip_end;
-    if(now < start) return D.landing_messages.before;
-    if(now > end) return D.landing_messages.after;
-    const diff=Math.round((new Date(now+'T00:00:00')-new Date(start+'T00:00:00'))/86400000)+1;
-    return D.landing_messages[String(diff)] || D.landing_messages[diff] || D.landing_messages.before;
-  }
-  function renderLanding(){
-    if(sessionStorage.getItem('chengduLandingSeen')==='1') return '';
-    const m=landingMessage();
-    return `<div class="landing" id="landing"><div class="land-inner">
-      <button class="skip" data-action="close-landing">Skip</button><div class="bamboo">🎋</div><div class="mountains"></div>
-      <div class="land-title"><h1>Our Chengdu Story</h1><small>A FAMILY JOURNEY · 15–20 OCT 2026</small></div>
-      <div class="bubble"><div class="cn">${esc(m.cn)}</div><div class="en">${esc(m.en)}</div></div>
-      <div class="panda wave"><div class="panda-body"></div><div class="panda-head"><i class="ear l"></i><i class="ear r"></i><i class="eye l"></i><i class="eye r"></i><i class="nose"></i></div><i class="arm l"></i><i class="arm r"></i><i class="leg l"></i><i class="leg r"></i></div>
-      <button class="enter-btn" data-action="close-landing">开启今天的旅程　→</button>
-    </div></div>`;
-  }
-
-  function nav(){
-    const items=[['home','⌂','Home'],['today','▣','Today'],['explore','⌾','Explore'],['trip','♧','Trip'],['memories','▧','Memories']];
-    return `<nav class="nav">${items.map(([p,i,t])=>`<button data-page="${p}" class="${state.page===p?'active':''}"><b>${i}</b>${t}</button>`).join('')}</nav>`;
-  }
-  function dayChips(){ return `<div class="day-strip">${D.days.map(d=>`<button class="day-chip ${d.day===state.day?'active':''}" data-day="${d.day}">Day ${d.day}<br><small>${d.weekday} ${d.date.slice(8)}</small></button>`).join('')}</div>`; }
-
-  function routeSvg(day){
-    let ev=day.events.filter(e=>['place','meal'].includes(e.type));
-    if(ev.length>5) ev=ev.slice(0,5);
-    const n=ev.length;
-    const pos = n<=4 ? [[16,64],[39,78],[62,43],[85,64]] : [[12,64],[31,78],[50,43],[69,75],[88,53]];
-    const path = n<=4 ? 'M16 64 Q27 88 39 78 Q50 69 62 43 Q73 38 85 64' : 'M12 64 Q21 88 31 78 Q41 67 50 43 Q59 44 69 75 Q78 86 88 53';
-    const dayCurrent=currentEventIndex(day);
-    return `<svg class="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <text x="8" y="24" class="route-decor">🏯</text><text x="78" y="24" class="route-decor">🌿</text><text x="83" y="91" class="route-decor">🐼</text>
-      <path class="route-path" d="${path}"/>
-      ${ev.map((e,j)=>{
-        const orig=day.events.indexOf(e); let cls='';
-        if(day.date===todayStr){ if(orig<dayCurrent && dayCurrent>=0) cls='past'; else if(orig===dayCurrent) cls='current'; else if(orig===nextEventIndex(day)) cls='next'; }
-        const [x,y]=pos[j];
-        return `<g class="route-node ${cls}"><circle cx="${x}" cy="${y}" r="6.3"></circle><text class="num" x="${x}" y="${y}">${j+1}</text><text class="name" x="${x}" y="${y+13}">${esc(shortName(e))}</text></g>`
-      }).join('')}
-    </svg>`;
-  }
-
-  function timeline(day){
-    return `<div class="timeline">${day.events.map((e,i)=>`<div class="event ${phaseForEvent(day,i)}">
-      <div class="tm">${e.start}</div><div><h4>${esc(e.title)}</h4><p>${esc(e.cn)}<br>${esc(e.subtitle||'')}</p>${e.time_sensitive?'<span class="urgent">TIME-SENSITIVE</span>':''}</div><img src="${esc(e.image||D.images.street)}" alt=""></div>`).join('')}</div>`;
-  }
-
-  function home(){
-    const actualDay = todayStr>=D.trip_start && todayStr<=D.trip_end ? Math.min(6, Math.max(1, Math.floor((new Date(todayStr)-new Date(D.trip_start))/86400000)+1)) : state.day;
-    const day=D.days[actualDay-1]; const ci=currentEventIndex(day), ni=nextEventIndex(day);
-    let nowCard, nextCard;
-    if(todayStr < D.trip_start){
-      const daysLeft=Math.ceil((new Date(D.trip_start)-new Date(todayStr))/86400000);
-      nowCard={title:`Trip begins in ${daysLeft} days`,sub:'行李慢慢收，期待慢慢长。',time:'15 Oct'};
-      nextCard={title:'Penang → Shanghai',sub:'HO1366 · 00:05',time:'00:05'};
-    }else if(todayStr > D.trip_end){
-      nowCard={title:'Back home',sub:'回忆已经悄悄留下来了。',time:'♡'}; nextCard={title:'Chengdu misses you',sub:'下次再回来，好不好？',time:'Next time'};
-    }else{
-      const ce=ci>=0?day.events[ci]:null, ne=ni>=0?day.events[ni]:null;
-      nowCard=ce?{title:ce.title,sub:ce.cn,time:ce.start}:{title:'Between little moments',sub:'慢慢来，不需要赶。',time:'Now'};
-      nextCard=ne?{title:ne.title,sub:`${ne.cn} · ${hhmmDiff(ne.start)} to go`,time:ne.start}:{title:'Today is complete',sub:'回酒店，好好休息。',time:'Done'};
-    }
-    const w=D.weather;
-    return `<main class="screen">
-      <div class="greeting"><div><h2>${greeting()},</h2><div class="quote">${esc(atmosphere())}</div></div><div class="weather">${w.icon} ${w.temp}°C<small>${esc(day.city)} · ${esc(w.desc)}</small></div></div>
-      <div class="hero"><img src="${esc(day.hero)}"><div class="hero-copy"><div class="cn">${esc(day.hero_cn)}</div><div class="en">${esc(day.hero_en)}</div></div></div>
-      <div class="now-grid"><div class="card mini-card"><div class="label">NOW</div><div class="timebig">${esc(nowCard.time)}</div><h3>${esc(nowCard.title)}</h3><p>${esc(nowCard.sub)}</p></div>
-      <div class="card mini-card"><div class="label">NEXT</div><div class="timebig">${esc(nextCard.time)}</div><h3>${esc(nextCard.title)}</h3><p>${esc(nextCard.sub)}</p></div></div>
-      <div class="quick">
-       <button data-page="today"><div class="qbox">▣</div><span>Today 今日行程</span></button>
-       <button data-page="food"><div class="qbox">♨</div><span>Nearby Food</span></button>
-       <button data-page="weather"><div class="qbox">☁</div><span>Weather 天气</span></button>
-       <button data-page="memories"><div class="qbox">▧</div><span>Memories 相册</span></button></div>
-      <div class="section-title"><h3>Our Journey</h3><small>15–20 Oct 2026</small></div>${dayChips()}
-      <div class="soft-note">“Not just places, but moments together.”<br><span class="sub">旅行的意义，是和重要的人一起。</span></div>
-      ${nav()}
-    </main>`;
-  }
-
-  function today(){ const day=dayData(); return `<main class="screen"><div class="topbar"><button class="pill" data-day="${Math.max(1,state.day-1)}">‹</button><div style="text-align:center"><h1 class="serif">Today</h1><div class="sub">${day.date.slice(5).replace('-','/')} · ${day.weekday}</div></div><button class="pill" data-day="${Math.min(6,state.day+1)}">›</button></div>
-    <div class="hero" style="height:205px"><img src="${esc(day.hero)}"><div class="hero-copy"><div class="cn">${esc(day.hero_cn)}</div><div class="en">${esc(day.hero_en)}</div></div></div>
-    <div class="card route-card"><div class="route-head"><strong>Today's Route　今日路线</strong><small>${day.events.filter(e=>['place','meal'].includes(e.type)).length} stops · gentle pace</small></div>${routeSvg(day)}<div class="route-note">Good food. Good company. That's the day. ♡</div></div>
-    ${timeline(day)}<div class="soft-note">今天不用赶，慢慢玩。<br><span class="sub">Take your time. You're exactly where you need to be. ♡</span></div>${nav()}</main>`; }
-
-  function sourceIcons(p){ const a=p.sources?.amap; return `<div class="sources"><span class="src amap ${a?'':'unknown'}">高${a?'✓':'·'}</span><span class="src dp unknown">评·</span><span class="src xhs unknown">书·</span><span class="trust">${p.trust_score>=75?'✓':p.trust_score>=55?'~':'!'} trust</span></div>`; }
-  function food(){
-    const cats=['全部','川菜','火锅','小吃','面','咖啡','甜品']; const radii=[500,1000,2000,5000];
-    return `<main class="screen"><div class="topbar"><div><h1 class="serif">附近美食</h1><div class="sub">Nearby Food · around you, when hungry</div></div><button class="pill" data-action="locate">◎ 定位</button></div>
-      <div class="card location-bar"><div class="loc-left"><i class="loc-dot"></i><div class="loc-text">${D.location_wgs?'Using your current location':'Tap 定位 to search around you'}<br><span class="muted">${D.food_live?'Live AMap POIs':'Preview / fallback until AMap key is connected'}</span></div></div></div>
-      <div class="filters">${cats.map(c=>`<button class="pill ${state.foodCategory===c?'active':''}" data-food-cat="${c}">${c}</button>`).join('')}</div>
-      <div class="filters">${radii.map(r=>`<button class="pill ${state.radius===r?'active':''}" data-radius="${r}">${r<1000?r+' m':r/1000+' km'}</button>`).join('')}</div>
-      <div class="poi-list">${D.food.map(p=>`<div class="card poi" data-poi="${esc(p.name)}"><img src="${esc(p.photo||D.images.food)}"><div><div class="poi-top"><h4>${esc(p.name)}</h4>${p.demo?'<span class="demo-flag">PREVIEW</span>':''}</div><div class="meta">${esc(p.tag||p.type||'Local food')} · ${Number(p.distance||0)<1000?Math.round(p.distance)+' m':(Number(p.distance||0)/1000).toFixed(1)+' km'}</div><div><span class="rating">★ ${esc(p.rating||'—')}</span>　<span class="open">${p.open_today?'Open · '+esc(p.open_today):'Hours unavailable'}</span></div>${sourceIcons(p)}</div></div>`).join('')}</div>
-      <div class="soft-note">评分看得到，复杂判断留在后台。<br><span class="sub">We compare signals quietly — the screen stays simple.</span></div>${nav()}</main>`;
-  }
-
-  function stylizedMap(){
-    const pins=(D.explore||[]).slice(0,7).map((p,i)=>{const pos=[[18,25],[72,22],[30,42],[78,48],[20,68],[62,70],[42,18]][i]||[50,30]; return `<div class="map-pin" style="left:${pos[0]}%;top:${pos[1]}%"><span>${i+1}</span></div>`}).join('');
-    return `<div class="map-card"><div class="map-canvas"><div class="river"></div>${pins}<div class="you"></div></div><div class="map-overlay"><strong>📍 ${D.location_wgs?'You are here':'Tap 定位 to place yourself on the map'}</strong>${D.amap_js_key?'Live AMap loads when configured':'Cute overview fallback · live AMap key not added yet'}</div></div>`;
-  }
-  function explore(){ const cats=[['景点','🏯'],['便利店','🏪'],['厕所','🚻'],['咖啡','☕'],['药房','✚'],['商场','🛍'],['酒店','▥']];
-    return `<main class="screen"><div class="topbar"><div><h1 class="serif">探索周边</h1><div class="sub">Explore · what is around me?</div></div><button class="pill" data-action="locate">◎ 定位</button></div>
-      <div class="explore-grid">${cats.map(([c,i])=>`<button class="explore-btn ${state.exploreCategory===c?'active':''}" data-explore-cat="${c}"><b>${i}</b>${c}</button>`).join('')}</div>
-      <div id="live-map-holder">${stylizedMap()}</div>
-      <div class="section-title"><h3>Nearby</h3><small>${D.explore?.length||0} places</small></div>
-      <div class="poi-list">${(D.explore||[]).slice(0,6).map((p,i)=>`<div class="card" style="padding:11px 13px;display:flex;justify-content:space-between;gap:10px"><div><strong style="font-size:12px">${i+1}. ${esc(p.name)}</strong><div class="meta">${esc(p.address||p.type||'')} · ${p.distance?Math.round(p.distance)+' m':''}</div></div><button class="loc-btn" data-amap="${p.lng||''},${p.lat||''},${esc(p.name)}">导航</button></div>`).join('') || '<div class="memory-empty">定位后，这里会出现你身边的小惊喜。</div>'}</div>
-      ${nav()}</main>`;
-  }
-
-  function weatherPage(){ const w=D.weather, day=dayData(); return `<main class="screen"><div class="topbar"><div><h1 class="serif">天气 · Weather</h1><div class="sub">${esc(day.city)} · live conditions</div></div><button class="pill" data-page="home">‹ Home</button></div>
-    <div class="hero" style="height:230px"><img src="${esc(day.hero)}"><div class="hero-copy"><div class="cn">${w.icon} ${w.temp}°C</div><div class="en">${esc(w.desc)} · feels like ${w.feels}°C</div></div></div>
-    <div class="stats" style="margin-top:12px"><div class="card stat"><b>${w.high}°</b><small>High</small></div><div class="card stat"><b>${w.low}°</b><small>Low</small></div><div class="card stat"><b>${w.rain_prob}%</b><small>Rain</small></div></div>
-    <div class="soft-note">普通天气只提醒，不打乱行程。<br><span class="sub">Only meaningful disruptions deserve a real alert.</span></div>${nav()}</main>`; }
-
-  function trip(){ return `<main class="screen"><div class="topbar"><div><h1 class="serif">我们的旅程</h1><div class="sub">Trip Overview</div></div><span class="sub">15–20 Oct 2026</span></div>
-    <div class="hero trip-hero"><img src="${D.images.temple}"><div class="hero-copy"><div class="cn">Chengdu</div><div class="en">Same people. A different view.</div></div></div>
-    <div class="tabs"><span class="active">Overview</span><span>Itinerary</span><span>Photos</span><span>Notes</span></div>
-    <div class="stats"><div class="card stat"><b>6</b><small>Days</small></div><div class="card stat"><b>1</b><small>Family trip</small></div><div class="card stat"><b>♡</b><small>Many memories</small></div></div>
-    <div class="section-title"><h3>Our Journey</h3><small>Shanghai · transit only</small></div>
-    <div class="card">${D.days.map(d=>{const brief=d.events.filter(e=>e.type==='place').slice(0,3).map(e=>e.cn.split(' · ')[0]).join(' · ') || d.events[0].cn; return `<div class="trip-day" data-day="${d.day}" data-page="today"><div class="badge">Day ${d.day}</div><div><strong>${esc(d.city)}</strong><small>${esc(brief)}</small></div><span>›</span></div>`}).join('')}</div>
-    <div class="soft-note">一起走过的，都是更好的风景。♡<br><span class="sub">A trip well taken brings us closer.</span></div>${nav()}</main>`; }
-
-  async function openDB(){ return new Promise((resolve,reject)=>{ const req=indexedDB.open('chengduStoryMemories',1); req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);}); }
-  async function getPhotos(){ const db=await openDB(); return new Promise((resolve,reject)=>{const tx=db.transaction('photos','readonly');const rq=tx.objectStore('photos').getAll();rq.onsuccess=()=>resolve(rq.result||[]);rq.onerror=()=>reject(rq.error);}); }
-  async function saveFiles(files){ const db=await openDB(); const tx=db.transaction('photos','readwrite'); for(const f of files){ const url=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)}); tx.objectStore('photos').put({id:`${Date.now()}-${Math.random()}`,name:f.name||'photo.jpg',type:f.type||'image/jpeg',dataUrl:url,date:todayStr}); } return new Promise(res=>tx.oncomplete=res); }
-  async function renderMemories(){ const box=root.querySelector('#memory-grid'); if(!box) return; const photos=await getPhotos(); if(!photos.length){box.innerHTML='<div class="memory-empty" style="grid-column:1/-1">还没有照片。第一张回忆，等你来拍 ♡</div>';return;} box.innerHTML=photos.slice().reverse().map(p=>`<div class="memory-item" data-photo-id="${p.id}"><img src="${p.dataUrl}"></div>`).join(''); }
-  function memories(){ const day=dayData(); return `<main class="screen"><div class="topbar"><div><h1 class="serif">旅行相册</h1><div class="sub">Memories · stored on this device</div></div><span>♡</span></div>
-    ${dayChips()}<div class="card day-summary"><div><h3>${day.date.slice(8)} Oct · ${esc(day.city)}</h3><p>${D.weather.icon} ${D.weather.temp}°C · ${day.events.filter(e=>e.type==='place').length} planned places</p></div><div style="font-size:28px">🍃</div></div>
-    <div class="card memory-head"><strong>A Little Happiness</strong><div class="sub">旅途中的小确幸</div><div class="memory-actions"><label class="action-btn">📷 Take Photo<input id="camera-input" type="file" accept="image/*" capture="environment"></label><label class="action-btn">＋ Add from Gallery<input id="gallery-input" type="file" accept="image/*" multiple></label></div></div>
-    <div id="memory-grid" class="memory-grid"></div><button id="save-selected" class="action-btn" style="width:100%;margin-top:10px">Save selected to phone / Share</button>
-    <div class="soft-note">这些瞬间，是我们最珍贵的故事。<br><span class="sub">Their memories are our most precious souvenirs.</span></div>${nav()}</main>`; }
-
-  function render(){
-    let body = state.page==='today'?today():state.page==='food'?food():state.page==='explore'?explore():state.page==='trip'?trip():state.page==='memories'?memories():state.page==='weather'?weatherPage():home();
-    root.innerHTML = renderLanding() + body;
-    bind();
-    if(state.page==='memories') renderMemories();
-    if(state.page==='explore' && D.amap_js_key && D.amap_security_code && D.location_gcj) initAmap();
-  }
-
-  function requestLocation(){
-    if(!navigator.geolocation){ alert('This browser does not support location.'); return; }
-    navigator.geolocation.getCurrentPosition(pos=>{
-      setStateValue('location',{lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ts:Date.now()});
-    }, err=> alert('Location permission is needed for nearby search. '+err.message), {enableHighAccuracy:true,timeout:12000,maximumAge:60000});
-  }
-
-  function bind(){
-    root.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>setStateValue('page',el.dataset.page)));
-    root.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>setStateValue('selected_day',Number(el.dataset.day))));
-    root.querySelectorAll('[data-radius]').forEach(el=>el.addEventListener('click',()=>setStateValue('radius',Number(el.dataset.radius))));
-    root.querySelectorAll('[data-food-cat]').forEach(el=>el.addEventListener('click',()=>setStateValue('food_category',el.dataset.foodCat)));
-    root.querySelectorAll('[data-explore-cat]').forEach(el=>el.addEventListener('click',()=>setStateValue('explore_category',el.dataset.exploreCat)));
-    root.querySelectorAll('[data-action="locate"]').forEach(el=>el.addEventListener('click',requestLocation));
-    root.querySelectorAll('[data-action="close-landing"]').forEach(el=>el.addEventListener('click',()=>{sessionStorage.setItem('chengduLandingSeen','1');const l=root.querySelector('#landing');if(l)l.classList.add('hidden')}));
-    root.querySelectorAll('[data-amap]').forEach(el=>el.addEventListener('click',()=>{const [lng,lat,name]=el.dataset.amap.split(','); window.open(`https://uri.amap.com/marker?position=${lng},${lat}&name=${encodeURIComponent(name)}&callnative=1`,'_blank')}));
-    const cam=root.querySelector('#camera-input'), gal=root.querySelector('#gallery-input');
-    [cam,gal].filter(Boolean).forEach(inp=>inp.addEventListener('change',async()=>{if(inp.files?.length){await saveFiles([...inp.files]);await renderMemories();}}));
-    const save=root.querySelector('#save-selected'); if(save) save.addEventListener('click',()=>saveSelected());
-    if((state.page==='food'||state.page==='explore') && !D.location_wgs && !sessionStorage.getItem('geoAsked')){sessionStorage.setItem('geoAsked','1'); setTimeout(requestLocation,350);}
-  }
-
-  async function saveSelected(){
-    const selected=[...root.querySelectorAll('.memory-item.selected')];
-    if(!selected.length){alert('先点选想保存的照片 ♡');return;}
-    const all=await getPhotos(); const ids=new Set(selected.map(x=>x.dataset.photoId)); const photos=all.filter(p=>ids.has(p.id)); const files=[];
-    for(const p of photos){const blob=await (await fetch(p.dataUrl)).blob(); files.push(new File([blob],p.name||'chengdu-memory.jpg',{type:p.type||blob.type||'image/jpeg'}));}
-    if(navigator.canShare && navigator.canShare({files}) && navigator.share){try{await navigator.share({files,title:'Our Chengdu Story'});return;}catch(e){}}
-    photos.forEach(p=>{const a=document.createElement('a');a.href=p.dataUrl;a.download=p.name||'chengdu-memory.jpg';a.click();});
-  }
-  root.addEventListener('click',e=>{const it=e.target.closest('.memory-item'); if(it) it.classList.toggle('selected');});
-
-  function initAmap(){
-    const holder=root.querySelector('#live-map-holder'); if(!holder) return;
-    holder.innerHTML='<div class="map-card"><div id="amap-live" class="map-live"></div></div>';
-    window._AMapSecurityConfig={securityJsCode:D.amap_security_code};
-    const make=()=>{
-      try{
-        const c=[D.location_gcj.lng,D.location_gcj.lat]; const map=new AMap.Map('amap-live',{zoom:15,center:c,viewMode:'2D'});
-        new AMap.Marker({position:c,map,content:'<div style="width:18px;height:18px;border:5px solid #fff;border-radius:50%;background:#2d7dcc;box-shadow:0 0 0 10px rgba(45,125,204,.15)"></div>'});
-        (D.explore||[]).slice(0,20).forEach((p,i)=>{if(p.lng&&p.lat)new AMap.Marker({position:[p.lng,p.lat],map,title:p.name,label:{content:String(i+1),direction:'top'}})});
-      }catch(e){ holder.innerHTML=stylizedMap(); }
-    };
-    if(window.AMap) make(); else { const s=document.createElement('script');s.src=`https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(D.amap_js_key)}`;s.onload=make;s.onerror=()=>holder.innerHTML=stylizedMap();document.head.appendChild(s); }
-  }
-
-  render();
-}
-"""
-
-journey_component = st.components.v2.component(
-    name="chengdu_family_story_single_file",
-    html=APP_HTML,
-    css=APP_CSS,
-    js=APP_JS,
-)
-
-# Mount with state callbacks so frontend values persist and are returned to Python.
-result = journey_component(
-    data={
-        **payload,
-        "radius": radius,
-        "food_category": food_category,
-        "explore_category": explore_category,
-    },
-    default={
-        "page": page,
-        "selected_day": selected_day,
-        "radius": radius,
-        "food_category": food_category,
-        "explore_category": explore_category,
-        "location": location,
-    },
-    on_page_change=lambda: None,
-    on_selected_day_change=lambda: None,
-    on_radius_change=lambda: None,
-    on_food_category_change=lambda: None,
-    on_explore_category_change=lambda: None,
-    on_location_change=lambda: None,
-    key="chengdu_story_ui",
-)
+components.html(html, height=980, scrolling=True)
