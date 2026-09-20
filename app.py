@@ -61,16 +61,36 @@ def commons(filename: str, width: int = 1400) -> str:
 
 
 IMG = {
+    # Home hero / shared images
     "panda_portrait": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=1600&q=92",
     "panda_bamboo": "https://images.unsplash.com/photo-1508264165352-258a6c1915d1?auto=format&fit=crop&w=1500&q=90",
-    "taikoo": commons("Sino-Ocean Taikoo Li Chengdu.jpg"),
-    "teahouse": commons("Tea in People's Park - Chengdu, China - DSC05362.jpg"),
-    "dujiangyan": commons("都江堰南桥 Dujiangyan Nanqiao Bridge.jpg"),
-    "jiuzhai": commons("九寨溝-五花海 Jiuzhaigou Five Flower Lake.jpg"),
-    "jiuzhai_alt": commons("5 Flowers Lake (127556467).jpeg"),
-    "sanxingdui": commons("Ancient Bronze Mask from Sanxingdui with Protruding Eyes & Ears (9951414745).jpg"),
-    "airport": commons("成都天府国际机场 Chengdu Tianfu International Airport 1.jpg"),
-    "airport_hall": commons("2025 Chengdu Tianfu Airport 03.jpg"),
+
+    # Route imagery — intentionally curated so the accordion feels scenic,
+    # editorial and varied rather than repeating the same few thumbnails.
+    "taikoo_night": commons("Sino-Ocean Taikoo Li Chengdu.jpg", 1200),
+    "taikoo_day": commons("Sino-Ocean Taikoo Li Chengdu 12.jpg", 1200),
+    "taikoo_alt": commons("Sino-Ocean Taikoo Li Chengdu 10.jpg", 1200),
+    "people_park": commons("Teahouse in Peoples Park - Chengdu, China - DSC05371.jpg", 1200),
+    "people_park_alt": commons("Teahouse in Peoples Park - Chengdu, China - DSC05353.jpg", 1200),
+    "panda_base_gate": commons("Chengdu Research Base of Giant Panda Breeding, 201907, 01.jpg", 1200),
+    "panda_base": commons("Chengdu Research Base of Giant Panda Breeding, 201907, 05.jpg", 1200),
+    "panda_base_alt": commons("Chengdu Research Base of Giant Panda Breeding, 201907, 09.jpg", 1200),
+    "dujiangyan": commons("都江堰南桥 Dujiangyan Nanqiao Bridge.jpg", 1200),
+    "dujiangyan_night": commons("Anshun Bridge at night.jpg", 1200),
+    "jiuzhai_long": commons("Long Lake (Jiuzhaigou) 20260511-1.jpg", 1200),
+    "jiuzhai_five": commons("5 Flowers Lake (127556467).jpeg", 1200),
+    "jiuzhai_waterfall": commons("九寨溝-珍珠灘瀑布 Jiuzhaigou Pearl Shoal Waterfall.jpg", 1200),
+    "jiuzhai_nuorilang": commons("1 nuorilang jiuzhaigou 2023.jpg", 1200),
+    "sanxingdui_museum": commons("New Sandingdui Museum 02.jpg", 1200),
+    "sanxingdui_gallery": commons("Sanxingdui Museum 20260512-1.jpg", 1200),
+    "anshun_2026": commons("Anshun Bridge Jin River Chengdu night 2026 dllu.jpg", 1200),
+    "jinli_night": commons("Chengdu Jinli-Straße bei Nacht 02.jpg", 1200),
+    "dongjiao": commons("东郊记忆 (123423479).jpeg", 1200),
+    "yulin": commons("15196 (Route 153) at Yulin Donglu 20241007195012.jpg", 1200),
+
+    # Transport / food — used only where scenery would be misleading.
+    "airport": commons("成都天府国际机场 Chengdu Tianfu International Airport 1.jpg", 1200),
+    "airport_hall": commons("2025 Chengdu Tianfu Airport 03.jpg", 1200),
     "mapo": commons("Authentic Mapo Tofu.jpg", 1200),
     "hotpot": commons("Sichuan-style hotpot.jpg", 1200),
     "snack": commons("Chengdu Zhong Dumpling(Zhong Jiaozi).jpg", 1200),
@@ -87,20 +107,20 @@ DAYS = [
         "nodes": [
             ["00:05", "飞往上海", "airport_hall", "plane"],
             ["08:10", "飞往成都", "airport", "plane"],
-            ["12:00", "抵达酒店", "coffee", "hotel"],
-            ["15:00", "春熙路", "taikoo", "landmark"],
-            ["17:00", "人民公园", "teahouse", "leaf"],
+            ["12:00", "抵达酒店", "taikoo_day", "hotel"],
+            ["15:00", "春熙路", "taikoo_night", "landmark"],
+            ["17:00", "人民公园", "people_park", "leaf"],
         ],
     },
     {
         "day": 2, "iso": "2026-10-16", "date": "16 Oct", "dow": "Fri", "city": "Chengdu",
         "vt": "熊猫都江", "note": "把今天的可爱好好记住。",
         "nodes": [
-            ["08:00", "酒店出发", "coffee", "hotel"],
-            ["09:00", "熊猫基地", "panda_portrait", "leaf"],
+            ["08:00", "酒店出发", "taikoo_alt", "hotel"],
+            ["09:00", "熊猫基地", "panda_base", "leaf"],
             ["12:30", "午餐自由", "mapo", "food"],
             ["14:00", "都江堰", "dujiangyan", "landmark"],
-            ["18:30", "返回酒店", "teahouse", "hotel"],
+            ["18:30", "返回酒店", "dujiangyan_night", "hotel"],
         ],
     },
     {
@@ -108,20 +128,20 @@ DAYS = [
         "vt": "九寨仙境", "note": "山水不语，记忆很久。",
         "nodes": [
             ["07:00", "早餐出发", "coffee", "hotel"],
-            ["08:00", "九寨沟", "jiuzhai", "landmark"],
+            ["08:00", "九寨沟", "jiuzhai_long", "landmark"],
             ["13:00", "午餐自由", "noodles", "food"],
-            ["14:00", "继续游览", "jiuzhai_alt", "leaf"],
-            ["18:00", "返回酒店", "jiuzhai", "hotel"],
+            ["14:00", "继续游览", "jiuzhai_five", "leaf"],
+            ["18:00", "返回酒店", "jiuzhai_waterfall", "hotel"],
         ],
     },
     {
         "day": 4, "iso": "2026-10-18", "date": "18 Oct", "dow": "Sun", "city": "Dujiangyan",
         "vt": "山水慢游", "note": "山水与小惊喜，都收好。",
         "nodes": [
-            ["08:00", "熊猫谷", "panda_bamboo", "leaf"],
-            ["11:00", "仰天窝", "panda_portrait", "leaf"],
+            ["08:00", "熊猫谷", "panda_base_alt", "leaf"],
+            ["11:00", "仰天窝", "panda_base_gate", "leaf"],
             ["12:30", "午餐自由", "hotpot", "food"],
-            ["14:00", "灌县古城", "dujiangyan", "landmark"],
+            ["14:00", "灌县古城", "jinli_night", "landmark"],
             ["19:00", "晚餐自由", "mapo", "food"],
         ],
     },
@@ -129,11 +149,11 @@ DAYS = [
         "day": 5, "iso": "2026-10-19", "date": "19 Oct", "dow": "Mon", "city": "Chengdu",
         "vt": "古蜀一日", "note": "古蜀的谜，留给夜色。",
         "nodes": [
-            ["09:00", "三星堆", "sanxingdui", "landmark"],
+            ["09:00", "三星堆", "sanxingdui_museum", "landmark"],
             ["12:30", "午餐自由", "noodles", "food"],
-            ["14:00", "东郊记忆", "taikoo", "landmark"],
-            ["17:00", "玉林路", "teahouse", "leaf"],
-            ["20:00", "九眼桥", "dujiangyan", "landmark"],
+            ["14:00", "东郊记忆", "dongjiao", "landmark"],
+            ["17:00", "玉林路", "yulin", "leaf"],
+            ["20:00", "九眼桥", "anshun_2026", "landmark"],
         ],
     },
     {
@@ -254,33 +274,33 @@ main{min-height:100dvh}
 .p-note{text-align:center;font:400 12.5px/1.35 var(--hand);color:#5a7a67;margin:5px 2px 0;white-space:nowrap}
 
 /* Illustrated route — frozen Home style: quiet bamboo paper + alternating scenic stops */
-.route{position:relative;flex:1;min-height:0;margin-top:3px;overflow:hidden;border-radius:16px;
-  background:linear-gradient(180deg,rgba(252,252,245,.82),rgba(248,249,239,.64));isolation:isolate}
-.route:before,.route:after{content:"";position:absolute;top:1%;bottom:0;width:38%;z-index:0;pointer-events:none;opacity:.16;background-repeat:no-repeat;background-size:100% 100%}
+.route{position:relative;flex:1;min-height:0;margin-top:1px;overflow:hidden;border-radius:16px;
+  background:linear-gradient(180deg,rgba(253,252,246,.78),rgba(247,249,239,.58));isolation:isolate}
+.route:before,.route:after{content:"";position:absolute;top:0;bottom:0;width:33%;z-index:0;pointer-events:none;opacity:.10;background-repeat:no-repeat;background-size:100% 100%}
 .route:before{left:-7%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
 .route:after{right:-9%;transform:scaleX(-1);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
-.rz{position:absolute;left:1px;right:1px;top:4px;bottom:0;z-index:1}
+.rz{position:absolute;left:0;right:0;top:1px;bottom:0;z-index:1}
 .rz svg.line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .rz path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
-.rz .base{stroke:#93aa97;stroke-width:1.35;stroke-dasharray:2 5.2;opacity:.78}
-.rz .done{stroke:#3f7557;stroke-width:2.2;opacity:.86}
+.rz .base{stroke:#8fa793;stroke-width:1.55;stroke-dasharray:2.2 5.2;opacity:.76}
+.rz .done{stroke:#3f7557;stroke-width:2.45;opacity:.88}
 .node{position:absolute;left:0;right:0;height:0;z-index:3}
 .strip.open .panel:not(.quiet) .node{animation:nodeIn .52s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.30s + var(--d,0s))}
 @keyframes nodeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.dot{position:absolute;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fbfaf3;border:2px solid #73927b;z-index:5;box-shadow:0 0 0 2px rgba(251,250,243,.82)}
+.dot{position:absolute;top:0;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fbfaf3;border:2px solid #6f9178;z-index:5;box-shadow:0 0 0 2px rgba(251,250,243,.86)}
 .node.done .dot{background:#3f7557;border-color:#f8f6ed;box-shadow:0 0 0 1px #3f7557}
 .node.cur .dot{background:#dba33f;border-color:#fffdf5;box-shadow:0 0 0 5px rgba(219,163,63,.18)}
-.card{position:absolute;top:-24px;height:52px;display:flex;align-items:center;gap:7px;z-index:4;min-width:0}
-.card.r{left:55%;right:1%;justify-content:flex-start}
-.card.l{left:1%;right:55%;flex-direction:row-reverse;text-align:right;justify-content:flex-start}
-.thumb{position:relative;width:58px;height:44px;flex:none;overflow:hidden;border-radius:12px;background:#e7eee3;display:grid;place-items:center;color:#5b7f69;box-shadow:0 5px 13px rgba(44,65,50,.10);border:2px solid rgba(255,255,255,.78)}
+.card{position:absolute;top:-31px;height:64px;display:flex;align-items:center;gap:7px;z-index:4;min-width:0}
+.card.r{left:54%;right:0;justify-content:flex-start}
+.card.l{left:0;right:54%;flex-direction:row-reverse;text-align:right;justify-content:flex-start}
+.thumb{position:relative;width:74px;height:56px;flex:none;overflow:hidden;border-radius:14px;background:#e7eee3;display:grid;place-items:center;color:#5b7f69;box-shadow:0 7px 17px rgba(38,59,45,.13);border:2px solid rgba(255,255,255,.88)}
 .thumb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(245,241,225,.12));box-shadow:inset 0 0 0 1px rgba(57,83,65,.08)}
-.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(.96) brightness(1.035)}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.98) contrast(.99) brightness(1.025)}
 .t{min-width:0;flex:1;text-shadow:0 1px 6px #fbfaf3,0 0 8px #fbfaf3}
 .t small{display:none}
-.t b{display:block;font:600 10.5px/1.28 var(--cn-serif);color:#24362c;white-space:normal;letter-spacing:.03em}
+.t b{display:block;font:600 11.4px/1.22 var(--cn-serif);color:#24362c;white-space:normal;letter-spacing:.02em}
 .node.done .t{opacity:.76}
-.panda{position:absolute;width:46px;height:70px;margin:-67px 0 0 -23px;z-index:7;transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 5px 4px rgba(30,50,40,.20));transform-origin:50% 100%}
+.panda{position:absolute;width:54px;height:82px;margin:-78px 0 0 -27px;z-index:7;transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 6px 5px rgba(30,50,40,.20));transform-origin:50% 100%}
 .panda svg,.panda img{width:100%;height:100%;display:block;object-fit:contain}
 .panda.walk svg,.panda.walk img{animation:bob .78s ease-in-out infinite alternate}
 @keyframes bob{to{transform:translateY(-2px) rotate(-.5deg)}}
@@ -596,10 +616,10 @@ function progress(d){
   for(let i=0;i<n-1;i++)if(m<T[i+1])return{idx:i+(m-T[i])/(T[i+1]-T[i]),st:'today'};
   return{idx:n-1,st:'today'};
 }
-const thumbUrl=u=>u.replace(/width=\d+/,'width=160').replace(/w=\d+/,'w=160');
+const thumbUrl=u=>u.replace(/width=\d+/,'width=420').replace(/w=\d+/,'w=420');
 function routeGeom(d){
   const n=d.nodes.length,pr=progress(d);
-  const pts=d.nodes.map((_,i)=>({x:i%2?58:42,y:93-i*(86/(n-1))}));
+  const pts=d.nodes.map((_,i)=>({x:i%2?61:39,y:91-i*(82/(n-1))}));
   const segs=pts.slice(0,-1).map((p,i)=>seg(p,pts[i+1]));
   const base='M'+P(pts[0])+segs.map(cub).join('');
   let done='';
