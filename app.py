@@ -186,7 +186,7 @@ HTML = r'''<!doctype html>
   --serif:"Cormorant Garamond","Noto Serif SC",serif;
   --cn-serif:"Noto Serif SC",serif; --sans:"Noto Sans SC",sans-serif;
   --hand:"Ma Shan Zheng","Noto Serif SC",serif; --script:"Caveat","Cormorant Garamond",cursive;
-  --nav-h:68px; --acc-h:clamp(300px,calc(100dvh - 440px),400px);
+  --nav-h:68px; --acc-h:clamp(355px,calc(100dvh - 368px),474px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:#e6e2d6;color:var(--ink);font-family:var(--sans);overscroll-behavior:none}
@@ -204,8 +204,9 @@ main{min-height:100dvh}
 
 /* ───── HOME ───── */
 .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:2px 12px 12px}
-.greeting{font:700 clamp(27px,7.6vw,32px)/1 var(--serif);letter-spacing:-.3px;color:#1c2a23}
-.home-poem{font:500 clamp(13px,3.7vw,15px)/1.22 var(--serif);color:var(--slate-ink);margin-top:5px;max-width:200px}
+.greeting{font:700 clamp(29px,8vw,34px)/1 var(--cn-serif);letter-spacing:.01em;color:#1c2a23}
+.greeting-en{font:500 11px/1.15 var(--serif);color:var(--slate-ink);letter-spacing:.35px;margin-top:4px}
+.home-poem{font:500 clamp(12px,3.45vw,14px)/1.28 var(--cn-serif);color:#4f6658;margin-top:4px;max-width:230px;letter-spacing:.03em}
 .wx{text-align:right;flex:none}
 .wx-row{display:flex;align-items:center;justify-content:flex-end;gap:7px}
 .wx-row svg{width:30px;height:30px}
@@ -219,11 +220,7 @@ main{min-height:100dvh}
 .hero-copy .cn2{padding-left:26px}
 .hero-copy .en{font:500 clamp(17px,5vw,21px)/1.05 var(--script);margin-top:9px;font-style:italic}
 .sheet{position:relative;z-index:3;margin-top:-30px;background:var(--sheet);border-radius:26px 26px 0 0;padding:10px 8px 16px;box-shadow:0 -10px 24px rgba(50,60,45,.06)}
-.date-row{display:flex;align-items:center;gap:11px;padding:9px 13px 9px 9px;margin-bottom:10px;border-radius:19px;background:#f1f2e9;border:1px solid rgba(60,90,70,.08);cursor:pointer;width:100%;text-align:left}
-.date-row .cal{width:38px;height:38px;border-radius:50%;background:#e4e8da;display:grid;place-items:center;color:#22392d;flex:none}
-.date-row b{display:block;font:500 clamp(15px,4.4vw,17px)/1.15 var(--serif);color:#25332b;letter-spacing:.1px}
-.date-row span{display:block;font:400 clamp(11px,3.3vw,13px)/1.2 var(--serif);color:#6b7770;margin-top:2px}
-.date-row .chev{margin-left:auto;color:#22392d}
+.journey-seam{height:5px}
 
 /* Horizontal accordion */
 .acc{--gap:4px;display:flex;gap:var(--gap);height:var(--acc-h)}
@@ -253,36 +250,40 @@ main{min-height:100dvh}
 .p-heads{display:flex;justify-content:center;gap:3px;height:21px}
 .p-heads svg{width:21px;height:21px;display:block;overflow:visible}
 .p-title b{display:block;font:700 17px/1.15 var(--cn-serif);color:var(--ink);margin-top:5px;white-space:nowrap;letter-spacing:.06em}
-.p-title span{display:block;font:500 9.5px var(--sans);color:var(--muted);letter-spacing:.3px;margin-top:3px;white-space:nowrap}
 .close{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;color:#4a5b52;cursor:pointer;padding:0;z-index:9}
 .p-note{text-align:center;font:400 12.5px/1.35 var(--hand);color:#5a7a67;margin:5px 2px 0;white-space:nowrap}
 
-/* Illustrated route */
-.route{position:relative;flex:1;min-height:0;margin-top:2px}
-.rz{position:absolute;left:0;right:0;top:34px;bottom:2px}
-.rz svg.line{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+/* Illustrated route — frozen Home style: quiet bamboo paper + alternating scenic stops */
+.route{position:relative;flex:1;min-height:0;margin-top:3px;overflow:hidden;border-radius:16px;
+  background:linear-gradient(180deg,rgba(252,252,245,.82),rgba(248,249,239,.64));isolation:isolate}
+.route:before,.route:after{content:"";position:absolute;top:1%;bottom:0;width:38%;z-index:0;pointer-events:none;opacity:.16;background-repeat:no-repeat;background-size:100% 100%}
+.route:before{left:-7%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
+.route:after{right:-9%;transform:scaleX(-1);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
+.rz{position:absolute;left:1px;right:1px;top:4px;bottom:0;z-index:1}
+.rz svg.line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .rz path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
-.rz .base{stroke:#a3b8a8;stroke-width:1.6;stroke-dasharray:1.5 5}
-.rz .done{stroke:#3f7b5c;stroke-width:2.3}
-.node{position:absolute;left:0;right:0;height:0}
-.strip.open .panel:not(.quiet) .node{animation:nodeIn .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.34s + var(--d,0s))}
-@keyframes nodeIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
-.dot{position:absolute;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fbfaf3;border:2px solid #8ba796;z-index:3}
-.node.done .dot{background:#3f7b5c;border-color:#fbfaf3;box-shadow:0 0 0 1px #3f7b5c}
-.node.cur .dot{background:var(--gold);border-color:#fffdf5;box-shadow:0 0 0 5px rgba(227,170,63,.24)}
-.card{position:absolute;top:-20px;height:40px;display:flex;align-items:center;gap:4px;z-index:2}
-.card.r{left:57%;right:0}
-.card.l{left:0;right:57%;flex-direction:row-reverse;text-align:right}
-.thumb{position:relative;width:38px;height:38px;flex:none;overflow:hidden;border-radius:46% 54% 50% 50%/54% 46% 54% 46%;background:linear-gradient(145deg,#dfe9d9,#f0eedc);display:grid;place-items:center;color:#5b7f69;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 60%,rgba(0,0,0,0) 100%);mask-image:radial-gradient(ellipse at 50% 50%,#000 60%,rgba(0,0,0,0) 100%)}
-.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(.96) brightness(1.04)}
-.t{min-width:0;flex:1;text-shadow:0 0 4px #fbfaf3,0 0 7px #fbfaf3}
-.t small{display:block;font:700 9.5px/1 var(--serif);color:var(--forest-2);letter-spacing:.2px}
-.t b{display:block;font:600 9.5px/1.15 var(--cn-serif);color:var(--ink);margin-top:3px;white-space:nowrap}
-.node.done .t{opacity:.8}
-.panda{position:absolute;width:40px;height:61px;margin:-58px 0 0 -20px;z-index:5;transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 4px 3px rgba(30,50,40,.24));transform-origin:50% 100%}
+.rz .base{stroke:#93aa97;stroke-width:1.35;stroke-dasharray:2 5.2;opacity:.78}
+.rz .done{stroke:#3f7557;stroke-width:2.2;opacity:.86}
+.node{position:absolute;left:0;right:0;height:0;z-index:3}
+.strip.open .panel:not(.quiet) .node{animation:nodeIn .52s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.30s + var(--d,0s))}
+@keyframes nodeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dot{position:absolute;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fbfaf3;border:2px solid #73927b;z-index:5;box-shadow:0 0 0 2px rgba(251,250,243,.82)}
+.node.done .dot{background:#3f7557;border-color:#f8f6ed;box-shadow:0 0 0 1px #3f7557}
+.node.cur .dot{background:#dba33f;border-color:#fffdf5;box-shadow:0 0 0 5px rgba(219,163,63,.18)}
+.card{position:absolute;top:-24px;height:52px;display:flex;align-items:center;gap:7px;z-index:4;min-width:0}
+.card.r{left:55%;right:1%;justify-content:flex-start}
+.card.l{left:1%;right:55%;flex-direction:row-reverse;text-align:right;justify-content:flex-start}
+.thumb{position:relative;width:58px;height:44px;flex:none;overflow:hidden;border-radius:12px;background:#e7eee3;display:grid;place-items:center;color:#5b7f69;box-shadow:0 5px 13px rgba(44,65,50,.10);border:2px solid rgba(255,255,255,.78)}
+.thumb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(245,241,225,.12));box-shadow:inset 0 0 0 1px rgba(57,83,65,.08)}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(.96) brightness(1.035)}
+.t{min-width:0;flex:1;text-shadow:0 1px 6px #fbfaf3,0 0 8px #fbfaf3}
+.t small{display:none}
+.t b{display:block;font:600 10.5px/1.28 var(--cn-serif);color:#24362c;white-space:normal;letter-spacing:.03em}
+.node.done .t{opacity:.76}
+.panda{position:absolute;width:46px;height:70px;margin:-67px 0 0 -23px;z-index:7;transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 5px 4px rgba(30,50,40,.20));transform-origin:50% 100%}
 .panda svg,.panda img{width:100%;height:100%;display:block;object-fit:contain}
-.panda.walk svg,.panda.walk img{animation:bob .75s ease-in-out infinite alternate}
-@keyframes bob{to{transform:translateY(-2px)}}
+.panda.walk svg,.panda.walk img{animation:bob .78s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-2px) rotate(-.5deg)}}
 .panel.quiet .panda{transition:none}
 
 /* ───── BOTTOM NAV ───── */
@@ -415,7 +416,9 @@ function chinaNow(){
 const hm=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
 function phase(){const n=chinaNow();if(n.iso<'2026-10-15')return'before';if(n.iso>'2026-10-20')return'after';return n.iso==='2026-10-20'?'return':'during'}
 function currentDay(){const n=chinaNow();if(n.iso<'2026-10-15')return 1;if(n.iso>'2026-10-20')return 6;return Math.max(1,Math.min(6,Number(n.iso.slice(-2))-14))}
-function greeting(){const h=chinaNow().h;return h<12?'Good morning,':h<18?'Good afternoon,':'Good evening,'}
+function greeting(){const h=chinaNow().h;return h<12?'早上好，':h<18?'下午好，':'晚上好，'}
+function greetingEN(){const h=chinaNow().h;return h<12?'Good morning.':h<18?'Good afternoon.':'Good evening.'}
+function weatherCN(c){if(c===null||c===undefined)return'天气更新中';if(c<=1)return c===0?'晴':'晴间多云';if(c<=3)return'多云';if(c<=48)return'雾';if(c<=67)return'有雨';if(c<=77)return'有雪';if(c<=82)return'阵雨';if(c<=99)return'雷雨';return'天气更新中'}
 
 /* ───── panda-head day markers (Mahjong circle-dot layouts) ───── */
 const LAY={1:[[30,30]],2:[[30,16],[30,44]],3:[[15,15],[30,30],[45,45]],4:[[18,18],[42,18],[18,42],[42,42]],5:[[16,16],[44,16],[30,30],[16,44],[44,44]],6:[[18,11],[42,11],[18,30],[42,30],[18,49],[42,49]]};
@@ -596,7 +599,7 @@ function progress(d){
 const thumbUrl=u=>u.replace(/width=\d+/,'width=160').replace(/w=\d+/,'w=160');
 function routeGeom(d){
   const n=d.nodes.length,pr=progress(d);
-  const pts=d.nodes.map((_,i)=>({x:i%2?55:45,y:93-i*(86/(n-1))}));
+  const pts=d.nodes.map((_,i)=>({x:i%2?58:42,y:93-i*(86/(n-1))}));
   const segs=pts.slice(0,-1).map((p,i)=>seg(p,pts[i+1]));
   const base='M'+P(pts[0])+segs.map(cub).join('');
   let done='';
@@ -612,7 +615,7 @@ function routeHTML(d,quiet){
   const g=routeGeom(d),{pr,pts,n}=g;
   const nodes=d.nodes.map((nd,i)=>{
     const st=pr.st==='past'?'done':pr.st==='future'?'':(pr.idx>=n-1?'done':i<Math.floor(pr.idx)?'done':i===Math.floor(pr.idx)?'cur':'');
-    return `<div class="node ${st}" style="top:${pts[i].y}%;--d:${(i*.07).toFixed(2)}s"><i class="dot" style="left:${pts[i].x}%"></i><div class="card ${i%2?'l':'r'}"><div class="thumb">${icon(nd[3],'sm')}<img src="${thumbUrl(DATA.images[nd[2]])}" alt="" loading="lazy" onerror="this.remove()"></div><div class="t"><small>${nd[0]}</small><b>${nd[1]}</b></div></div></div>`;
+    return `<div class="node ${st}" style="top:${pts[i].y}%;--d:${(i*.07).toFixed(2)}s"><i class="dot" style="left:${pts[i].x}%"></i><div class="card ${i%2?'l':'r'}"><div class="thumb">${icon(nd[3],'sm')}<img src="${thumbUrl(DATA.images[nd[2]])}" alt="${esc(nd[1])}" loading="lazy" onerror="this.remove()"></div><div class="t"><b>${nd[1]}</b></div></div></div>`;
   }).join('');
   const start=quiet?g.target:pts[0];
   const traveler=DATA.traveler_panda?`<img src="${DATA.traveler_panda}" alt="背着绿色背包向前走的熊猫">`:PANDA;
@@ -634,13 +637,10 @@ function stripHTML(d,i){
 function renderHome(){
   const hero=DATA.images.panda_portrait.replace(/w=\d+/,'w=1000');
   $('#home').innerHTML=`
-   <div class="home-top"><div><div class="greeting" id="greet">${greeting()}</div><div class="home-poem">Good company turns places into beautiful stories.</div></div>
-     <div class="wx"><div class="wx-row" id="wxIcon">${wxIcon(wx?wx.code:null)}<span class="wx-temp" id="wxTemp">${wx?Math.round(wx.t)+'°C':'—°C'}</span></div><small>Chengdu · 成都</small></div></div>
+   <div class="home-top"><div><div class="greeting" id="greet">${greeting()}</div><div class="greeting-en" id="greetEn">${greetingEN()}</div><div class="home-poem">和家人，一起看更大的世界。</div></div>
+     <div class="wx"><div class="wx-row" id="wxIcon">${wxIcon(wx?wx.code:null)}<span class="wx-temp" id="wxTemp">${wx?Math.round(wx.t)+'°C':'—°C'}</span></div><small id="wxPlace">成都 · ${wx?weatherCN(wx.code):'天气更新中'}</small></div></div>
    <div class="hero"><img src="${hero}" alt="A giant panda resting on a wooden log" onerror="this.style.display='none'"><div class="hero-copy"><div class="cn1">成都，</div><div class="cn2">刚刚好。</div><div class="en">Chengdu.<br>Just right.</div></div></div>
-   <div class="sheet">
-     <button class="date-row" onclick="setOpen(currentDay()-1)" aria-label="Open today's route"><span class="cal">${icon('calendar')}</span><span><b>15 - 20 Oct 2026</b><span>Chengdu Family Trip</span></span><span class="chev">${icon('chevron','sm')}</span></button>
-     <div class="acc" id="acc">${days.map(stripHTML).join('')}</div>
-   </div>`;
+   <div class="sheet"><div class="journey-seam"></div><div class="acc" id="acc">${days.map(stripHTML).join('')}</div></div>`;
   sizeAcc();
 }
 function sizeAcc(){
@@ -653,7 +653,7 @@ function fillPanel(i,quiet){
   const d=days[i],p=$$('#acc .panel')[i];
   p.classList.toggle('quiet',!!quiet);
   const heads=Array.from({length:d.day},()=>`<svg viewBox="-10 -10 20 20" aria-hidden="true">${pandaHead(0,0,9.3)}</svg>`).join('');
-  p.innerHTML=`<button class="close" aria-label="收起">${icon('close','sm')}</button><div class="p-head"><div class="p-heads" role="img" aria-label="第${d.day}天">${heads}</div><div class="p-title"><b>${d.vt}</b><span>${d.date} · ${d.dow} · ${d.city}</span></div></div><div class="p-note">${d.note}</div><div class="route"><div class="rz">${routeHTML(d,quiet)}</div></div>`;
+  p.innerHTML=`<button class="close" aria-label="收起">${icon('close','sm')}</button><div class="p-head"><div class="p-heads" role="img" aria-label="第${d.day}天">${heads}</div><div class="p-title"><b>${d.vt}</b></div></div><div class="p-note">${d.note}</div><div class="route"><div class="rz">${routeHTML(d,quiet)}</div></div>`;
   if(!quiet){
     const g=routeGeom(d),pd=p.querySelector('.panda');
     setTimeout(()=>{if(openIdx===i&&pd){pd.style.left=g.target.x+'%';pd.style.top=g.target.y+'%'}},520);
@@ -682,7 +682,7 @@ async function loadWeather(){
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.66&longitude=104.06&current=temperature_2m,weather_code&timezone=Asia%2FShanghai');
     const j=await r.json();wx={t:j.current.temperature_2m,code:j.current.weather_code};
     const t=$('#wxTemp'),ic=$('#wxIcon svg');
-    if(t){t.textContent=Math.round(wx.t)+'°C';ic.outerHTML=wxIcon(wx.code)}
+    if(t){t.textContent=Math.round(wx.t)+'°C';ic.outerHTML=wxIcon(wx.code);const p=$('#wxPlace');if(p)p.textContent='成都 · '+weatherCN(wx.code)}
   }catch(e){}
 }
 
@@ -773,7 +773,7 @@ function fitFrame(){try{if(window.frameElement)window.frameElement.style.height=
 /* ───── boot ───── */
 prepareLanding();nav();renderHome();renderFood();renderExplore();renderExpenses();showPage('home');fitFrame();loadWeather();
 window.addEventListener('resize',()=>{fitFrame();sizeAcc()});
-setInterval(()=>{if(openIdx>=0&&$('#home').classList.contains('active'))fillPanel(openIdx,true);const g=$('#greet');if(g)g.textContent=greeting()},60000);
+setInterval(()=>{if(openIdx>=0&&$('#home').classList.contains('active'))fillPanel(openIdx,true);const g=$('#greet'),ge=$('#greetEn');if(g)g.textContent=greeting();if(ge)ge.textContent=greetingEN()},60000);
 </script>
 </body>
 </html>'''.replace("__DATA__", PAYLOAD)
