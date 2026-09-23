@@ -89,6 +89,15 @@ IMG = {
     "dongjiao": commons("东郊记忆 (123423479).jpeg", 1200),
     "yulin": commons("15196 (Route 153) at Yulin Donglu 20241007195012.jpg", 1200),
 
+    # Home accordion route gallery — iconic, place-specific views.
+    "ifs_panda": commons("IFS Chengdu Tower and I AM HERE Panda Statue.jpg", 1400),
+    "kuanzhai": commons("Street scene - Kuanzhai Alleys - Chengdu, China - DSC05311.jpg", 1400),
+    "wide_alley": commons("Wide Alley - 宽巷子 - January 2019, Chengdu, Sichuan.jpg", 1400),
+    "yulin_street": commons("Yulin East Road 20241007194923.jpg", 1400),
+    "sanxingdui_mask": commons("20250519 Bronze mask in the Sanxingdui Museum.jpg", 1400),
+    "pudong_t2": commons("201801 Intl departure entrance at PVG T2.jpg", 1400),
+    "penang_home": commons("George Town skyline at dusk Nov 2024-6-cropped.jpg", 1400),
+
     # Transport / food — used only where scenery would be misleading.
     "airport": commons("成都天府国际机场 Chengdu Tianfu International Airport 1.jpg", 1200),
     "airport_hall": commons("2025 Chengdu Tianfu Airport 03.jpg", 1200),
@@ -270,42 +279,104 @@ main{min-height:100dvh}
 .close{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;color:#4a5b52;cursor:pointer;padding:0;z-index:9}
 .p-note{display:none}
 
-/* Illustrated route — frozen Home style: quiet bamboo paper + alternating scenic stops */
-.route{position:relative;flex:1;min-height:0;margin-top:5px;overflow:hidden;border-radius:16px;
-  background:linear-gradient(180deg,rgba(253,252,246,.72),rgba(247,249,239,.54));isolation:isolate}
-.route:before,.route:after{content:"";position:absolute;top:0;bottom:0;width:33%;z-index:0;pointer-events:none;opacity:.10;background-repeat:no-repeat;background-size:100% 100%}
-.route:before{left:-7%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
-.route:after{right:-9%;transform:scaleX(-1);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 360'%3E%3Cg fill='none' stroke='%236b936f' stroke-linecap='round'%3E%3Cpath d='M24 360C30 278 25 187 37 0M57 360C54 281 65 170 63 18' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237fa47f'%3E%3Cellipse cx='29' cy='56' rx='22' ry='7' transform='rotate(-34 29 56)'/%3E%3Cellipse cx='43' cy='93' rx='24' ry='8' transform='rotate(24 43 93)'/%3E%3Cellipse cx='31' cy='139' rx='22' ry='7' transform='rotate(-30 31 139)'/%3E%3Cellipse cx='61' cy='181' rx='24' ry='8' transform='rotate(28 61 181)'/%3E%3Cellipse cx='38' cy='232' rx='24' ry='8' transform='rotate(-29 38 232)'/%3E%3Cellipse cx='68' cy='278' rx='22' ry='7' transform='rotate(25 68 278)'/%3E%3C/g%3E%3C/svg%3E")}
-.rz{position:absolute;left:0;right:0;top:1px;bottom:0;z-index:1}
+/* Illustrated route — approved preview: an ink-wash travel scroll, not a UI timeline */
+.route{
+  position:relative;flex:1;min-height:0;margin-top:4px;overflow:hidden;border-radius:16px;isolation:isolate;
+  background:
+    radial-gradient(circle at 18% 18%,rgba(173,197,171,.13),transparent 27%),
+    radial-gradient(circle at 86% 66%,rgba(193,205,177,.11),transparent 28%),
+    linear-gradient(180deg,rgba(255,254,248,.87),rgba(248,249,239,.68));
+}
+.route:before,.route:after{
+  content:"";position:absolute;top:-2%;bottom:-2%;width:38%;z-index:0;pointer-events:none;
+  opacity:.065;background-repeat:no-repeat;background-size:100% 100%;
+}
+.route:before{
+  left:-14%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 420'%3E%3Cg fill='none' stroke='%235f8a68' stroke-linecap='round'%3E%3Cpath d='M28 430C37 326 30 210 47-8M68 430C64 330 80 196 77 12' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237da37f'%3E%3Cellipse cx='34' cy='66' rx='28' ry='8' transform='rotate(-32 34 66)'/%3E%3Cellipse cx='48' cy='115' rx='29' ry='9' transform='rotate(24 48 115)'/%3E%3Cellipse cx='35' cy='176' rx='27' ry='8' transform='rotate(-31 35 176)'/%3E%3Cellipse cx='70' cy='230' rx='30' ry='9' transform='rotate(27 70 230)'/%3E%3Cellipse cx='43' cy='294' rx='29' ry='9' transform='rotate(-28 43 294)'/%3E%3Cellipse cx='78' cy='350' rx='28' ry='8' transform='rotate(25 78 350)'/%3E%3C/g%3E%3C/svg%3E");
+}
+.route:after{
+  right:-17%;transform:scaleX(-1) rotate(-2deg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 420'%3E%3Cg fill='none' stroke='%235f8a68' stroke-linecap='round'%3E%3Cpath d='M28 430C37 326 30 210 47-8M68 430C64 330 80 196 77 12' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237da37f'%3E%3Cellipse cx='34' cy='66' rx='28' ry='8' transform='rotate(-32 34 66)'/%3E%3Cellipse cx='48' cy='115' rx='29' ry='9' transform='rotate(24 48 115)'/%3E%3Cellipse cx='35' cy='176' rx='27' ry='8' transform='rotate(-31 35 176)'/%3E%3Cellipse cx='70' cy='230' rx='30' ry='9' transform='rotate(27 70 230)'/%3E%3Cellipse cx='43' cy='294' rx='29' ry='9' transform='rotate(-28 43 294)'/%3E%3Cellipse cx='78' cy='350' rx='28' ry='8' transform='rotate(25 78 350)'/%3E%3C/g%3E%3C/svg%3E");
+}
+.rz{position:absolute;left:0;right:0;top:0;bottom:0;z-index:1}
 .rz svg.line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .rz path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
-.rz .base{stroke:#6f977d;stroke-width:2.05;stroke-dasharray:2.2 5.1;opacity:.77}
-.rz .done{stroke:#356d50;stroke-width:2.75;opacity:.88}
+.rz .wash{
+  stroke:#b5cbb4;stroke-width:13;opacity:.21;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.55));
+}
+.rz .base{stroke:#5f896b;stroke-width:1.45;stroke-dasharray:3.2 6.1;opacity:.61}
+.rz .done{stroke:#315f46;stroke-width:2.2;opacity:.72}
 .node{position:absolute;left:0;right:0;height:0;z-index:3}
-.strip.open .panel:not(.quiet) .node{animation:nodeIn .52s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.30s + var(--d,0s))}
-@keyframes nodeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.dot{position:absolute;top:0;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fbfaf3;border:2px solid #6f9178;z-index:5;box-shadow:0 0 0 2px rgba(251,250,243,.86)}
-.node.done .dot{background:#3f7557;border-color:#f8f6ed;box-shadow:0 0 0 1px #3f7557}
-.node.cur .dot{background:#dba33f;border-color:#fffdf5;box-shadow:0 0 0 5px rgba(219,163,63,.18)}
-.card{position:absolute;top:-31px;height:64px;display:flex;align-items:center;gap:0;z-index:4;min-width:0}
-.card.r{left:52%;right:-2%;justify-content:flex-start}
-.card.l{left:-2%;right:52%;flex-direction:row-reverse;text-align:right;justify-content:flex-start}
-.thumb{position:relative;width:90px;height:58px;flex:none;overflow:hidden;border-radius:16px;background:#e7eee3;display:grid;place-items:center;color:#5b7f69;box-shadow:0 8px 18px rgba(38,59,45,.15);border:2px solid rgba(255,255,255,.9)}
-.thumb:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(245,241,225,.12));box-shadow:inset 0 0 0 1px rgba(57,83,65,.08)}
-.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.98) contrast(.99) brightness(1.025)}
-.t{position:absolute;top:50%;transform:translateY(-50%);z-index:5;min-width:52px;max-width:92px;padding:5px 8px;border-radius:999px;background:rgba(255,253,245,.94);box-shadow:0 3px 10px rgba(51,69,55,.08);text-shadow:0 1px 4px #fff}
-.card.r .t{right:0}.card.l .t{left:0}
+.strip.open .panel:not(.quiet) .node{
+  animation:nodeIn .52s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:calc(.30s + var(--d,0s))
+}
+@keyframes nodeIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.dot{
+  position:absolute;top:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:#faf8ee;border:1.5px solid #60886c;z-index:5;
+  box-shadow:0 0 0 2px rgba(250,248,238,.8)
+}
+.node.done .dot{background:#456f54;border-color:#f8f6ed;box-shadow:0 0 0 1px #456f54}
+.node.cur .dot{background:#c99e4a;border-color:#fffdf5;box-shadow:0 0 0 4px rgba(201,158,74,.13)}
+.card{
+  position:absolute;top:-43px;height:88px;z-index:4;min-width:0;
+  display:flex;align-items:center;pointer-events:none
+}
+.card.r{left:53%;right:1%;justify-content:flex-start}
+.card.l{left:1%;right:53%;justify-content:flex-end}
+.thumb{
+  position:relative;width:118px;height:79px;flex:none;overflow:visible;
+  border-radius:28% 40% 26% 36% / 28% 24% 38% 32%;
+  background:#e6ede2;color:#5b7f69;
+  filter:drop-shadow(0 8px 10px rgba(42,60,47,.14));
+  transform:rotate(var(--tilt,0deg));
+}
+.card.r .thumb{--tilt:1.2deg}
+.card.l .thumb{--tilt:-1.2deg}
+.thumb:before{
+  content:"";position:absolute;inset:-4px;border-radius:inherit;
+  background:rgba(255,253,244,.76);z-index:-1;transform:rotate(-.7deg)
+}
+.thumb img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
+  border-radius:inherit;filter:saturate(.96) contrast(.99) brightness(1.035)
+}
+.thumb>.icon{display:none}
+.t{
+  position:absolute;z-index:6;bottom:-7px;min-width:64px;max-width:108px;padding:4px 8px 5px;
+  border-radius:4px;background:rgba(250,247,235,.94);
+  box-shadow:0 3px 10px rgba(50,68,54,.09);
+  border:1px solid rgba(83,105,86,.08);
+}
+.card.r .t{left:7px}.card.l .t{right:7px}
 .t small{display:none}
-.t b{display:block;font:600 11.5px/1.2 var(--cn-serif);color:#24362c;white-space:normal;letter-spacing:.01em;text-align:center}
-.rz.count-3 .card{top:-39px;height:82px}.rz.count-3 .thumb{width:112px;height:72px;border-radius:18px}.rz.count-3 .t{font-size:12px;min-width:60px}
-.rz.count-4 .card{top:-34px;height:70px}.rz.count-4 .thumb{width:98px;height:64px}
-.rz.count-5 .thumb{width:80px;height:52px;border-radius:13px}.rz.count-5 .card{top:-28px;height:58px}.rz.count-5 .t{padding:4px 6px;min-width:48px}.rz.count-5 .t b{font-size:10.4px}
-.node.done .t{opacity:.76}
-.panda{position:absolute;width:64px;height:96px;margin:-91px 0 0 -32px;z-index:7;transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 7px 6px rgba(30,50,40,.20));transform-origin:50% 100%}
+.t b{
+  display:block;font:600 11.5px/1.18 var(--cn-serif);color:#25372d;
+  white-space:normal;letter-spacing:.015em;text-align:center
+}
+.rz.count-3 .card{top:-50px;height:102px}
+.rz.count-3 .thumb{width:137px;height:94px}
+.rz.count-3 .t{min-width:70px;max-width:118px}.rz.count-3 .t b{font-size:12px}
+.rz.count-4 .card{top:-45px;height:92px}
+.rz.count-4 .thumb{width:122px;height:83px}
+.rz.count-5 .card{top:-39px;height:80px}
+.rz.count-5 .thumb{width:105px;height:70px;border-radius:24% 38% 26% 34% / 29% 25% 36% 32%}
+.rz.count-5 .t{min-width:56px;max-width:90px;padding:3px 6px 4px}
+.rz.count-5 .t b{font-size:10.4px}
+.node.done .card{opacity:.78}
+.panda{
+  position:absolute;width:72px;height:108px;margin:-100px 0 0 -36px;z-index:7;
+  transition:left 1.7s cubic-bezier(.4,.1,.2,1),top 1.7s cubic-bezier(.4,.1,.2,1);
+  filter:drop-shadow(0 8px 7px rgba(30,50,40,.20));transform-origin:50% 100%
+}
 .panda svg,.panda img{width:100%;height:100%;display:block;object-fit:contain}
 .panda.walk svg,.panda.walk img{animation:bob .78s ease-in-out infinite alternate}
-@keyframes bob{to{transform:translateY(-2px) rotate(-.5deg)}}
+@keyframes bob{to{transform:translateY(-2px) rotate(-.6deg)}}
 .panel.quiet .panda{transition:none}
+
 
 /* ───── BOTTOM NAV ───── */
 .bottom-nav{position:fixed;z-index:80;left:50%;bottom:0;transform:translateX(-50%);width:min(100vw,460px);height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(253,252,247,.95);backdrop-filter:blur(16px);border-top:1px solid rgba(60,75,65,.1)}
@@ -602,6 +673,48 @@ function art(d){
   return `<svg viewBox="0 0 100 250" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${defs}${A[d]}</svg>`;
 }
 
+/* ───── approved scenic route for Home accordion only ─────
+   Time remains internal for panda progress; the UI only shows place + image. */
+const HOME_ROUTE={
+  1:[
+    ["15:00","IFS","ifs_panda"],
+    ["16:00","太古里","taikoo_day"],
+    ["17:00","人民公园","people_park"],
+    ["18:30","宽窄巷子","kuanzhai"]
+  ],
+  2:[
+    ["09:00","熊猫基地","panda_base"],
+    ["14:00","都江堰","dujiangyan"],
+    ["17:00","灌县古城","guanxian"]
+  ],
+  3:[
+    ["08:00","九寨沟","jiuzhai_nuorilang"],
+    ["11:00","五花海","jiuzhai_five"],
+    ["14:00","长海","jiuzhai_long"],
+    ["17:00","珍珠滩瀑布","jiuzhai_waterfall"]
+  ],
+  4:[
+    ["08:00","熊猫谷","panda_base_alt"],
+    ["11:00","仰天窝","panda_base_gate"],
+    ["15:00","灌县古城","guanxian"],
+    ["18:30","南桥","dujiangyan"]
+  ],
+  5:[
+    ["09:00","三星堆博物馆","sanxingdui_mask"],
+    ["13:30","东郊记忆","dongjiao"],
+    ["17:00","玉林路","yulin_street"],
+    ["20:00","九眼桥","anshun_2026"]
+  ],
+  6:[
+    ["08:00","天府机场","airport_hall"],
+    ["12:30","成都起飞","airport"],
+    ["15:15","上海浦东","pudong_t2"],
+    ["23:00","回到槟城","penang_home"]
+  ]
+};
+const routeStops=d=>HOME_ROUTE[d.day]||d.nodes;
+
+
 /* ───── route geometry ───── */
 const lerp=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
 const seg=(a,b)=>{const ym=(a.y+b.y)/2;return[a,{x:a.x,y:ym},{x:b.x,y:ym},b]};
@@ -609,18 +722,23 @@ function bez(s,t){const u=1-t,f=(c)=>u*u*u*s[0][c]+3*u*u*t*s[1][c]+3*u*t*t*s[2][
 function leftPart(s,t){const a=lerp(s[0],s[1],t),b=lerp(s[1],s[2],t),c=lerp(s[2],s[3],t),d=lerp(a,b,t),e=lerp(b,c,t);return[s[0],a,d,lerp(d,e,t)]}
 const P=p=>`${p.x.toFixed(2)} ${p.y.toFixed(2)}`, cub=s=>`C${P(s[1])} ${P(s[2])} ${P(s[3])}`;
 function progress(d){
-  const n=d.nodes.length,now=chinaNow();
+  const stops=routeStops(d),n=stops.length,now=chinaNow();
   if(now.iso<d.iso)return{idx:0,st:'future'};
   if(now.iso>d.iso)return{idx:n-1,st:'past'};
-  const m=now.h*60+now.m,T=d.nodes.map(x=>hm(x[0]));
+  const m=now.h*60+now.m,T=stops.map(x=>hm(x[0]));
   if(m<=T[0])return{idx:0,st:'today'};
   for(let i=0;i<n-1;i++)if(m<T[i+1])return{idx:i+(m-T[i])/(T[i+1]-T[i]),st:'today'};
   return{idx:n-1,st:'today'};
 }
-const thumbUrl=u=>u.replace(/width=\d+/,'width=420').replace(/w=\d+/,'w=420');
+const thumbUrl=u=>u.replace(/width=\d+/,'width=760').replace(/w=\d+/,'w=760');
 function routeGeom(d){
-  const n=d.nodes.length,pr=progress(d);
-  const pts=d.nodes.map((_,i)=>({x:i%2?68+(i%3):32-(i%3),y:24+i*(66/(n-1))}));
+  const stops=routeStops(d),n=stops.length,pr=progress(d);
+  // Chronological journey starts at the BOTTOM and climbs upward.
+  const top=16,bottom=82;
+  const pts=stops.map((_,i)=>({
+    x:i%2===0 ? 39-(i%3)*1.2 : 64+(i%3)*1.2,
+    y:bottom-i*((bottom-top)/(n-1))
+  }));
   const segs=pts.slice(0,-1).map((p,i)=>seg(p,pts[i+1]));
   const base='M'+P(pts[0])+segs.map(cub).join('');
   let done='';
@@ -630,17 +748,35 @@ function routeGeom(d){
     done='M'+P(pts[0])+segs.slice(0,k).map(cub).join('')+cub(leftPart(segs[k],u));
   }
   const k=Math.min(Math.floor(pr.idx),n-2),u=pr.idx>=n-1?1:pr.idx-k;
-  return{n,pr,pts,base,done,target:bez(segs[k],u)};
+  return{n,pr,pts,base,done,target:bez(segs[k],u),stops};
 }
 function routeHTML(d,quiet){
-  const g=routeGeom(d),{pr,pts,n}=g;
-  const nodes=d.nodes.map((nd,i)=>{
+  const g=routeGeom(d),{pr,pts,n,stops}=g;
+  const nodes=stops.map((nd,i)=>{
     const st=pr.st==='past'?'done':pr.st==='future'?'':(pr.idx>=n-1?'done':i<Math.floor(pr.idx)?'done':i===Math.floor(pr.idx)?'cur':'');
-    return `<div class="node ${st}" style="top:${pts[i].y}%;--d:${(i*.07).toFixed(2)}s"><i class="dot" style="left:${pts[i].x}%"></i><div class="card ${i%2?'l':'r'}"><div class="thumb">${icon(nd[3],'sm')}<img src="${thumbUrl(DATA.images[nd[2]])}" alt="${esc(nd[1])}" loading="lazy" onerror="this.remove()"></div><div class="t"><b>${nd[1]}</b></div></div></div>`;
+    return `<div class="node ${st}" style="top:${pts[i].y}%;--d:${(i*.07).toFixed(2)}s">
+      <i class="dot" style="left:${pts[i].x}%"></i>
+      <div class="card ${i%2?'l':'r'}">
+        <div class="thumb">
+          <img src="${thumbUrl(DATA.images[nd[2]])}" alt="${esc(nd[1])}" loading="lazy" onerror="this.style.display='none'">
+          <div class="t"><b>${esc(nd[1])}</b></div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
-  const start=quiet?g.target:pts[0];
-  const traveler=DATA.traveler_panda?`<img src="${DATA.traveler_panda}" alt="背着绿色背包向前走的熊猫">`:PANDA;
-  return `<svg class="line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path class="base" d="${g.base}"/>${g.done?`<path class="done" d="${g.done}"/>`:''}</svg>${nodes}<div class="panda ${pr.st==='today'?'walk':''}" style="left:${start.x}%;top:${start.y}%">${traveler}</div>`;
+  const raw=quiet?g.target:pts[0];
+  // The traveler visually trails the route slightly so it feels like it is walking upward.
+  const start={x:raw.x,y:Math.min(91,raw.y+6.5)};
+  const traveler=DATA.traveler_panda
+    ? `<img src="${DATA.traveler_panda}" alt="背着绿色背包向前走的熊猫">`
+    : PANDA;
+  return `<svg class="line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path class="wash" d="${g.base}"/>
+      <path class="base" d="${g.base}"/>
+      ${g.done?`<path class="done" d="${g.done}"/>`:''}
+    </svg>
+    ${nodes}
+    <div class="panda ${pr.st==='today'?'walk':''}" style="left:${start.x}%;top:${start.y}%">${traveler}</div>`;
 }
 
 /* ───── Home ───── */
@@ -677,7 +813,7 @@ function fillPanel(i,quiet){
    p.innerHTML=`<button class="close" aria-label="收起">${icon('close','sm')}</button><div class="p-head"><div class="p-heads" role="img" aria-label="第${d.day}天">${heads}</div><div class="p-title"><b>${d.vt}</b></div></div><div class="p-note">${d.note}</div><div class="route"><div class="rz count-${d.nodes.length}">${routeHTML(d,quiet)}</div></div>`;
   if(!quiet){
     const g=routeGeom(d),pd=p.querySelector('.panda');
-    setTimeout(()=>{if(openIdx===i&&pd){pd.style.left=g.target.x+'%';pd.style.top=g.target.y+'%'}},520);
+    setTimeout(()=>{if(openIdx===i&&pd){pd.style.left=g.target.x+'%';pd.style.top=Math.min(91,g.target.y+6.5)+'%'}},520);
   }
 }
 function setOpen(i){
