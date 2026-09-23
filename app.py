@@ -279,34 +279,51 @@ main{min-height:100dvh}
 .close{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;color:#4a5b52;cursor:pointer;padding:0;z-index:9}
 .p-note{display:none}
 
-/* Illustrated route — approved preview: an ink-wash travel scroll, not a UI timeline */
+/* Illustrated route — approved preview: bamboo ink-wash travel scroll */
 .route{
   position:relative;flex:1;min-height:0;margin-top:4px;overflow:hidden;border-radius:16px;isolation:isolate;
   background:
-    radial-gradient(circle at 18% 18%,rgba(173,197,171,.13),transparent 27%),
-    radial-gradient(circle at 86% 66%,rgba(193,205,177,.11),transparent 28%),
-    linear-gradient(180deg,rgba(255,254,248,.87),rgba(248,249,239,.68));
+    radial-gradient(ellipse at 50% 18%,rgba(255,255,252,.94) 0%,rgba(255,255,252,.55) 37%,transparent 65%),
+    radial-gradient(circle at 13% 48%,rgba(151,184,151,.105),transparent 31%),
+    radial-gradient(circle at 91% 72%,rgba(151,184,151,.095),transparent 32%),
+    linear-gradient(180deg,rgba(255,254,248,.96),rgba(247,249,237,.82));
 }
+/* Two full-height bamboo groves.  More visible than v5, but still behind the story. */
 .route:before,.route:after{
-  content:"";position:absolute;top:-2%;bottom:-2%;width:38%;z-index:0;pointer-events:none;
-  opacity:.065;background-repeat:no-repeat;background-size:100% 100%;
+  content:"";position:absolute;top:-4%;bottom:-4%;width:49%;z-index:0;pointer-events:none;
+  opacity:.115;background-repeat:no-repeat;background-size:100% 100%;
+  filter:saturate(.82);
 }
 .route:before{
-  left:-14%;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 420'%3E%3Cg fill='none' stroke='%235f8a68' stroke-linecap='round'%3E%3Cpath d='M28 430C37 326 30 210 47-8M68 430C64 330 80 196 77 12' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237da37f'%3E%3Cellipse cx='34' cy='66' rx='28' ry='8' transform='rotate(-32 34 66)'/%3E%3Cellipse cx='48' cy='115' rx='29' ry='9' transform='rotate(24 48 115)'/%3E%3Cellipse cx='35' cy='176' rx='27' ry='8' transform='rotate(-31 35 176)'/%3E%3Cellipse cx='70' cy='230' rx='30' ry='9' transform='rotate(27 70 230)'/%3E%3Cellipse cx='43' cy='294' rx='29' ry='9' transform='rotate(-28 43 294)'/%3E%3Cellipse cx='78' cy='350' rx='28' ry='8' transform='rotate(25 78 350)'/%3E%3C/g%3E%3C/svg%3E");
+  left:-17%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 520'%3E%3Cg fill='none' stroke='%235b8065' stroke-linecap='round'%3E%3Cpath d='M38 540C50 394 38 238 63-26' stroke-width='3.4'/%3E%3Cpath d='M84 540C76 390 101 205 94-22' stroke-width='2.7'/%3E%3Cpath d='M126 540C132 390 118 218 145-12' stroke-width='2.1'/%3E%3Cpath d='M62 158C79 134 91 114 111 97M83 265C65 242 48 224 31 210M111 364C129 340 143 321 161 309' stroke-width='1.5'/%3E%3C/g%3E%3Cg fill='%23789c7a'%3E%3Cellipse cx='43' cy='58' rx='34' ry='9' transform='rotate(-31 43 58)'/%3E%3Cellipse cx='71' cy='98' rx='32' ry='9' transform='rotate(24 71 98)'/%3E%3Cellipse cx='103' cy='130' rx='31' ry='8' transform='rotate(-35 103 130)'/%3E%3Cellipse cx='122' cy='173' rx='35' ry='9' transform='rotate(31 122 173)'/%3E%3Cellipse cx='55' cy='211' rx='34' ry='9' transform='rotate(-27 55 211)'/%3E%3Cellipse cx='37' cy='251' rx='30' ry='8' transform='rotate(28 37 251)'/%3E%3Cellipse cx='91' cy='296' rx='36' ry='9' transform='rotate(-30 91 296)'/%3E%3Cellipse cx='131' cy='333' rx='33' ry='9' transform='rotate(29 131 333)'/%3E%3Cellipse cx='98' cy='386' rx='34' ry='9' transform='rotate(-25 98 386)'/%3E%3Cellipse cx='145' cy='425' rx='34' ry='9' transform='rotate(31 145 425)'/%3E%3Cellipse cx='70' cy='464' rx='32' ry='8' transform='rotate(-31 70 464)'/%3E%3C/g%3E%3C/svg%3E");
 }
 .route:after{
-  right:-17%;transform:scaleX(-1) rotate(-2deg);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 420'%3E%3Cg fill='none' stroke='%235f8a68' stroke-linecap='round'%3E%3Cpath d='M28 430C37 326 30 210 47-8M68 430C64 330 80 196 77 12' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%237da37f'%3E%3Cellipse cx='34' cy='66' rx='28' ry='8' transform='rotate(-32 34 66)'/%3E%3Cellipse cx='48' cy='115' rx='29' ry='9' transform='rotate(24 48 115)'/%3E%3Cellipse cx='35' cy='176' rx='27' ry='8' transform='rotate(-31 35 176)'/%3E%3Cellipse cx='70' cy='230' rx='30' ry='9' transform='rotate(27 70 230)'/%3E%3Cellipse cx='43' cy='294' rx='29' ry='9' transform='rotate(-28 43 294)'/%3E%3Cellipse cx='78' cy='350' rx='28' ry='8' transform='rotate(25 78 350)'/%3E%3C/g%3E%3C/svg%3E");
+  right:-19%;transform:scaleX(-1) rotate(-1deg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 520'%3E%3Cg fill='none' stroke='%235b8065' stroke-linecap='round'%3E%3Cpath d='M38 540C50 394 38 238 63-26' stroke-width='3.4'/%3E%3Cpath d='M84 540C76 390 101 205 94-22' stroke-width='2.7'/%3E%3Cpath d='M126 540C132 390 118 218 145-12' stroke-width='2.1'/%3E%3Cpath d='M62 158C79 134 91 114 111 97M83 265C65 242 48 224 31 210M111 364C129 340 143 321 161 309' stroke-width='1.5'/%3E%3C/g%3E%3Cg fill='%23789c7a'%3E%3Cellipse cx='43' cy='58' rx='34' ry='9' transform='rotate(-31 43 58)'/%3E%3Cellipse cx='71' cy='98' rx='32' ry='9' transform='rotate(24 71 98)'/%3E%3Cellipse cx='103' cy='130' rx='31' ry='8' transform='rotate(-35 103 130)'/%3E%3Cellipse cx='122' cy='173' rx='35' ry='9' transform='rotate(31 122 173)'/%3E%3Cellipse cx='55' cy='211' rx='34' ry='9' transform='rotate(-27 55 211)'/%3E%3Cellipse cx='37' cy='251' rx='30' ry='8' transform='rotate(28 37 251)'/%3E%3Cellipse cx='91' cy='296' rx='36' ry='9' transform='rotate(-30 91 296)'/%3E%3Cellipse cx='131' cy='333' rx='33' ry='9' transform='rotate(29 131 333)'/%3E%3Cellipse cx='98' cy='386' rx='34' ry='9' transform='rotate(-25 98 386)'/%3E%3Cellipse cx='145' cy='425' rx='34' ry='9' transform='rotate(31 145 425)'/%3E%3Cellipse cx='70' cy='464' rx='32' ry='8' transform='rotate(-31 70 464)'/%3E%3C/g%3E%3C/svg%3E");
 }
 .rz{position:absolute;left:0;right:0;top:0;bottom:0;z-index:1}
+/* Hanging bamboo canopy + low bamboo leaves create the denser preview atmosphere. */
+.rz:before,.rz:after{
+  content:"";position:absolute;pointer-events:none;z-index:0;background-repeat:no-repeat;background-size:contain;opacity:.105;
+}
+.rz:before{
+  left:-5%;top:-4%;width:66%;height:34%;
+  background-position:left top;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 250 130'%3E%3Cg fill='none' stroke='%23577c61' stroke-linecap='round'%3E%3Cpath d='M-10 8C55 17 114 43 173 95' stroke-width='3'/%3E%3Cpath d='M23 15C64 31 94 53 126 83M82 38C122 43 159 58 206 92' stroke-width='1.8'/%3E%3C/g%3E%3Cg fill='%23779a78'%3E%3Cellipse cx='30' cy='22' rx='30' ry='8' transform='rotate(18 30 22)'/%3E%3Cellipse cx='70' cy='35' rx='31' ry='8' transform='rotate(-24 70 35)'/%3E%3Cellipse cx='101' cy='53' rx='28' ry='7' transform='rotate(22 101 53)'/%3E%3Cellipse cx='137' cy='71' rx='31' ry='8' transform='rotate(-24 137 71)'/%3E%3Cellipse cx='177' cy='91' rx='29' ry='8' transform='rotate(25 177 91)'/%3E%3Cellipse cx='208' cy='101' rx='25' ry='7' transform='rotate(-18 208 101)'/%3E%3C/g%3E%3C/svg%3E");
+}
+.rz:after{
+  right:-6%;bottom:-5%;width:58%;height:29%;
+  background-position:right bottom;transform:scaleX(-1) rotate(3deg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 120'%3E%3Cg fill='none' stroke='%23577c61' stroke-linecap='round'%3E%3Cpath d='M-5 111C52 88 106 57 174 6' stroke-width='2.6'/%3E%3Cpath d='M48 91C83 75 114 57 141 35' stroke-width='1.6'/%3E%3C/g%3E%3Cg fill='%23779a78'%3E%3Cellipse cx='38' cy='91' rx='28' ry='8' transform='rotate(-25 38 91)'/%3E%3Cellipse cx='72' cy='73' rx='29' ry='8' transform='rotate(24 72 73)'/%3E%3Cellipse cx='105' cy='58' rx='27' ry='7' transform='rotate(-28 105 58)'/%3E%3Cellipse cx='141' cy='39' rx='29' ry='8' transform='rotate(25 141 39)'/%3E%3Cellipse cx='177' cy='21' rx='26' ry='7' transform='rotate(-25 177 21)'/%3E%3C/g%3E%3C/svg%3E");
+}
 .rz svg.line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .rz path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
 .rz .wash{
-  stroke:#b5cbb4;stroke-width:13;opacity:.21;
+  stroke:#b5cbb4;stroke-width:12.5;opacity:.18;
   filter:drop-shadow(0 1px 0 rgba(255,255,255,.55));
 }
-.rz .base{stroke:#5f896b;stroke-width:1.45;stroke-dasharray:3.2 6.1;opacity:.61}
+.rz .base{stroke:#5f896b;stroke-width:1.35;stroke-dasharray:3.2 6.3;opacity:.57}
 .rz .done{stroke:#315f46;stroke-width:2.2;opacity:.72}
 .node{position:absolute;left:0;right:0;height:0;z-index:3}
 .strip.open .panel:not(.quiet) .node{
@@ -328,7 +345,7 @@ main{min-height:100dvh}
 .card.r{left:53%;right:1%;justify-content:flex-start}
 .card.l{left:1%;right:53%;justify-content:flex-end}
 .thumb{
-  position:relative;width:118px;height:79px;flex:none;overflow:visible;
+  position:relative;width:122px;height:82px;flex:none;overflow:visible;
   border-radius:28% 40% 26% 36% / 28% 24% 38% 32%;
   background:#e6ede2;color:#5b7f69;
   filter:drop-shadow(0 8px 10px rgba(42,60,47,.14));
@@ -358,12 +375,12 @@ main{min-height:100dvh}
   white-space:normal;letter-spacing:.015em;text-align:center
 }
 .rz.count-3 .card{top:-50px;height:102px}
-.rz.count-3 .thumb{width:137px;height:94px}
+.rz.count-3 .thumb{width:142px;height:97px}
 .rz.count-3 .t{min-width:70px;max-width:118px}.rz.count-3 .t b{font-size:12px}
 .rz.count-4 .card{top:-45px;height:92px}
-.rz.count-4 .thumb{width:122px;height:83px}
+.rz.count-4 .thumb{width:127px;height:86px}
 .rz.count-5 .card{top:-39px;height:80px}
-.rz.count-5 .thumb{width:105px;height:70px;border-radius:24% 38% 26% 34% / 29% 25% 36% 32%}
+.rz.count-5 .thumb{width:109px;height:73px;border-radius:24% 38% 26% 34% / 29% 25% 36% 32%}
 .rz.count-5 .t{min-width:56px;max-width:90px;padding:3px 6px 4px}
 .rz.count-5 .t b{font-size:10.4px}
 .node.done .card{opacity:.78}
