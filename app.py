@@ -249,8 +249,6 @@ HTML = r'''<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Caveat:wght@500;600&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
-<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <style>
 :root{
   --paper:#faf8f1; --paper-2:#f3f1e7; --sheet:#fcfbf6;
@@ -312,8 +310,6 @@ main{min-height:100dvh}
 .swipe-card[data-depth="0"]{z-index:30;transform:translateY(0) scale(1)}
 .swipe-card[data-depth="1"]{z-index:20;transform:translateY(12px) scale(.94)}
 .swipe-card[data-depth="2"]{z-index:10;transform:translateY(24px) scale(.90)}
-.swipe-card[data-role="prev"],.swipe-card[data-role="next"]{opacity:0;pointer-events:none}
-.swipe-stage[data-reveal="prev"] .swipe-card[data-role="prev"],.swipe-stage[data-reveal="next"] .swipe-card[data-role="next"]{opacity:1}
 .swipe-card.dragging{transition:none}
 .swipe-card.throwing{transition:transform .34s cubic-bezier(.18,.72,.2,1),opacity .28s ease}
 .swipe-card-inner{position:absolute;inset:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform .58s cubic-bezier(.2,.75,.2,1);-webkit-transition:-webkit-transform .58s cubic-bezier(.2,.75,.2,1)}
@@ -453,13 +449,13 @@ main{min-height:100dvh}
 }
 
 /* ───── BOTTOM NAV ───── */
-.bottom-nav{position:fixed;z-index:80;left:50%;bottom:0;transform:translateX(-50%);width:min(100vw,460px);height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(253,252,247,.95);backdrop-filter:blur(16px);border-top:1px solid rgba(60,75,65,.1)}
+.bottom-nav{position:fixed;z-index:80;left:50%;bottom:0;transform:translateX(-50%);width:min(100vw,460px);height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(3,1fr);background:rgba(253,252,247,.95);backdrop-filter:blur(16px);border-top:1px solid rgba(60,75,65,.1)}
 .nav-btn{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:400 10.5px var(--sans);color:var(--slate);cursor:pointer}
 .nav-btn .icon{width:22px;height:22px}
 .nav-btn.active{color:var(--forest);font-weight:600}
 .nav-btn.active .icon{stroke-width:2}
 
-/* ───── shared page bits (Food / Explore / Expenses) ───── */
+/* ───── shared page bits (Food / Expenses) ───── */
 .page-head{height:50px;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;margin:1px 0 8px}
 .page-head .center{text-align:center}.page-head h1{font:600 27px/.9 var(--serif);margin:0}.page-head .sub{font-size:9px;color:var(--muted);margin-top:5px}
 .round-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.82);display:grid;place-items:center;cursor:pointer}
@@ -470,11 +466,6 @@ main{min-height:100dvh}
 .radius-select{display:flex;justify-content:flex-end;gap:5px;margin:-3px 0 10px}.radius-select button{border:0;background:transparent;color:#85877f;font-size:9px;padding:3px;cursor:pointer}.radius-select button.active{color:var(--forest);font-weight:600;border-bottom:1px solid var(--forest)}
 .food-list{display:grid;gap:9px}.food-card{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:8px;border-radius:19px}.food-card img{width:104px;height:101px;border-radius:15px;object-fit:cover}.food-card h3{font:600 13px/1.3 var(--cn-serif);margin:3px 0 5px}.food-meta{font-size:9px;line-height:1.65;color:var(--muted)}.food-rating{font:600 12px var(--serif);color:var(--gold)}.platforms{display:flex;gap:5px;margin-top:7px}.platform{width:22px;height:17px;border-radius:5px;background:#e4ece3;color:#3c674e;display:grid;place-items:center;font:600 6.5px var(--sans);font-style:normal}.open-t{color:#4c7256;font-weight:600}
 .ending{margin:20px 0 6px;text-align:center;padding:16px 12px;color:#6d5b49}.ending .cn{font:400 15px var(--cn-serif)}.ending .en{font:italic 12px var(--serif);margin-top:5px;color:#878078}
-.map-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}.map-cat{border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.55);padding:9px 2px;text-align:center;font-size:9px;color:#5f675f}.map-cat .icon{margin:0 auto 5px;color:var(--forest)}
-.map-wrap{height:420px;margin:0 -8px;position:relative;overflow:hidden;background:#e5e9df}.map-wrap svg{width:100%;height:100%;display:block}
-.map-top-note{position:absolute;top:14px;left:50%;transform:translateX(-50%);border-radius:15px;background:rgba(255,255,255,.92);box-shadow:0 8px 22px rgba(37,54,43,.12);padding:10px 13px;font-size:10px;white-space:nowrap;color:#536159;display:flex;gap:6px;align-items:center}
-.map-you{position:absolute;left:51%;top:48%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:rgba(47,92,65,.13);display:grid;place-items:center}.map-you:before{content:"";width:16px;height:16px;border-radius:50%;background:var(--forest);border:4px solid #fff;box-shadow:0 4px 11px rgba(26,61,42,.26)}
-.poi{position:absolute;transform:translate(-50%,-100%);width:28px;height:34px;border-radius:16px 16px 16px 4px;rotate:-45deg;background:#a75a4d;box-shadow:0 5px 10px rgba(46,56,48,.18);display:grid;place-items:center}.poi .icon{rotate:45deg;color:#fff;width:14px;height:14px}.poi.green{background:#4c7058}.poi.gold{background:#b78343}.poi.pink{background:#ad6c7d}.poi.blue{background:#4f7da3}
 .exp-total{border-radius:22px;padding:18px;text-align:center;background:linear-gradient(140deg,#eef3e6,#fbf7e8)}.exp-total small{font:500 10px var(--sans);color:var(--muted)}.exp-total b{display:block;font:600 38px/1.1 var(--serif);color:#25382e;margin-top:6px}
 .exp-form{border-radius:20px;padding:13px;margin-top:11px}.exp-row{display:flex;gap:7px;margin-top:9px}.exp-input{min-width:0;flex:1;border:1px solid var(--line);background:#fffefa;border-radius:13px;padding:10px 11px;font-size:12px;outline:none}.exp-input:focus{border-color:#77917c;box-shadow:0 0 0 3px rgba(83,119,91,.1)}.exp-input.amt{flex:0 0 96px}
 .exp-add{border:0;border-radius:13px;background:var(--forest);color:#fff;padding:0 15px;font-size:12px;cursor:pointer}
@@ -488,8 +479,9 @@ main{min-height:100dvh}
 .state-card{border-radius:22px;padding:26px 20px;text-align:center;margin-top:12px}.state-card .state-icon{width:52px;height:52px;border-radius:50%;background:#edf2e9;color:var(--forest);display:grid;place-items:center;margin:0 auto 12px}.state-card h3{font:600 17px var(--cn-serif);margin:0}.state-card p{font-size:10px;line-height:1.6;color:var(--muted);margin:7px auto 14px;max-width:260px}.spinner{width:24px;height:24px;border:2px solid #dce6dc;border-top-color:var(--forest);border-radius:50%;animation:spin .8s linear infinite;margin:12px auto}@keyframes spin{to{transform:rotate(360deg)}}
 .food-list{display:grid;gap:9px}.food-card.live{position:relative;grid-template-columns:90px 1fr;padding:8px;cursor:pointer;overflow:hidden}.food-photo,.food-placeholder{width:90px;height:92px;border-radius:15px;object-fit:cover}.food-placeholder{display:grid;place-items:center;background:linear-gradient(145deg,#e4eadf,#f5ecdc);color:#67806e}.food-card.live h3{font:600 13px/1.25 var(--cn-serif);margin:3px 0 6px;padding-right:38px}.food-card.live .score{position:absolute;right:11px;top:10px;width:34px;height:34px;border-radius:50%;background:#eef3e7;color:#315d46;display:grid;place-items:center;font:700 13px var(--serif)}.food-line{font-size:9.5px;line-height:1.55;color:var(--muted)}.food-bottom{display:flex;align-items:center;gap:7px;margin-top:6px}.smart{font-size:9px;font-weight:600;color:#3e7054}.open-label{font-size:8px;color:#5b7e63;background:#edf4e9;border-radius:99px;padding:3px 6px}.confidence{font-size:8px;color:#927a58}.radius-select{align-items:center}.radius-label{font-size:9px;color:#96978f;padding:3px;margin-right:auto}
 .modal-backdrop{position:fixed;z-index:150;inset:0;margin:auto;width:min(100vw,460px);background:rgba(19,35,27,.34);display:flex;align-items:flex-end;backdrop-filter:blur(2px)}.sheet-modal{width:100%;max-height:88dvh;overflow:auto;border-radius:28px 28px 0 0;background:#fbf9f2;padding:13px 15px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(20,45,31,.2);animation:sheetUp .28s ease}.sheet-grab{width:38px;height:4px;border-radius:9px;background:#ccd3ca;margin:0 auto 12px}@keyframes sheetUp{from{transform:translateY(18px);opacity:.5}to{transform:none;opacity:1}}.sheet-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.sheet-title h2{font:700 21px/1.12 var(--cn-serif);margin:0}.sheet-title p{font-size:10px;color:var(--muted);margin:6px 0}.sheet-close{border:0;background:#eeeae0;width:30px;height:30px;border-radius:50%;cursor:pointer}.detail-photo,.detail-placeholder{width:100%;height:178px;border-radius:20px;margin:10px 0;object-fit:cover}.detail-placeholder{display:grid;place-items:center;background:linear-gradient(145deg,#dce9df,#f3eadb);color:#577565}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.detail-stat{border:1px solid var(--line);border-radius:15px;background:#fffef9;padding:10px}.detail-stat small{display:block;font-size:8px;color:var(--muted)}.detail-stat b{display:block;font:600 14px var(--cn-serif);margin-top:3px}.sheet-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.sheet-actions a,.sheet-actions button{text-decoration:none;text-align:center;border:1px solid var(--line);border-radius:14px;background:#fffef9;color:var(--forest);padding:11px 6px;font-size:10px;font-weight:600;cursor:pointer}.sheet-actions .main{grid-column:1/-1;background:var(--forest);color:#fff;border-color:var(--forest)}
-.map-cats{display:flex;overflow:auto;gap:7px;scrollbar-width:none;padding-bottom:2px}.map-cats::-webkit-scrollbar{display:none}.map-cat{min-width:74px;cursor:pointer}.map-cat.active{background:var(--forest);color:#fff}.map-cat.active .icon{color:#fff}.real-map{height:430px;margin:8px -10px 0;position:relative;overflow:hidden;background:#e4eadf}.real-map #mapCanvas{position:absolute;inset:0}.map-toolbar{position:absolute;z-index:4;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;pointer-events:none}.map-toolbar>*{pointer-events:auto}.map-note{background:rgba(255,255,255,.92);border-radius:14px;padding:9px 11px;box-shadow:0 7px 18px rgba(33,55,42,.13);font-size:9px;color:#506359;max-width:250px}.map-control{border:0;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.94);box-shadow:0 7px 18px rgba(33,55,42,.16);display:grid;place-items:center;color:var(--forest);cursor:pointer}.poi-marker{width:29px;height:35px;border-radius:17px 17px 17px 5px;transform:rotate(-45deg);background:#3f7558;border:2px solid #fff;box-shadow:0 5px 13px rgba(30,55,39,.25);display:grid;place-items:center;cursor:pointer}.poi-marker span{transform:rotate(45deg);font-size:13px}.user-marker{width:18px;height:18px;border-radius:50%;background:#2e6c4d;border:4px solid #fff;box-shadow:0 0 0 7px rgba(46,108,77,.16)}.map-fallback-list{display:grid;gap:7px;padding:10px}.poi-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:15px;padding:10px 12px;cursor:pointer}.poi-row b{font:600 12px var(--cn-serif)}.poi-row small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
 .segmented{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;border-radius:15px;background:#ebe9df;margin-bottom:11px}.segmented button{border:0;border-radius:11px;background:transparent;padding:8px 2px;font-size:9px;color:#737970;cursor:pointer}.segmented button.active{background:#fffef9;color:var(--forest);font-weight:600;box-shadow:0 3px 9px rgba(52,70,57,.08)}.sync-row{display:flex;justify-content:space-between;align-items:center;margin:0 2px 10px}.summary-hero{padding:18px;border-radius:24px;background:linear-gradient(145deg,#edf3e8,#faf4e6);position:relative;overflow:hidden}.summary-hero:after{content:"";position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(116,148,115,.08);right:-45px;bottom:-65px}.summary-hero small{font-size:9px;color:var(--muted)}.summary-hero .big{font:700 38px/1.05 var(--serif);color:#213a2d;margin-top:5px}.summary-hero .fx{font-size:10px;color:#7c796d;margin-top:5px}.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:9px}.summary-card{border-radius:17px;padding:12px}.summary-card small{font-size:8px;color:var(--muted)}.summary-card b{display:block;font:600 18px var(--serif);margin-top:4px}.section-label{display:flex;justify-content:space-between;align-items:center;margin:17px 3px 8px}.section-label h3{font:600 16px var(--cn-serif);margin:0}.section-label small{font-size:9px;color:var(--muted)}.transfer-list,.member-list,.bill-list{display:grid;gap:7px}.transfer,.member-row,.bill-row{border-radius:16px;padding:11px 12px;display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;border-radius:50%;background:#e6eee3;color:#315f47;display:grid;place-items:center;font:700 12px var(--serif);flex:none}.member-main,.bill-main{min-width:0;flex:1}.member-main b,.bill-main b{font:600 12px var(--cn-serif)}.member-main small,.bill-main small{display:block;font-size:8.5px;color:var(--muted);margin-top:3px}.row-amount{font:600 15px var(--serif);white-space:nowrap}.row-actions{display:flex;gap:4px}.row-actions button{border:0;background:#f0eee6;border-radius:9px;padding:6px;color:#68766d;cursor:pointer}.me-badge{font-size:8px;color:#fff;background:var(--forest);border-radius:99px;padding:3px 6px}.inactive{opacity:.56}.form-grid{display:grid;gap:9px;margin-top:12px}.field label{display:block;font-size:9px;color:#6e7a72;margin:0 0 5px 3px}.field input,.field select{width:100%;border:1px solid var(--line);background:#fffef9;border-radius:13px;padding:11px 12px;font-size:12px;outline:0}.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.check-pill{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:13px;background:#fffef9;padding:9px;font-size:10px}.split-lines{display:grid;gap:6px}.split-line{display:grid;grid-template-columns:1fr 108px;align-items:center;gap:8px}.split-line input{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px;text-align:right}.validation{min-height:16px;font-size:9px;color:#ad5f55;margin-top:3px}.local-note{border-radius:15px;background:#f5eee0;color:#806b4d;padding:9px 11px;font-size:9px;line-height:1.45;margin-bottom:9px}.toast{position:fixed;z-index:220;left:50%;bottom:calc(var(--nav-h) + 18px);transform:translateX(-50%);width:max-content;max-width:calc(min(100vw,460px) - 32px);background:#203a2d;color:#fff;border-radius:999px;padding:10px 15px;font-size:10px;box-shadow:0 9px 25px rgba(20,45,31,.24);animation:toastIn .25s ease}@keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.nearby-tools{border-radius:18px;padding:11px;margin:0 0 11px}.nearby-tools-title{font:600 12px var(--cn-serif);margin:0 0 8px;color:#30483a}.nearby-links{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.nearby-link{min-height:42px;border:1px solid var(--line);border-radius:13px;background:#fffef9;color:var(--forest);text-decoration:none;display:flex;align-items:center;gap:7px;padding:8px 9px;font-size:9px;line-height:1.25}.nearby-link .icon{width:17px;height:17px;flex:none}
 
 /* ───── LANDING ───── */
 #landing{position:fixed;z-index:200;inset:0;margin:auto;width:min(100vw,460px);height:100dvh;overflow:hidden;background:#d8ebe3;transition:opacity .7s ease,visibility .7s ease}
@@ -527,7 +519,7 @@ main{min-height:100dvh}
 <body>
 <div class="app-shell">
   <div id="landing" aria-label="Our Chengdu Story opening">
-    <div class="land-scene"><video id="landingVideo" muted playsinline preload="auto" aria-label="Panda walking through a Chengdu garden"></video><img id="landingPhoto" alt="A giant panda walking beside a Chengdu garden lake" style="display:none"></div>
+    <div class="land-scene"><video id="landingVideo" muted playsinline preload="metadata" aria-label="Panda walking through a Chengdu garden"></video><img id="landingPhoto" alt="A giant panda walking beside a Chengdu garden lake" style="display:none"></div>
     <div class="land-bamboo" aria-hidden="true"><svg viewBox="0 0 210 330" fill="none"><path d="M21-5c16 91 30 192 47 345M83-10c5 102 13 203 20 344" stroke="#60775f" stroke-width="4" opacity=".62"/><g fill="#748a70" opacity=".75"><path d="M33 48C7 22 3 11 1 2c25 3 43 14 51 33-5 8-11 12-19 13Z"/><path d="M46 85C16 70 7 59 3 50c26-3 46 4 58 20-2 8-7 13-15 15Z"/><path d="M62 141c-31-9-42-18-48-26 25-8 47-5 62 8 0 8-6 14-14 18Z"/><path d="M94 52c22-25 35-30 45-31-7 25-20 41-39 46-7-6-9-10-6-15Z"/><path d="M101 112c28-18 42-20 51-18-13 22-30 34-50 34-5-7-6-12-1-16Z"/><path d="M108 183c29-17 43-18 52-16-14 22-32 32-52 31-5-7-5-12 0-15Z"/></g></svg></div>
     <button class="land-skip" id="landingSkip" onclick="enterApp()">跳过</button>
     <div class="land-brand"><h1 id="landingBrand">我们的<br>成都故事</h1><p id="landingTagline">一家人的旅程</p></div>
@@ -542,7 +534,6 @@ main{min-height:100dvh}
   <main>
     <section id="home" class="page active"></section>
     <section id="food" class="page"></section>
-    <section id="explore" class="page"></section>
     <section id="expenses" class="page"></section>
   </main>
   <nav class="bottom-nav" aria-label="Main navigation"></nav>
@@ -554,19 +545,18 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const days=DATA.days;
 let lang='zh', currentPage='home', foodCategory='all', foodRadius=2, swipeDayIdx=0, swipeFlipped=false, wx=null;
 let userLocation=null,locationTimestamp=0,geoStatus='idle',foodPois=[],foodLoading=false,foodError='',selectedFood=null,foodQuery='',foodSearchTimer=null,lastOverpassAt=0;
-let exploreCategory='attractions',explorePois=[],exploreLoading=false,exploreError='',selectedExplore=null,map=null,userMapMarker=null,poiMarkers=[];
 let expenseTab='overview',ledger={members:[],expenses:[],splits:[],settlements:[]},cloudStatus='local',fxRate=null;
 
 const I18N={
  zh:{
-  nav_home:'首页',nav_food:'美食',nav_explore:'探索',nav_expenses:'花费',switch_lang:'切换为英文',
+  nav_home:'首页',nav_food:'美食',nav_expenses:'花费',switch_lang:'切换为英文',
   morning:'早上好，',afternoon:'下午好，',evening:'晚上好，',home_line:'和家人，一起看更大的世界。',hero_1:'成都，',hero_2:'刚刚好。',
   weather_loading:'天气更新中',sunny:'晴',partly:'晴间多云',cloudy:'多云',fog:'雾',rain:'有雨',snow:'有雪',showers:'阵雨',storm:'雷雨',chengdu:'成都',chongqing:'重庆',
   food_title:'附近美食',food_sub:'我现在在这里，附近有什么值得吃？',search_food:'搜索附近店铺',range:'范围',retry:'重试',location_title:'需要当前位置',location_body:'允许一次定位，才能查找真正位于你附近的店。应用不会持续追踪位置。',locate:'获取当前位置',locating:'正在寻找你的位置…',location_denied:'定位权限未开启',location_denied_body:'请在浏览器设置中允许定位，然后再试一次。',location_insecure:'需要安全连接',location_insecure_body:'请使用 HTTPS，或在本机用 localhost / 127.0.0.1 打开后重试。',location_unavailable:'暂时无法获取位置',location_unavailable_body:'这通常不是因为你不在成都。请确认设备定位已开启，稍后重试。',
   all:'全部',sichuan:'川菜',hotpot:'火锅',snacks:'小吃',noodles:'面食',coffee:'咖啡',dessert:'甜品',more:'更多',
   nothing_food:'附近还没找到合适的店。',wider:'换个距离再看看。',service_down:'附近搜索暂时不可用。',cached:'正在显示上次缓存的结果。',smart_score:'推荐分',limited:'数据有限',high_conf:'高可信',open:'营业中',hours_listed:'有营业时间资料',walk:'步行约 {n} 分钟',
-  food_detail:'店铺详情',category:'类别',distance:'距离',walking:'步行',status:'状态',price:'价格',unknown:'暂无资料',navigate:'高德导航',search_dp:'大众点评搜索',search_red:'小红书搜索',view_map:'在地图查看',amap_nearby:'打开高德搜索附近',
-  explore_title:'探索',explore_sub:'我现在在这里，附近有什么？',attractions:'景点',convenience:'便利店',toilets:'厕所',pharmacy:'药房',shopping_places:'商场',hotels:'酒店',food:'美食',recenter:'回到当前位置',map_unavailable:'地图暂时无法加载',map_list:'仍可使用附近地点列表。',nearby_loading:'正在查找附近地点…',nothing_nearby:'附近暂时没有找到地点。',open_food:'在美食页查看',
+  food_detail:'店铺详情',category:'类别',distance:'距离',walking:'步行',status:'状态',price:'价格',unknown:'暂无资料',navigate:'高德导航',search_dp:'大众点评搜索',search_red:'小红书搜索',amap_nearby:'打开高德搜索附近',
+  nearby_tools:'附近实用地点',convenience:'便利店',toilets:'厕所',pharmacy:'药房',shopping_places:'商场',hotels:'酒店',nearby_loading:'正在查找附近地点…',open_amap_place:'打开高德查看附近{place}',
   expenses_title:'花费',expenses_sub:'旅行账本与家庭分账',overview:'总览',bills:'账单',split:'分账',members:'成员',local_mode:'本机模式：数据只保存在这个浏览器。配置 Supabase 后即可与家人同步。',cloud_mode:'家庭共享已开启',syncing:'正在同步',sync_failed:'同步失败，已保留本机数据',refresh:'刷新',
   actual_spend:'我的实际花费',i_paid:'我已付款',owed_to_me:'别人欠我',i_owe:'我欠别人',unsettled:'尚未结清',no_me:'请先在“成员”中选择“这是我”。',no_expenses:'还没有账单。',start_today:'第一笔就从今天开始吧。',add_expense:'新增账单',record_payment:'记录还款',settled:'已结清',mark_settled:'标记已结清',
   food_cat:'餐饮',transport:'交通',tickets:'门票',shopping_expense:'购物',lodging:'住宿',other:'其他',amount:'金额',description:'说明 / 备注',optional:'可选',paid_by:'谁付款',participants:'参与成员',split_method:'分账方式',equal:'平均分',exact:'指定金额',percentage:'百分比',shares:'按份数',save:'保存',cancel:'取消',invalid_total:'分账合计必须等于账单金额。',select_participant:'请至少选择一位参与成员。',saved:'已保存',queued_offline:'已保存到本机，联网后会自动同步',
@@ -576,14 +566,14 @@ const I18N={
   day:'第{n}天',close:'关闭',delete:'删除',confirm_deactivate:'确定停用这位成员吗？',confirm_delete_expense:'确定删除这笔账单吗？',cny:'人民币',myr:'马币参考'
  },
  en:{
-  nav_home:'Home',nav_food:'Food',nav_explore:'Explore',nav_expenses:'Expenses',switch_lang:'Switch to Chinese',
+  nav_home:'Home',nav_food:'Food',nav_expenses:'Expenses',switch_lang:'Switch to Chinese',
   morning:'Good morning,',afternoon:'Good afternoon,',evening:'Good evening,',home_line:'See a bigger world, together as a family.',hero_1:'Chengdu.',hero_2:'Just right.',
   weather_loading:'Weather updating',sunny:'Sunny',partly:'Partly cloudy',cloudy:'Cloudy',fog:'Fog',rain:'Rain',snow:'Snow',showers:'Showers',storm:'Thunderstorms',chengdu:'Chengdu',chongqing:'Chongqing',
   food_title:'Nearby Food',food_sub:'What is worth eating near me right now?',search_food:'Search nearby places',range:'Distance',retry:'Retry',location_title:'Location needed',location_body:'Allow one location check to find places truly near you. The app does not track continuously.',locate:'Use My Location',locating:'Finding your location…',location_denied:'Location permission is off',location_denied_body:'Allow location in your browser settings, then try again.',location_insecure:'Secure connection required',location_insecure_body:'Open the app over HTTPS, or use localhost / 127.0.0.1 when running it locally.',location_unavailable:'Location is temporarily unavailable',location_unavailable_body:'This is not caused by being outside Chengdu. Check that device location is on, then try again.',
   all:'All',sichuan:'Sichuan',hotpot:'Hot Pot',snacks:'Snacks',noodles:'Noodles',coffee:'Coffee',dessert:'Dessert',more:'More',
   nothing_food:'Nothing suitable nearby yet.',wider:'Try a wider radius.',service_down:'Nearby search is temporarily unavailable.',cached:'Showing the last cached results.',smart_score:'Smart Score',limited:'Limited data',high_conf:'High confidence',open:'Open',hours_listed:'Hours available',walk:'~{n} min walk',
-  food_detail:'Place Details',category:'Category',distance:'Distance',walking:'Walking',status:'Status',price:'Price',unknown:'Not available',navigate:'Navigate',search_dp:'Search Dianping',search_red:'Search Xiaohongshu',view_map:'View on Map',amap_nearby:'Search Nearby in AMap',
-  explore_title:'Explore',explore_sub:'What is around me?',attractions:'Attractions',convenience:'Convenience',toilets:'Toilets',pharmacy:'Pharmacy',shopping_places:'Shopping',hotels:'Hotels',food:'Food',recenter:'Recenter',map_unavailable:'Map unavailable',map_list:'You can still use the nearby-place list.',nearby_loading:'Finding nearby places…',nothing_nearby:'Nothing nearby in this category yet.',open_food:'Open in Food',
+  food_detail:'Place Details',category:'Category',distance:'Distance',walking:'Walking',status:'Status',price:'Price',unknown:'Not available',navigate:'Navigate',search_dp:'Search Dianping',search_red:'Search Xiaohongshu',amap_nearby:'Search Nearby in AMap',
+  nearby_tools:'Nearby essentials',convenience:'Convenience stores',toilets:'Toilets',pharmacy:'Pharmacies',shopping_places:'Shopping malls',hotels:'Hotels',nearby_loading:'Finding nearby places…',open_amap_place:'Open nearby {place} in AMap',
   expenses_title:'Expenses',expenses_sub:'Trip spending and family splitting',overview:'Overview',bills:'Expenses',split:'Split',members:'Members',local_mode:'Local mode: data stays in this browser. Configure Supabase to share with family.',cloud_mode:'Family sharing is active',syncing:'Syncing',sync_failed:'Sync failed; local data is safe',refresh:'Refresh',
   actual_spend:'My Actual Spend',i_paid:'I Paid',owed_to_me:'Owed to Me',i_owe:'I Owe',unsettled:'Unsettled',no_me:'Choose “This is me” under Members first.',no_expenses:'No expenses yet.',start_today:"Start with today's first one.",add_expense:'Add Expense',record_payment:'Record Payment',settled:'Settled',mark_settled:'Mark Settled',
   food_cat:'Food',transport:'Transport',tickets:'Tickets',shopping_expense:'Shopping',lodging:'Lodging',other:'Other',amount:'Amount',description:'Description / note',optional:'Optional',paid_by:'Paid by',participants:'Participants',split_method:'Split method',equal:'Split equally',exact:'Exact amounts',percentage:'Percentage',shares:'Shares',save:'Save',cancel:'Cancel',invalid_total:'The split total must equal the expense amount.',select_participant:'Select at least one participant.',saved:'Saved',queued_offline:'Saved locally; it will sync when you are online',
@@ -621,11 +611,10 @@ function toggleLang(){lang=lang==='zh'?'en':'zh';store.set('chengduLang',lang);a
 function applyLanguage(){
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
   document.body.classList.toggle('lang-en',lang==='en');
-  [...foodPois,...explorePois].forEach(p=>{const n=osmName(p.tags);p.name=n===L('unknown')&&explorePois.includes(p)?L(exploreCategory==='shopping'?'shopping_places':exploreCategory):n;p.status=p.tags.opening_hours==='24/7'?L('open'):(p.tags.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited')});
+  foodPois.forEach(p=>{p.name=osmName(p.tags);p.status=p.tags.opening_hours==='24/7'?L('open'):(p.tags.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited')});
   const keepDay=swipeDayIdx,keepFlip=swipeFlipped;renderHome(keepDay);if(keepFlip)flipTopCard(true);
   nav();renderLandingText();
   if(currentPage==='food')renderFood();
-  if(currentPage==='explore')renderExplore();
   if(currentPage==='expenses')renderExpenses();
   showPage(currentPage,false);
 }
@@ -635,7 +624,6 @@ const ICONS={
  home:'<path d="M3 10.8 10 4l7 6.8v7.1a1.1 1.1 0 0 1-1.1 1.1H4.1A1.1 1.1 0 0 1 3 17.9Z"/><path d="M7.6 19v-5.4h4.8V19"/>',
  homeSolid:'<path d="M10 2.6 2.3 9.5a.6.6 0 0 0 .4 1H4v7.1a1 1 0 0 0 1 1h3.3v-5h3.4v5H15a1 1 0 0 0 1-1v-7.1h1.3a.6.6 0 0 0 .4-1Z" fill="currentColor" stroke="none"/>',
  food:'<path d="M6 3v6M4 3v4a2 2 0 0 0 4 0V3M6 9v8M13 3v14M13 3c3 2 3 6 0 8"/>',
- compass:'<circle cx="10" cy="10" r="7.5"/><path d="m12.8 7.2-1.7 3.9-3.9 1.7 1.7-3.9Z"/>',
  wallet:'<rect x="2" y="6" width="16" height="11.5" rx="2.2"/><path d="M4 6l9-3a1 1 0 0 1 1.3 1v2M13 11.7h5v3h-5a1.5 1.5 0 0 1 0-3Z"/>',
  calendar:'<rect x="3" y="5" width="14" height="13" rx="2"/><path d="M6 3v4M14 3v4M3 9h14M7 12h.01M10 12h.01M13 12h.01M7 15h.01M10 15h.01"/>',
  chevron:'<path d="m8 4 6 6-6 6"/>', back:'<path d="m12.5 4-6 6 6 6"/>', close:'<path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/>',
@@ -948,7 +936,7 @@ function wxIcon(c){
 // Home is now an infinite swipe-card stack.
 // Right swipe = next day. Left swipe = previous day. Tap = flip to the route map.
 const SWIPE_THRESHOLD=.35;
-let dragState=null,swipeAnimating=false;
+let dragState=null,swipeAnimating=false,swipeFallbackCleanup=null;
 
 function daySummary(d){return (HOME_ROUTE[d.day]||[]).map(x=>proper(x[0])).join(' · ')}
 const ROUTE_ART_POINTS={
@@ -959,16 +947,16 @@ const ROUTE_ART_POINTS={
   5:[[40,27],[58,43],[42,63],[55,80]],
   6:[[58,25],[40,51],[67,76]]
 };
-function cardFrontHTML(d){
+function cardFrontHTML(d,eager=true){
   const main=DATA.card_art?.[d.day]?.front||'';
-  const panda=d.day===6&&DATA.traveler_panda?`<div class="cover-panda"><img src="${DATA.traveler_panda}" alt=""></div>`:'';
+  const panda=d.day===6&&DATA.traveler_panda?`<div class="cover-panda"><img src="${DATA.traveler_panda}" alt="" loading="${eager?'eager':'lazy'}" decoding="async"></div>`:'';
   return `<div class="swipe-face swipe-front">
     <div class="card-front-head">
       <div><div class="day-kicker">${lang==='zh'?`第 ${d.day} 天`:`DAY ${d.day}`}</div><div class="card-front-title">${esc(proper(d.vt))}</div></div>
       <div class="card-date">${esc(d.date)}</div>
     </div>
     <div class="card-cover-art">
-      <img class="cover-main day${d.day}" src="${main}" alt="${esc(proper(d.vt))}" loading="eager">
+      <img class="cover-main day${d.day}" src="${main}" alt="${esc(proper(d.vt))}" loading="${eager?'eager':'lazy'}" decoding="async">
       ${panda}
     </div>
     <div class="card-front-bottom">
@@ -977,14 +965,17 @@ function cardFrontHTML(d){
     </div>
   </div>`
 }
-function cardRouteBackHTML(d){
-  const stops=routeStops(d),n=stops.length;
-  const pts=(ROUTE_ART_POINTS[d.day]||[]).map(p=>({x:p[0],y:p[1]}));
+function routePandaPosition(d){
+  const stops=routeStops(d),n=stops.length,pts=(ROUTE_ART_POINTS[d.day]||[]).map(p=>({x:p[0],y:p[1]}));
   const pr=progress(d),k=Math.min(Math.floor(pr.idx),Math.max(0,n-2)),u=pr.idx>=n-1?1:pr.idx-k;
-  let px=pts[0]?.x||50,py=pts[0]?.y||82;
-  if(n>1){const a=pts[k],b=pts[Math.min(k+1,n-1)];px=a.x+(b.x-a.x)*u;py=a.y+(b.y-a.y)*u}
-  if(pr.st==='future'){px=pts[0]?.x||50;py=(pts[0]?.y||82)+5}
-  if(pr.st==='past'){px=pts[n-1]?.x||50;py=(pts[n-1]?.y||18)+5}
+  let x=pts[0]?.x||50,y=pts[0]?.y||82;
+  if(n>1){const a=pts[k],b=pts[Math.min(k+1,n-1)];x=a.x+(b.x-a.x)*u;y=a.y+(b.y-a.y)*u}
+  if(pr.st==='future'){x=pts[0]?.x||50;y=(pts[0]?.y||82)+5}
+  if(pr.st==='past'){x=pts[n-1]?.x||50;y=(pts[n-1]?.y||18)+5}
+  return{x,top:Math.min(93,y+4)}
+}
+function cardRouteBackHTML(d){
+  const stops=routeStops(d),n=stops.length,pts=(ROUTE_ART_POINTS[d.day]||[]).map(p=>({x:p[0],y:p[1]})),pos=routePandaPosition(d);
   const nodes=stops.map((s,i)=>{
     return `<div class="route-label ${i%2===0?'left':'right'}" style="left:${pts[i].x}%;top:${pts[i].y}%">
       <b>${esc(proper(s[1]))}</b>
@@ -992,7 +983,7 @@ function cardRouteBackHTML(d){
   }).join('');
   const art=DATA.card_art?.[d.day]?.back||'';
   const traveler=DATA.route_traveler_panda
-    ?`<img src="${DATA.route_traveler_panda}" alt="${lang==='zh'?'正面背包熊猫':'Front-facing backpack panda'}">`
+    ?`<img data-src="${DATA.route_traveler_panda}" alt="${lang==='zh'?'正面背包熊猫':'Front-facing backpack panda'}" decoding="async">`
     :PANDA;
   return `<div class="swipe-face swipe-back">
     <div class="swipe-back-head">
@@ -1000,15 +991,24 @@ function cardRouteBackHTML(d){
       <button class="flip-back" onclick="event.stopPropagation();flipTopCard(false)" aria-label="${lang==='zh'?'翻回正面':'Flip back'}">${icon('refresh','sm')}</button>
     </div>
     <div class="card-route-map count-${n}">
-      <img class="route-back-art" src="${art}" alt="" loading="eager">
+      <img class="route-back-art" data-src="${art}" alt="" decoding="async">
       ${nodes}
-      <div class="route-panda" style="left:${px}%;top:${Math.min(93,py+4)}%">${traveler}</div>
+      <div class="route-panda" style="left:${pos.x}%;top:${pos.top}%">${traveler}</div>
     </div>
   </div>`
 }
-function stackCardHTML(idx,depth,role='current'){
-  const safe=(idx+days.length)%days.length,d=days[safe];
-  return `<article class="swipe-card" data-role="${role}" data-depth="${depth}" data-index="${safe}" aria-label="${L('day',{n:d.day})} ${esc(proper(d.vt))}"><div class="swipe-card-inner">${cardFrontHTML(d)}${cardRouteBackHTML(d)}</div></article>`
+function stackCardHTML(idx,depth){
+  const safe=(idx+days.length)%days.length,d=days[safe],eager=depth===0;
+  return `<article class="swipe-card" data-depth="${depth}" data-index="${safe}" aria-label="${L('day',{n:d.day})} ${esc(proper(d.vt))}"><div class="swipe-card-inner">${cardFrontHTML(d,eager)}${cardRouteBackHTML(d)}</div></article>`
+}
+function fillLowerCard(card,index){
+  if(!card)return;const safe=(index+days.length)%days.length,d=days[safe];
+  card.dataset.index=String(safe);card.setAttribute('aria-label',`${L('day',{n:d.day})} ${proper(d.vt)}`);
+  card.querySelector('.swipe-card-inner').innerHTML=cardFrontHTML(d,false)+cardRouteBackHTML(d)
+}
+function prepareLowerCards(direction){
+  const stage=$('#swipeStage');if(!stage)return;const key=direction>0?'next':'prev';if(stage.dataset.lowerDirection===key)return;
+  const step=direction>0?1:-1;fillLowerCard(stage.querySelector('[data-depth="1"]'),swipeDayIdx+step);fillLowerCard(stage.querySelector('[data-depth="2"]'),swipeDayIdx+step*2);stage.dataset.lowerDirection=key
 }
 function initialSwipeIndex(){
   const saved=Number(store.get('chengduSwipeDay')),now=chinaNow();
@@ -1019,22 +1019,18 @@ function initialSwipeIndex(){
 }
 function renderSwipeStack(index=swipeDayIdx){
   swipeDayIdx=(index+days.length)%days.length;store.set('chengduSwipeDay',String(swipeDayIdx));swipeFlipped=false;
-  const stage=$('#swipeStage');if(!stage)return;
-  const curr=swipeDayIdx;
-  const prev=(curr-1+days.length)%days.length,prev2=(curr-2+days.length)%days.length;
-  const next=(curr+1)%days.length,next2=(curr+2)%days.length;
-  stage.dataset.reveal='next';
-  stage.innerHTML=stackCardHTML(prev2,2,'prev')+stackCardHTML(prev,1,'prev')+stackCardHTML(next2,2,'next')+stackCardHTML(next,1,'next')+stackCardHTML(curr,0,'current');
+  const stage=$('#swipeStage');if(!stage)return;const curr=swipeDayIdx,next=(curr+1)%days.length,next2=(curr+2)%days.length;
+  stage.dataset.lowerDirection='next';stage.innerHTML=stackCardHTML(next2,2)+stackCardHTML(next,1)+stackCardHTML(curr,0);
   bindSwipeTop();renderStackDots()
 }
 function renderStackDots(){const box=$('#stackDots');if(box)box.innerHTML=days.map((d,i)=>`<button class="${i===swipeDayIdx?'active':''}" onclick="jumpDay(${i})" aria-label="${L('day',{n:d.day})}"></button>`).join('')}
 function jumpDay(i){if(!swipeAnimating){swipeDayIdx=(i+days.length)%days.length;renderSwipeStack(swipeDayIdx)}}
-function flipTopCard(force=null){const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;swipeFlipped=force===null?!swipeFlipped:!!force;top.classList.toggle('flipped',swipeFlipped)}
-function setStackReveal(direction){const stage=$('#swipeStage');if(stage)stage.dataset.reveal=direction>0?'next':'prev'}
+function loadTopBackAssets(top){top.querySelectorAll('[data-src]').forEach(el=>{if(!el.hasAttribute('src')){el.src=el.dataset.src;el.removeAttribute('data-src')}})}
+function flipTopCard(force=null){const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;const next=force===null?!swipeFlipped:!!force;if(next)loadTopBackAssets(top);swipeFlipped=next;top.classList.toggle('flipped',swipeFlipped)}
+function updateCurrentRoutePanda(){if(document.hidden||currentPage!=='home'||!swipeFlipped)return;const el=$('#swipeStage .swipe-card[data-depth="0"] .route-panda');if(!el)return;const pos=routePandaPosition(days[swipeDayIdx]);el.style.left=`${pos.x}%`;el.style.top=`${pos.top}%`}
 function animateLower(p,direction){
-  p=Math.max(0,Math.min(1,p));setStackReveal(direction);
-  const role=direction>0?'next':'prev';
-  const b=$(`#swipeStage .swipe-card[data-role="${role}"][data-depth="1"]`),c=$(`#swipeStage .swipe-card[data-role="${role}"][data-depth="2"]`);
+  p=Math.max(0,Math.min(1,p));prepareLowerCards(direction);
+  const b=$('#swipeStage .swipe-card[data-depth="1"]'),c=$('#swipeStage .swipe-card[data-depth="2"]');
   if(b)b.style.transform=`translateY(${12*(1-p)}px) scale(${(.94+.06*p).toFixed(4)})`;
   if(c)c.style.transform=`translateY(${24-12*p}px) scale(${(.90+.04*p).toFixed(4)})`
 }
@@ -1042,12 +1038,13 @@ function resetLower(){document.querySelectorAll('#swipeStage .swipe-card[data-de
 function completeSwipe(direction){
   if(swipeAnimating||swipeFlipped)return;
   const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;
-  swipeAnimating=true;setStackReveal(direction);const distance=(window.innerWidth||430)*1.35*direction;
+  swipeAnimating=true;prepareLowerCards(direction);const distance=(window.innerWidth||430)*1.35*direction;
   top.classList.remove('dragging');top.classList.add('throwing');top.style.transform=`translate(${distance}px,${Math.abs(distance)*.045}px) rotate(${distance*.06}deg)`;top.style.opacity='0';animateLower(1,direction);
   setTimeout(()=>{swipeDayIdx=(swipeDayIdx+(direction>0?1:-1)+days.length)%days.length;store.set('chengduSwipeDay',String(swipeDayIdx));swipeAnimating=false;resetLower();renderSwipeStack(swipeDayIdx)},320)
 }
 function springBack(){const top=$('#swipeStage .swipe-card[data-depth="0"]');if(top){top.classList.remove('dragging');top.style.transform='';top.style.opacity=''}resetLower()}
 function bindSwipeTop(){
+  if(swipeFallbackCleanup){swipeFallbackCleanup();swipeFallbackCleanup=null}
   const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;
   const start=e=>{
     if(swipeAnimating)return;
@@ -1063,8 +1060,8 @@ function bindSwipeTop(){
     if(Math.hypot(dx,dy)>7)dragState.moved=true;
     if(dragState.wasFlipped)return;
     if(Math.abs(dx)>Math.abs(dy)&&e.cancelable)e.preventDefault();
-    top.style.transform=`translateX(${dx}px) rotate(${(dx*.06).toFixed(2)}deg)`;
-    if(dx!==0)animateLower(Math.min(1,Math.abs(dx)/(top.clientWidth*SWIPE_THRESHOLD)),dx>0?1:-1)
+    if(dx!==0)animateLower(Math.min(1,Math.abs(dx)/(top.clientWidth*SWIPE_THRESHOLD)),dx>0?1:-1);
+    top.style.transform=`translateX(${dx}px) rotate(${(dx*.06).toFixed(2)}deg)`
   };
   const end=()=>{
     if(!dragState)return;
@@ -1090,7 +1087,8 @@ function bindSwipeTop(){
     top.addEventListener('touchend',end);
     top.addEventListener('mousedown',start);
     window.addEventListener('mousemove',move);
-    window.addEventListener('mouseup',end)
+    window.addEventListener('mouseup',end);
+    swipeFallbackCleanup=()=>{window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',end)}
   }
 }
 function renderHome(forcedIndex=null){
@@ -1110,13 +1108,13 @@ function renderHome(forcedIndex=null){
 }
 function sizeSwipe(){}
 
-async function loadWeather(){
-  try{
-    const c=weatherContext(),r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code&timezone=Asia%2FShanghai`);
-    const j=await r.json();wx={t:j.current.temperature_2m,code:j.current.weather_code,city:c.key};
-    const t=$('#wxTemp'),ic=$('#wxIcon svg');
-    if(t){t.textContent=Math.round(wx.t)+'°C';ic.outerHTML=wxIcon(wx.code);const p=$('#wxPlace');if(p)p.textContent=L(wx.city)+' · '+weatherCN(wx.code)}
-  }catch(e){}
+const WEATHER_MAX_AGE=15*60*1000;let weatherUpdatedAt=0,weatherCity='';
+function paintWeather(){if(!wx)return;const t=$('#wxTemp'),ic=$('#wxIcon svg');if(t){t.textContent=Math.round(wx.t)+'°C';if(ic)ic.outerHTML=wxIcon(wx.code);const p=$('#wxPlace');if(p)p.textContent=L(wx.city)+' · '+weatherCN(wx.code)}}
+async function loadWeather(force=false){
+  if(document.hidden&&!force)return;const c=weatherContext(),key=`chengduWeather:${c.key}`,now=Date.now();
+  if(!force&&wx&&weatherCity===c.key&&now-weatherUpdatedAt<WEATHER_MAX_AGE){paintWeather();return}
+  if(!force)try{const cached=JSON.parse(store.get(key)||'null');if(cached&&now-cached.ts<WEATHER_MAX_AGE){wx=cached.data;weatherCity=c.key;weatherUpdatedAt=cached.ts;paintWeather();return}}catch(e){}
+  try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code&timezone=Asia%2FShanghai`),j=await r.json();wx={t:j.current.temperature_2m,code:j.current.weather_code,city:c.key};weatherCity=c.key;weatherUpdatedAt=Date.now();store.set(key,JSON.stringify({ts:weatherUpdatedAt,data:wx}));paintWeather()}catch(e){}
 }
 
 function weatherContext(){
@@ -1127,7 +1125,7 @@ function weatherContext(){
 
 /* ───── Location + Overpass shared engine ───── */
 const FOOD_FILTERS=['all','sichuan','hotpot','snacks','noodles','coffee','dessert'];
-const EXPLORE_CATS=['attractions','convenience','toilets','coffee','pharmacy','shopping','hotels','food'];
+const NEARBY_UTILS=['convenience','toilets','pharmacy','coffee','shopping','hotels'],FOOD_VISIBLE_LIMIT=16;
 const rad=x=>x*Math.PI/180;
 function distanceM(a,b,c,d){const R=6371000,p=rad(c-a),q=rad(d-b),h=Math.sin(p/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(q/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function distanceText(m){return m<1000?`${Math.round(m/10)*10} m`:`${(m/1000).toFixed(m<3000?1:0)} km`}
@@ -1136,23 +1134,24 @@ function gcjTransformLat(x,y){let r=-100+2*x+3*y+.2*y*y+.1*x*y+.2*Math.sqrt(Math
 function gcjTransformLon(x,y){let r=300+x+2*y+.1*x*x+.1*x*y+.1*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*Math.PI)+20*Math.sin(2*x*Math.PI))*2/3;r+=(20*Math.sin(x*Math.PI)+40*Math.sin(x/3*Math.PI))*2/3;r+=(150*Math.sin(x/12*Math.PI)+300*Math.sin(x/30*Math.PI))*2/3;return r}
 function wgs84ToGcj02(lat,lon){if(outOfChina(lat,lon))return{lat,lon};const a=6378245,ee=.006693421622965943,dLat=gcjTransformLat(lon-105,lat-35),dLon=gcjTransformLon(lon-105,lat-35),radLat=lat/180*Math.PI,magic=1-ee*Math.sin(radLat)**2,sqrt=Math.sqrt(magic);return{lat:lat+(dLat*180)/((a*(1-ee))/(magic*sqrt)*Math.PI),lon:lon+(dLon*180)/(a/sqrt*Math.cos(radLat)*Math.PI)}}
 function amapNavigationUrl(p){const c=wgs84ToGcj02(p.lat,p.lon),q=encodeURIComponent(p.name);return`https://uri.amap.com/navigation?to=${c.lon.toFixed(6)},${c.lat.toFixed(6)},${q}&mode=walk&policy=1&src=chengdu-story&callnative=1`}
-function amapNearbyUrl(kind='all'){if(!userLocation)return'https://uri.amap.com/';const c=wgs84ToGcj02(userLocation.lat,userLocation.lon),names={food:lang==='zh'?'美食':'Food',attractions:lang==='zh'?'景点':'Attractions',convenience:lang==='zh'?'便利店':'Convenience Store',toilets:lang==='zh'?'厕所':'Toilets',coffee:lang==='zh'?'咖啡':'Coffee',pharmacy:lang==='zh'?'药房':'Pharmacy',shopping:lang==='zh'?'商场':'Shopping',hotels:lang==='zh'?'酒店':'Hotels',all:lang==='zh'?'附近':'Nearby'};return`https://uri.amap.com/search?keyword=${encodeURIComponent(names[kind]||names.all)}&center=${c.lon.toFixed(6)},${c.lat.toFixed(6)}&view=map&src=chengdu-story&callnative=1`}
+function amapNearbyUrl(kind='all'){if(!userLocation)return'https://uri.amap.com/';const c=wgs84ToGcj02(userLocation.lat,userLocation.lon),names={food:lang==='zh'?'美食':'Food',convenience:lang==='zh'?'便利店':'Convenience Store',toilets:lang==='zh'?'厕所':'Toilets',coffee:lang==='zh'?'咖啡':'Coffee',pharmacy:lang==='zh'?'药房':'Pharmacy',shopping:lang==='zh'?'商场':'Shopping',hotels:lang==='zh'?'酒店':'Hotels',all:lang==='zh'?'附近':'Nearby'};return`https://uri.amap.com/search?keyword=${encodeURIComponent(names[kind]||names.all)}&center=${c.lon.toFixed(6)},${c.lat.toFixed(6)}&view=map&src=chengdu-story&callnative=1`}
 function cacheRead(k,maxAge=30*60*1000){try{const x=JSON.parse(store.get(k)||'null');return x&&Date.now()-x.ts<maxAge?x.data:null}catch(e){return null}}
 function cacheAny(k){try{const x=JSON.parse(store.get(k)||'null');return x?x.data:null}catch(e){return null}}
 function cacheWrite(k,data){store.set(k,JSON.stringify({ts:Date.now(),data}))}
 function locCache(){return userLocation?`${Math.round(userLocation.lat*500)}:${Math.round(userLocation.lon*500)}`:'none'}
 const LOCATION_MAX_AGE=12*60*1000;
 const locationFresh=()=>!!(userLocation&&locationTimestamp&&Date.now()-locationTimestamp<=LOCATION_MAX_AGE);
-function expireLocationIfNeeded(){if(userLocation&&!locationFresh()){userLocation=null;locationTimestamp=0;geoStatus='idle';foodPois=[];explorePois=[];selectedFood=null;selectedExplore=null}}
+function expireLocationIfNeeded(){if(userLocation&&!locationFresh()){userLocation=null;locationTimestamp=0;geoStatus='idle';foodPois=[];selectedFood=null}}
 function requestLocation(source='food'){
-  const redraw=()=>{if(currentPage==='food')renderFood();else if(currentPage==='explore')renderExplore(false)};
+  const redraw=()=>{if(currentPage==='food')renderFood()};
+  if(locationFresh()){geoStatus='ready';redraw();if(currentPage==='food'&&!foodPois.length)loadFoodPois();return}
   if(!window.isSecureContext){geoStatus='insecure';redraw();return}
   if(!navigator.geolocation){geoStatus='unavailable';redraw();return}
   geoStatus='pending';redraw();
   navigator.geolocation.getCurrentPosition(async p=>{
     locationTimestamp=Date.now();userLocation={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,ts:locationTimestamp};geoStatus='ready';store.set('chengduLastLocation',JSON.stringify(userLocation));
-    if(currentPage==='explore'){renderExplore(false);await loadExplorePois(true)}else if(currentPage==='food'){await loadFoodPois(true)}else if(source==='explore'){await loadExplorePois(true)}else{await loadFoodPois(true)}
-  },e=>{geoStatus=e&&e.code===1?'denied':'unavailable';redraw()},{enableHighAccuracy:false,timeout:10000,maximumAge:0});
+    if(currentPage==='food')await loadFoodPois()
+  },e=>{geoStatus=e&&e.code===1?'denied':'unavailable';redraw()},{enableHighAccuracy:false,timeout:10000,maximumAge:LOCATION_MAX_AGE});
 }
 async function fetchOverpass(query,key){
   const fresh=cacheRead(key);if(fresh)return{data:fresh,cached:false};
@@ -1166,11 +1165,12 @@ function osmName(t){return t[lang==='zh'?'name:zh':'name:en']||t.name||t['name:z
 function foodCategoryOf(t){const c=(t.cuisine||'').toLowerCase(),a=t.amenity||'';if(a==='cafe')return'coffee';if(a==='ice_cream'||/dessert|ice_cream|cake/.test(c))return'dessert';if(/hot_pot|hotpot/.test(c))return'hotpot';if(/noodle|ramen/.test(c))return'noodles';if(a==='fast_food'||a==='food_court')return'snacks';if(/sichuan|chinese/.test(c))return'sichuan';return'more'}
 function foodLabel(k){return L(k)}
 function smartScore(p){const r=parseFloat(p.tags.rating||p.tags['rating:google']||0),reviews=parseInt(p.tags.review_count||p.tags['reviews']||0,10),evidence=Number.isFinite(r)&&r>0;let s=50+Math.max(0,10-Math.round(p.distance/300));if(p.tags.opening_hours)s+=4;if(p.tags.website||p.tags.phone||p.tags['contact:phone'])s+=4;if(p.tags.cuisine)s+=3;if(p.photo)s+=2;if(evidence)s+=Math.round(Math.min(5,r)*5)+(reviews>=20?5:reviews>=5?2:0);p.hasRatingEvidence=evidence;p.reviewEvidence=reviews;return Math.max(50,Math.min(evidence?94:76,s))}
-function normalizePois(elements,kind){return elements.map(e=>{const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(lat==null||lon==null)return null;let name=osmName(t);if(name===L('unknown')&&kind!=='food')name=L(exploreCategory==='shopping'?'shopping_places':exploreCategory);const p={id:String(e.type)+e.id,lat,lon,tags:t,name,photo:osmPhoto(t),distance:userLocation?distanceM(userLocation.lat,userLocation.lon,lat,lon):0};p.foodCat=foodCategoryOf(t);p.score=smartScore(p);p.walk=Math.max(1,Math.ceil(p.distance/78));p.status=t.opening_hours==='24/7'?L('open'):(t.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited');return p}).filter(p=>p&&(kind!=='food'||p.name!==L('unknown'))).sort((a,b)=>kind==='food'?b.score-a.score:a.distance-b.distance)}
+function normalizeFoodPois(elements){return elements.map(e=>{const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(lat==null||lon==null)return null;const name=osmName(t),p={id:String(e.type)+e.id,lat,lon,tags:t,name,photo:osmPhoto(t),distance:userLocation?distanceM(userLocation.lat,userLocation.lon,lat,lon):0};p.foodCat=foodCategoryOf(t);p.score=smartScore(p);p.walk=Math.max(1,Math.ceil(p.distance/78));p.status=t.opening_hours==='24/7'?L('open'):(t.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited');return p}).filter(p=>p&&p.name!==L('unknown')).sort((a,b)=>b.score-a.score)}
 
 /* ───── Food ───── */
 function foodQueryText(){const a=`(around:${Math.round(foodRadius*1000)},${userLocation.lat},${userLocation.lon})`;let s='';if(foodCategory==='coffee')s=`nwr["amenity"="cafe"]${a};`;else if(foodCategory==='dessert')s=`nwr["amenity"~"ice_cream|cafe"]["cuisine"~"dessert|ice_cream|cake",i]${a};`;else if(foodCategory==='hotpot')s=`nwr["amenity"="restaurant"]["cuisine"~"hot_pot|hotpot",i]${a};`;else if(foodCategory==='noodles')s=`nwr["amenity"~"restaurant|fast_food"]["cuisine"~"noodle|ramen",i]${a};`;else if(foodCategory==='sichuan')s=`nwr["amenity"="restaurant"]["cuisine"~"sichuan|chinese",i]${a};`;else if(foodCategory==='snacks')s=`nwr["amenity"~"fast_food|food_court"]${a};`;else s=`nwr["amenity"~"restaurant|fast_food|cafe|food_court|ice_cream"]${a};`;return`[out:json][timeout:20];(${s});out center tags;`}
-async function loadFoodPois(force=false){if(!userLocation)return;foodLoading=true;foodError='';renderFood();const key=`chengduPoi:food:${locCache()}:${foodRadius}:${foodCategory}`;if(force)store.set(key,'');try{const r=await fetchOverpass(foodQueryText(),key);foodPois=normalizePois(r.data,'food').filter(p=>p.distance<=foodRadius*1000);foodError=r.cached?'cached':''}catch(e){foodPois=[];foodError='failed'}foodLoading=false;renderFood()}
+let foodRequestKey='',foodRequestSeq=0;
+async function loadFoodPois(force=false){if(!userLocation||document.hidden)return;const key=`chengduPoi:food:${locCache()}:${foodRadius}:${foodCategory}`;if(foodLoading&&foodRequestKey===key&&!force)return;const seq=++foodRequestSeq;foodRequestKey=key;foodLoading=true;foodError='';if(currentPage==='food')renderFood();if(force)store.set(key,'');try{const r=await fetchOverpass(foodQueryText(),key);if(seq!==foodRequestSeq)return;foodPois=normalizeFoodPois(r.data).filter(p=>p.distance<=foodRadius*1000);foodError=r.cached?'cached':''}catch(e){if(seq!==foodRequestSeq)return;foodPois=[];foodError='failed'}finally{if(seq===foodRequestSeq){foodLoading=false;if(currentPage==='food')renderFood()}}}
 function selectFoodCategory(k){foodCategory=k;userLocation?loadFoodPois():renderFood()}
 function setFoodRadius(r){foodRadius=r;userLocation?loadFoodPois():renderFood()}
 function setFoodSearch(v){foodQuery=v.trim().toLowerCase();clearTimeout(foodSearchTimer);foodSearchTimer=setTimeout(renderFood,180)}
@@ -1181,40 +1181,21 @@ function locationState(source){
   const copy=states[geoStatus]||['location_title','location_body'];
   return`<div class="state-card paper-card"><div class="state-icon">${icon('locate','lg')}</div><h3>${L(copy[0])}</h3><p>${L(copy[1])}</p><button class="primary-btn" onclick="requestLocation('${source}')">${L(geoStatus==='idle'?'locate':'retry')}</button></div>`
 }
+function nearbyUtilityLinks(){if(!userLocation)return'';const icons={convenience:'shopping',toilets:'toilet',pharmacy:'pharmacy',coffee:'coffee',shopping:'shopping',hotels:'hotel'};return`<section class="nearby-tools paper-card"><h3 class="nearby-tools-title">${L('nearby_tools')}</h3><div class="nearby-links">${NEARBY_UTILS.map(k=>{const label=L(k==='shopping'?'shopping_places':k);return`<a class="nearby-link" target="_blank" rel="noopener" href="${amapNearbyUrl(k)}">${icon(icons[k],'sm')}<span>${L('open_amap_place',{place:label})}</span></a>`}).join('')}</div></section>`}
 function renderFood(){
-  const shown=foodPois.filter(p=>!foodQuery||p.name.toLowerCase().includes(foodQuery));
+  const shown=foodPois.filter(p=>!foodQuery||p.name.toLowerCase().includes(foodQuery)).slice(0,FOOD_VISIBLE_LIMIT);
   $('#food').className='page app-page'+(currentPage==='food'?' active':'');
   $('#food').innerHTML=`<div class="app-head"><div><h1>${L('food_title')}</h1><p>${L('food_sub')}</p></div><div class="head-actions"><button class="icon-btn" onclick="requestLocation('food')" aria-label="${L('locate')}">${icon('locate')}</button></div></div>
   <div class="tool-row"><div class="search-box">${icon('search','sm')}<input value="${esc(foodQuery)}" oninput="setFoodSearch(this.value)" placeholder="${L('search_food')}"></div></div>
   <div class="filter-scroll">${FOOD_FILTERS.map(k=>`<button class="filter-chip ${k===foodCategory?'active':''}" onclick="selectFoodCategory('${k}')">${L(k)}</button>`).join('')}</div>
   <div class="radius-select"><span class="radius-label">${L('range')}</span>${[.5,1,2,5].map(r=>`<button class="${r===foodRadius?'active':''}" onclick="setFoodRadius(${r})">${r<1?'500m':r+'km'}</button>`).join('')}</div>
+  ${nearbyUtilityLinks()}
   ${!userLocation?locationState('food'):foodLoading?`<div class="state-card paper-card"><div class="spinner"></div><h3>${L('nearby_loading')}</h3></div>`:`${foodError?`<div class="local-note">${L(foodError==='cached'?'cached':'service_down')} ${foodError==='failed'?`<button class="mini-btn" onclick="loadFoodPois(true)">${L('retry')}</button> <a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl('food')}">${L('amap_nearby')}</a>`:''}</div>`:''}<div class="food-list">${shown.map(foodCard).join('')||`<div class="state-card paper-card"><h3>${L('nothing_food')}</h3><p>${L('wider')}</p></div>`}</div>`}`;
   if(currentPage==='food'&&userLocation&&!foodLoading&&!foodPois.length&&!foodError)setTimeout(()=>loadFoodPois(),80);
 }
-function openFoodSheet(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedFood=p;const img=p.photo?`<img class="detail-photo" src="${esc(p.photo)}" alt="${esc(p.name)}" onerror="this.outerHTML='<div class=&quot;detail-placeholder&quot;>🍜</div>'">`:`<div class="detail-placeholder">🍜</div>`;const q=encodeURIComponent(p.name);showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${foodLabel(p.foodCat)} · ${distanceText(p.distance)}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div>${img}<div class="detail-grid"><div class="detail-stat"><small>${L('smart_score')}</small><b>${p.score}</b></div><div class="detail-stat"><small>${L('walking')}</small><b>${L('walk',{n:p.walk})}</b></div><div class="detail-stat"><small>${L('status')}</small><b>${p.status||L('unknown')}</b></div><div class="detail-stat"><small>${L('price')}</small><b>${esc(p.tags['price:range']||L('unknown'))}</b></div></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="${amapNavigationUrl(p)}">${L('navigate')}</a><a target="_blank" rel="noopener" href="https://m.dianping.com/search?keyword=${q}">${L('search_dp')}</a><a target="_blank" rel="noopener" href="https://www.xiaohongshu.com/search_result?keyword=${q}">${L('search_red')}</a><button onclick="focusExplore('${esc(p.id)}')">${L('view_map')}</button></div>`)}
+function openFoodSheet(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedFood=p;const img=p.photo?`<img class="detail-photo" src="${esc(p.photo)}" alt="${esc(p.name)}" onerror="this.outerHTML='<div class=&quot;detail-placeholder&quot;>🍜</div>'">`:`<div class="detail-placeholder">🍜</div>`;const q=encodeURIComponent(p.name);showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${foodLabel(p.foodCat)} · ${distanceText(p.distance)}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div>${img}<div class="detail-grid"><div class="detail-stat"><small>${L('smart_score')}</small><b>${p.score}</b></div><div class="detail-stat"><small>${L('walking')}</small><b>${L('walk',{n:p.walk})}</b></div><div class="detail-stat"><small>${L('status')}</small><b>${p.status||L('unknown')}</b></div><div class="detail-stat"><small>${L('price')}</small><b>${esc(p.tags['price:range']||L('unknown'))}</b></div></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="${amapNavigationUrl(p)}">${L('navigate')}</a><a target="_blank" rel="noopener" href="https://m.dianping.com/search?keyword=${q}">${L('search_dp')}</a><a target="_blank" rel="noopener" href="https://www.xiaohongshu.com/search_result?keyword=${q}">${L('search_red')}</a></div>`)}
 function showModal(html){closeModal();document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><div class="sheet-modal"><div class="sheet-grab"></div>${html}</div></div>`)}
 function closeModal(){const m=$('#modalBackdrop');if(m)m.remove()}
-
-/* ───── Explore ───── */
-function exploreQueryText(){const a=`(around:2000,${userLocation.lat},${userLocation.lon})`,q={attractions:`nwr["tourism"~"attraction|museum|viewpoint|gallery"]${a};nwr["historic"]${a};`,convenience:`nwr["shop"="convenience"]${a};`,toilets:`nwr["amenity"="toilets"]${a};`,coffee:`nwr["amenity"="cafe"]${a};`,pharmacy:`nwr["amenity"="pharmacy"]${a};`,shopping:`nwr["shop"~"mall|department_store"]${a};`,hotels:`nwr["tourism"~"hotel|guest_house"]${a};`,food:`nwr["amenity"~"restaurant|fast_food|food_court"]${a};`}[exploreCategory];return`[out:json][timeout:20];(${q});out center tags;`}
-async function loadExplorePois(force=false){if(!userLocation)return;exploreLoading=true;exploreError='';renderExplore(false);const key=`chengduPoi:map:${locCache()}:${exploreCategory}`;if(force)store.set(key,'');try{const r=await fetchOverpass(exploreQueryText(),key);explorePois=normalizePois(r.data,'map').filter(p=>p.distance<=2000).slice(0,80);exploreError=r.cached?'cached':''}catch(e){explorePois=[];exploreError='failed'}exploreLoading=false;renderExplore(false)}
-function selectExploreCategory(k){exploreCategory=k;selectedExplore=null;userLocation?loadExplorePois():renderExplore(false)}
-function mapIcon(){return{attractions:'⌂',convenience:'▣',toilets:'●',coffee:'☕',pharmacy:'✚',shopping:'◇',hotels:'⌂',food:'●'}[exploreCategory]||'●'}
-function renderExplore(fetchIfNeeded=true){
-  if(map){try{map.remove()}catch(e){}map=null}poiMarkers=[];
-  $('#explore').className='page app-page'+(currentPage==='explore'?' active':'');
-  $('#explore').innerHTML=`<div class="app-head"><div><h1>${L('explore_title')}</h1><p>${L('explore_sub')}</p></div></div><div class="map-cats">${EXPLORE_CATS.map(k=>`<button class="map-cat ${k===exploreCategory?'active':''}" onclick="selectExploreCategory('${k}')">${icon(k==='attractions'?'landmark':k==='toilets'?'toilet':k==='pharmacy'?'pharmacy':k==='hotels'?'hotel':k==='food'?'food':k==='coffee'?'coffee':'shopping')} ${L(k==='shopping'?'shopping_places':k)}</button>`).join('')}</div>
-  ${!userLocation?locationState('explore'):`<div class="real-map"><div id="mapCanvas"></div><div class="map-toolbar"><div class="map-note">${exploreLoading?L('nearby_loading'):exploreError?L(exploreError==='cached'?'cached':'service_down'):`${distanceText(userLocation.accuracy||0)} · ${L(exploreCategory==='shopping'?'shopping_places':exploreCategory)}`}</div><button class="map-control" onclick="recenterMap()" aria-label="${L('recenter')}">${icon('locate')}</button></div></div><div id="mapFallback" class="map-fallback-list">${exploreError==='failed'?`<div class="local-note"><a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl(exploreCategory)}">${L('amap_nearby')}</a></div>`:''}${explorePois.slice(0,12).map(p=>poiRow(p)).join('')}</div>`}`;
-  if(userLocation)setTimeout(initMap,40);
-  if(userLocation&&fetchIfNeeded&&!exploreLoading&&!explorePois.length)setTimeout(()=>loadExplorePois(),80);
-}
-function initMap(){const el=$('#mapCanvas');if(!el||!userLocation)return;const amap=`<a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl(exploreCategory)}">${L('amap_nearby')}</a>`;if(!globalThis.maplibregl){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')} ${amap}</div>`);return}try{map=new maplibregl.Map({container:'mapCanvas',style:'https://tiles.openfreemap.org/styles/liberty',center:selectedExplore?[selectedExplore.lon,selectedExplore.lat]:[userLocation.lon,userLocation.lat],zoom:selectedExplore?16:14,attributionControl:true,localIdeographFontFamily:'Noto Sans SC, sans-serif'});map.addControl(new maplibregl.NavigationControl({showCompass:false}),'bottom-right');const ue=document.createElement('div');ue.className='user-marker';userMapMarker=new maplibregl.Marker({element:ue}).setLngLat([userLocation.lon,userLocation.lat]).addTo(map);map.on('load',()=>{drawPoiMarkers();if(selectedExplore)openExploreSheet(selectedExplore.id)})}catch(e){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')} ${amap}</div>`)}}
-function drawPoiMarkers(){if(!map)return;poiMarkers.forEach(m=>m.remove());poiMarkers=explorePois.map(p=>{const el=document.createElement('div');el.className='poi-marker';el.innerHTML=`<span>${mapIcon()}</span>`;el.addEventListener('click',()=>openExploreSheet(p.id));return new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map)})}
-function recenterMap(){if(map&&userLocation)map.flyTo({center:[userLocation.lon,userLocation.lat],zoom:15})}
-function poiRow(p){return`<div class="poi-row paper-card" onclick="openExploreSheet('${esc(p.id)}')"><div><b>${esc(p.name)}</b><small>${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</small></div><span>›</span></div>`}
-function openExploreSheet(id){const p=explorePois.find(x=>x.id===id)||selectedExplore;if(!p)return;selectedExplore=p;if(map)map.flyTo({center:[p.lon,p.lat],zoom:16});const foodAction=exploreCategory==='food'?`<button onclick="openInFood('${esc(p.id)}')">${L('open_food')}</button>`:'';showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="${amapNavigationUrl(p)}">${L('navigate')} →</a>${foodAction}</div>`)}
-function focusExplore(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedExplore=p;exploreCategory='food';explorePois=[p];closeModal();showPage('explore');setTimeout(()=>openExploreSheet(p.id),260)}
-function openInFood(id){const p=explorePois.find(x=>x.id===id);if(!p)return;foodCategory='all';foodPois=[p];selectedFood=p;closeModal();showPage('food');setTimeout(()=>openFoodSheet(p.id),160)}
 
 /* ───── Shared expenses + Splitwise engine ───── */
 function loadLocalLedger(){try{const x=JSON.parse(store.get('chengduLedgerV3')||'null');if(x&&Array.isArray(x.members))return x}catch(e){}return{members:[],expenses:[],splits:[],settlements:[]}}
@@ -1246,7 +1227,7 @@ async function cloudPatch(table,id,row){return cloudBatch([{table,method:'PATCH'
 async function cloudDelete(table,query){return cloudBatch([{table,method:'DELETE',query,body:null}])}
 function ledgerStats(){const stats={};ledger.members.forEach(m=>stats[m.id]={paid:0,share:0,net:0});ledger.expenses.forEach(e=>{if(stats[e.paid_by_member_id])stats[e.paid_by_member_id].paid+=Number(e.amount)});ledger.splits.forEach(s=>{if(stats[s.member_id])stats[s.member_id].share+=Number(s.share_amount)});Object.values(stats).forEach(x=>x.net=x.paid-x.share);ledger.settlements.forEach(s=>{if(stats[s.from_member_id])stats[s.from_member_id].net+=Number(s.amount);if(stats[s.to_member_id])stats[s.to_member_id].net-=Number(s.amount)});const creditors=Object.entries(stats).filter(([,x])=>x.net>.005).map(([id,x])=>({id,amt:x.net})).sort((a,b)=>b.amt-a.amt),debtors=Object.entries(stats).filter(([,x])=>x.net<-.005).map(([id,x])=>({id,amt:-x.net})).sort((a,b)=>b.amt-a.amt),transfers=[];let i=0,j=0;while(i<debtors.length&&j<creditors.length){const a=Math.min(debtors[i].amt,creditors[j].amt);if(a>.005)transfers.push({from:debtors[i].id,to:creditors[j].id,amount:Math.round(a*100)/100});debtors[i].amt-=a;creditors[j].amt-=a;if(debtors[i].amt<.005)i++;if(creditors[j].amt<.005)j++}return{stats,transfers}}
 function fxText(n){return fxRate?`RM ${(Number(n)*fxRate).toFixed(2)}`:''}
-async function loadFx(){const c=cacheRead('chengduFxCnyMyr',12*60*60*1000)||cacheAny('chengduFxCnyMyr');if(c?.rate)fxRate=c.rate;try{const r=await fetch('https://open.er-api.com/v6/latest/CNY'),j=await r.json();if(j?.rates?.MYR){fxRate=Number(j.rates.MYR);cacheWrite('chengduFxCnyMyr',{rate:fxRate})}}catch(e){}if(currentPage==='expenses')renderExpenses()}
+async function loadFx(){const fresh=cacheRead('chengduFxCnyMyr',12*60*60*1000);if(fresh?.rate){fxRate=fresh.rate;if(currentPage==='expenses')renderExpenses();return}const stale=cacheAny('chengduFxCnyMyr');if(stale?.rate)fxRate=stale.rate;if(document.hidden)return;try{const r=await fetch('https://open.er-api.com/v6/latest/CNY'),j=await r.json();if(j?.rates?.MYR){fxRate=Number(j.rates.MYR);cacheWrite('chengduFxCnyMyr',{rate:fxRate})}}catch(e){}if(currentPage==='expenses')renderExpenses()}
 function expenseShell(inner){const mode=CLOUD&&cloudStatus==='cloud'?`<span class="status-pill"><i class="status-dot"></i>${L('cloud_mode')}</span>`:`<span class="status-pill warn"><i class="status-dot"></i>${L(cloudStatus==='syncing'?'syncing':cloudStatus==='failed'?'sync_failed':'local_mode')}</span>`;return`<div class="app-head"><div><h1>${L('expenses_title')}</h1><p>${L('expenses_sub')}</p></div><div class="head-actions"><button class="icon-btn" onclick="syncLedger()" aria-label="${L('refresh')}">${icon('refresh')}</button></div></div><div class="sync-row">${mode}</div><div class="segmented">${['overview','bills','split','members'].map(k=>`<button class="${expenseTab===k?'active':''}" onclick="expenseTab='${k}';renderExpenses()">${L(k)}</button>`).join('')}</div>${inner}`}
 function renderExpenses(){
   $('#expenses').className='page app-page'+(currentPage==='expenses'?' active':'');
@@ -1275,19 +1256,19 @@ async function saveSettlement(){const from=$('#settleFrom').value,to=$('#settleT
 
 /* ───── Navigation ───── */
 function nav(){
-  const items=[['home','nav_home'],['food','nav_food'],['explore','nav_explore'],['expenses','nav_expenses']],ic={home:'home',food:'food',explore:'compass',expenses:'wallet'};
+  const items=[['home','nav_home'],['food','nav_food'],['expenses','nav_expenses']],ic={home:'home',food:'food',expenses:'wallet'};
   $('.bottom-nav').innerHTML=items.map(x=>`<button class="nav-btn" data-page="${x[0]}" onclick="showPage('${x[0]}')"><span data-ic="${x[0]}"></span><span>${L(x[1])}</span></button>`).join('');
   $$('.nav-btn').forEach(b=>{b.dataset.icon=ic[b.dataset.page]});
 }
 function showPage(name,rerender=true){
-  if(name==='food'||name==='explore')expireLocationIfNeeded();
+  if(name==='food')expireLocationIfNeeded();
   currentPage=name;
   $$('.page').forEach(p=>p.classList.toggle('active',p.id===name));
   $$('.nav-btn').forEach(b=>{
     const on=b.dataset.page===name;b.classList.toggle('active',on);
     b.firstElementChild.innerHTML=icon(b.dataset.page==='home'&&on?'homeSolid':b.dataset.icon);
   });
-  if(rerender){if(name==='home')sizeSwipe();if(name==='food')renderFood();if(name==='explore')renderExplore();if(name==='expenses')renderExpenses()}
+  if(rerender){if(name==='home')sizeSwipe();if(name==='food')renderFood();if(name==='expenses')renderExpenses()}
   settleAtTop();
 }
 function scrollHome(){try{document.scrollingElement.scrollTo({top:0,left:0,behavior:'instant'})}catch(e){}document.documentElement.scrollTop=0;document.body.scrollTop=0;try{window.parent.scrollTo({top:0,left:0,behavior:'instant'})}catch(e){}}
@@ -1310,30 +1291,16 @@ function renderLandingText(){
   if(bubble)bubble.innerHTML=`<div class="${lang==='zh'?'cn':'en'}">${m.msg}</div>`;
   if(phaseEl)phaseEl.textContent=m.phase;
 }
+function stopLandingVideo(release=false){const v=$('#landingVideo');if(!v)return;if(!v.paused)v.pause();if(release&&v.hasAttribute('src')){v.removeAttribute('src');v.load()}}
 function prepareLanding(){
-  const v=$('#landingVideo'),f=$('#landingPhoto');
-  if(DATA.landing_video){
-    v.src=DATA.landing_video;
-    v.style.display='block';
-    f.style.display='none';
-    v.currentTime=0;
-    const tryPlay=()=>v.play().catch(()=>{});
-    v.addEventListener('canplay',tryPlay,{once:true});
-    tryPlay();
-  }else{
-    v.style.display='none';
-    f.style.display='block';
-    f.src=DATA.landing_image||DATA.images.panda_portrait;
-  }
-  $('#landingAvatar').src=DATA.images.panda_portrait.replace(/w=\d+/,'w=200');
-  $('#landingAvatar').alt=lang==='zh'?'熊猫头像':'Panda portrait';
-  renderLandingText();
-  const last=Number(store.get('chengduLandingAt')||0);
-  if(Date.now()-last<3*60*60*1000)$('#landing').classList.add('hidden');
+  const landing=$('#landing'),v=$('#landingVideo'),f=$('#landingPhoto'),last=Number(store.get('chengduLandingAt')||0),skipRecent=Date.now()-last<3*60*60*1000;
+  $('#landingAvatar').src=DATA.images.panda_portrait.replace(/w=\d+/,'w=200');$('#landingAvatar').alt=lang==='zh'?'熊猫头像':'Panda portrait';renderLandingText();
+  if(skipRecent){landing.classList.add('hidden');return}
+  if(DATA.landing_video){v.src=DATA.landing_video;v.style.display='block';f.style.display='none';v.currentTime=0;const tryPlay=()=>{if(!document.hidden&&!landing.classList.contains('hidden'))v.play().catch(()=>{})};v.addEventListener('canplay',tryPlay,{once:true});tryPlay()}
+  else{v.style.display='none';f.style.display='block';f.src=DATA.landing_image||DATA.images.panda_portrait}
 }
 function enterApp(){
-  const v=$('#landingVideo');if(v&&!v.paused)v.pause();
-  store.set('chengduLandingAt',String(Date.now()));$('#landing').classList.add('hidden');sizeSwipe();settleAtTop()
+  stopLandingVideo(true);store.set('chengduLandingAt',String(Date.now()));$('#landing').classList.add('hidden');sizeSwipe();settleAtTop()
 }
 
 function fitFrame(){try{if(window.frameElement)window.frameElement.style.height=`${Math.max(640,window.parent.innerHeight||window.innerHeight)}px`}catch(e){}}
@@ -1341,11 +1308,13 @@ function fitFrame(){try{if(window.frameElement)window.frameElement.style.height=
 /* ───── boot ───── */
 ledger=loadLocalLedger();
 try{const savedLoc=JSON.parse(store.get('chengduLastLocation')||'null');if(savedLoc&&Number.isFinite(savedLoc.lat)&&Number.isFinite(savedLoc.lon)&&Number.isFinite(savedLoc.ts)&&Date.now()-savedLoc.ts<=LOCATION_MAX_AGE){userLocation=savedLoc;locationTimestamp=savedLoc.ts;geoStatus='ready'}}catch(e){}
+function heartbeat(){if(document.hidden)return;if(currentPage==='home'){const g=$('#greet'),ge=$('#greetEn');if(g)g.textContent=greeting();if(ge)ge.textContent=greetingEN();updateCurrentRoutePanda()}loadWeather()}
+function handleVisibility(){if(document.hidden){stopLandingVideo(false);return}const landing=$('#landing'),v=$('#landingVideo');if(landing&&!landing.classList.contains('hidden')&&v?.hasAttribute('src'))v.play().catch(()=>{});heartbeat();if(currentPage==='food'&&userLocation&&!foodPois.length)loadFoodPois();if(currentPage==='expenses'&&loadOutbox().length&&CLOUD)syncLedger()}
 prepareLanding();nav();renderHome();renderExpenses();showPage('home');fitFrame();loadWeather();loadFx();if(CLOUD)syncLedger();
-window.addEventListener('resize',()=>{fitFrame();sizeSwipe()});
-window.addEventListener('online',()=>{if(CLOUD)syncLedger()});
-setInterval(()=>{const g=$('#greet'),ge=$('#greetEn');if(g)g.textContent=greeting();if(ge)ge.textContent=greetingEN();if(currentPage==='home'&&swipeFlipped){const i=swipeDayIdx;renderSwipeStack(i);flipTopCard(true)}},60000);
-setInterval(loadWeather,15*60*1000);
+window.addEventListener('resize',()=>{fitFrame();sizeSwipe()},{passive:true});
+window.addEventListener('online',()=>{if(CLOUD)syncLedger();if(currentPage==='food'&&userLocation&&!foodPois.length)loadFoodPois()});
+document.addEventListener('visibilitychange',handleVisibility);
+setInterval(heartbeat,60000);
 </script>
 </body>
 </html>'''.replace("__DATA__", PAYLOAD)
