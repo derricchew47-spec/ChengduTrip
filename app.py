@@ -16,6 +16,7 @@ preview how the panda traveler moves along a day's route.
 from __future__ import annotations
 
 import json
+import base64
 from urllib.parse import quote
 
 import streamlit as st
@@ -63,9 +64,28 @@ def _secret(name: str, default: str = "") -> str:
         return default
 
 
+def _safe_supabase_client_key() -> str:
+    """Only expose a browser-safe Supabase publishable/legacy anon key."""
+    key = _secret("SUPABASE_PUBLISHABLE_KEY") or _secret("SUPABASE_ANON_KEY")
+    lowered = key.lower()
+    if not key or lowered.startswith("sb_secret_") or "service_role" in lowered:
+        return ""
+    # Legacy JWT keys expose their role in the payload. Reject service-role JWTs.
+    if key.count(".") == 2:
+        try:
+            payload = key.split(".")[1]
+            payload += "=" * (-len(payload) % 4)
+            claims = json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
+            if claims.get("role") == "service_role":
+                return ""
+        except Exception:
+            pass
+    return key
+
+
 APP_CONFIG = {
     "supabase_url": _secret("SUPABASE_URL"),
-    "supabase_key": _secret("SUPABASE_KEY"),
+    "supabase_key": _safe_supabase_client_key(),
     "trip_id": _secret("SUPABASE_TRIP_ID", "chengdu-family-2026"),
 }
 
@@ -116,6 +136,23 @@ IMG = {
     # Transport / food — used only where scenery would be misleading.
     "airport": commons("成都天府国际机场 Chengdu Tianfu International Airport 1.jpg", 1200),
     "airport_hall": commons("2025 Chengdu Tianfu Airport 03.jpg", 1200),
+    "chongqing_train": commons("202308 Platform of Chongqingbei Railway Station, passengers leaving.jpg", 1200),
+    "chongqing_city": commons("Chongqing Panorama1.jpg", 1200),
+    "chongqing_night": commons("Chongqing-NanbinRd-Night.jpg", 1200),
+    "shancheng_trail": commons("山城步道——山城巷.jpg", 1200),
+    "shibati": commons("Shibati 十八梯 2022.1.1.jpg", 1200),
+    "xiahaoli": commons("山城巷上区.jpg", 1200),
+    "jiefangbei": commons("Chongqing Jiefangbei CBD.jpg", 1200),
+    "chaotianmen": commons("Raffles City Chongqing 20260507-1.jpg", 1200),
+    "hongya": commons("202308 Hongya Cave at night from Qiansimen Bridge.jpg", 1200),
+    "ciqikou": commons("Street in the Old Town of Ciqikou.jpg", 1200),
+    "liziba": commons("A train of Chongqing Rail Transit Line 2 coming through a residential building at Liziba 2255.jpg", 1200),
+    "bayi": commons("Sichuan-style hotpot.jpg", 1200),
+    "panda_huahua": commons("Chengdu Research Base of Giant Panda Breeding, 201907, 06.jpg", 1200),
+    "dujiangyan_waterworks": commons("Dujiangyan Scenic Area 36606-Dujiangyan (49067671478).jpg", 1200),
+    "zhongshuge": commons("DujiangyanZhongshuge.jpg", 1200),
+    "nanqiao": commons("都江堰南桥 2024-05-01 06.jpg", 1200),
+    "blue_tears": commons("都江堰南桥 5.jpg", 1200),
     "mapo": commons("Authentic Mapo Tofu.jpg", 1200),
     "hotpot": commons("Sichuan-style hotpot.jpg", 1200),
     "snack": commons("Chengdu Zhong Dumpling(Zhong Jiaozi).jpg", 1200),
@@ -124,68 +161,55 @@ IMG = {
     "dessert": commons("Brown Sugar Bing Fen.jpg", 1200),
 }
 
-# Each node: [time, short Chinese title (<=5 chars), image key, fallback icon]
+# Home node content deliberately contains no schedule times. Animation-only
+# anchors live separately in INTERNAL_ROUTE_TIMES in the browser code.
 DAYS = [
     {
-        "day": 1, "iso": "2026-10-15", "date": "15 Oct", "dow": "Thu", "city": "Chengdu",
-        "vt": "初见成都", "note": "先别急着认识整座城。",
+        "day": 1, "iso": "2026-10-15", "date": "15 Oct", "dow": "Thu", "city": "Chengdu → Chongqing",
+        "vt": "初见山城", "note": "今天先去山城。",
         "nodes": [
-            ["00:05", "飞往上海", "airport_hall", "plane"],
-            ["08:10", "飞往成都", "airport", "plane"],
-            ["12:00", "抵达酒店", "taikoo_day", "hotel"],
-            ["15:00", "春熙路", "taikoo_night", "landmark"],
-            ["17:00", "人民公园", "people_park", "leaf"],
+            ["天府机场", "airport", "plane"], ["高铁前往重庆", "chongqing_train", "plane"],
+            ["抵达重庆", "chongqing_city", "landmark"], ["自由活动", "chongqing_night", "leaf"],
         ],
     },
     {
-        "day": 2, "iso": "2026-10-16", "date": "16 Oct", "dow": "Fri", "city": "Chengdu",
-        "vt": "熊猫都江", "note": "把今天的可爱好好记住。",
+        "day": 2, "iso": "2026-10-16", "date": "16 Oct", "dow": "Fri", "city": "Chongqing",
+        "vt": "山城漫游", "note": "山城的故事藏在高低之间。",
         "nodes": [
-            ["09:00", "熊猫基地", "panda_base", "leaf"],
-            ["14:00", "都江堰", "dujiangyan", "landmark"],
-            ["17:00", "灌县古城", "guanxian", "landmark"],
+            ["山城步道", "shancheng_trail", "landmark"], ["十八梯", "shibati", "landmark"],
+            ["下浩里", "xiahaoli", "landmark"], ["解放碑", "jiefangbei", "landmark"],
+            ["朝天门广场", "chaotianmen", "landmark"], ["洪崖洞", "hongya", "landmark"],
         ],
     },
     {
-        "day": 3, "iso": "2026-10-17", "date": "17 Oct", "dow": "Sat", "city": "Jiuzhaigou",
-        "vt": "九寨仙境", "note": "山水不语，记忆很久。",
+        "day": 3, "iso": "2026-10-17", "date": "17 Oct", "dow": "Sat", "city": "Chongqing → Chengdu",
+        "vt": "渝蓉之间", "note": "再看一眼重庆，然后回成都。",
         "nodes": [
-            ["08:00", "九寨沟", "jiuzhai_nuorilang", "landmark"],
-            ["11:00", "五花海", "jiuzhai_five", "leaf"],
-            ["14:00", "长海", "jiuzhai_long", "landmark"],
-            ["17:00", "珍珠滩瀑布", "jiuzhai_waterfall", "leaf"],
+            ["磁器口", "ciqikou", "landmark"], ["李子坝", "liziba", "landmark"],
+            ["八一路好吃街", "bayi", "food"], ["返回成都", "chongqing_train", "plane"],
         ],
     },
     {
-        "day": 4, "iso": "2026-10-18", "date": "18 Oct", "dow": "Sun", "city": "Dujiangyan",
-        "vt": "山水慢游", "note": "山水与小惊喜，都收好。",
+        "day": 4, "iso": "2026-10-18", "date": "18 Oct", "dow": "Sun", "city": "Chengdu / Dujiangyan",
+        "vt": "熊猫都江", "note": "白天看熊猫，夜里看蓝色的水。",
         "nodes": [
-            ["08:00", "熊猫谷", "panda_base_alt", "leaf"],
-            ["11:00", "仰天窝", "panda_base_gate", "leaf"],
-            ["12:30", "午餐自由", "hotpot", "food"],
-            ["14:00", "灌县古城", "jinli_night", "landmark"],
-            ["19:00", "晚餐自由", "mapo", "food"],
+            ["熊猫基地", "panda_base", "leaf"], ["花花", "panda_huahua", "leaf"],
+            ["都江堰", "dujiangyan_waterworks", "landmark"], ["灌县古城", "guanxian", "landmark"],
+            ["钟书阁", "zhongshuge", "landmark"], ["南桥", "nanqiao", "landmark"],
+            ["蓝眼泪夜景", "blue_tears", "landmark"],
         ],
     },
     {
         "day": 5, "iso": "2026-10-19", "date": "19 Oct", "dow": "Mon", "city": "Chengdu",
-        "vt": "古蜀一日", "note": "古蜀的谜，留给夜色。",
-        "nodes": [
-            ["09:00", "三星堆博物馆", "sanxingdui_museum", "landmark"],
-            ["13:30", "东郊记忆", "dongjiao", "landmark"],
-            ["17:00", "玉林路", "yulin", "leaf"],
-            ["20:00", "九眼桥", "anshun_2026", "landmark"],
-        ],
+        "vt": "成都慢游", "note": "想去哪，就去哪。",
+        "nodes": [["成都自由日", "people_park", "leaf"]],
     },
     {
-        "day": 6, "iso": "2026-10-20", "date": "20 Oct", "dow": "Tue", "city": "Chengdu → Penang",
+        "day": 6, "iso": "2026-10-20", "date": "20 Oct", "dow": "Tue", "city": "Chengdu",
         "vt": "带回成都", "note": "旅程会结束，故事还在。",
         "nodes": [
-            ["08:00", "前往机场", "airport_hall", "plane"],
-            ["09:00", "值机·休息", "airport", "plane"],
-            ["12:30", "飞往上海", "airport", "plane"],
-            ["15:15", "上海转机", "coffee", "plane"],
-            ["17:30", "飞回槟城", "airport_hall", "plane"],
+            ["酒店出发", "taikoo_day", "hotel"], ["天府机场", "airport_hall", "plane"],
+            ["返程", "airport", "plane"],
         ],
     },
 ]
@@ -400,6 +424,17 @@ main{min-height:100dvh}
 .rz.count-5 .thumb{width:109px;height:73px;border-radius:24% 38% 26% 34% / 29% 25% 36% 32%}
 .rz.count-5 .t{min-width:56px;max-width:90px;padding:3px 6px 4px}
 .rz.count-5 .t b{font-size:10.4px}
+.rz.count-6 .card,.rz.count-7 .card{top:-32px;height:65px}
+.rz.count-6 .thumb,.rz.count-7 .thumb{width:93px;height:61px;border-radius:24% 38% 26% 34% / 29% 25% 36% 32%}
+.rz.count-6 .t,.rz.count-7 .t{min-width:50px;max-width:82px;padding:3px 5px 4px}
+.rz.count-6 .t b,.rz.count-7 .t b{font-size:9.4px;line-height:1.12}
+.free-day-scene{position:absolute;inset:7% 8% 4%;z-index:3;display:flex;flex-direction:column;align-items:center;text-align:center}
+.free-day-photo{width:76%;height:47%;object-fit:cover;border-radius:34% 25% 32% 26% / 24% 34% 27% 36%;filter:drop-shadow(0 9px 12px rgba(42,60,47,.16));border:5px solid rgba(255,253,244,.8)}
+.free-day-copy{margin-top:10px;padding:8px 16px;border-radius:12px;background:rgba(250,247,235,.83);color:#31463a}
+.free-day-copy b{display:block;font:600 16px var(--cn-serif);margin-bottom:4px}
+.free-day-copy span{display:block;font:400 11px/1.45 var(--cn-serif);white-space:pre-line}
+.free-day-panda{position:absolute;bottom:-9px;left:7%;width:70px;height:104px;filter:drop-shadow(0 7px 6px rgba(30,50,40,.18))}
+.free-day-panda img{width:100%;height:100%;object-fit:contain;transform:rotate(-4deg)}
 .node.done .card{opacity:.78}
 .panda{
   position:absolute;width:72px;height:108px;margin:-100px 0 0 -36px;z-index:7;
@@ -513,7 +548,7 @@ const DATA=__DATA__;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const days=DATA.days;
 let lang='zh', currentPage='home', foodCategory='all', foodRadius=2, openIdx=-1, wx=null;
-let userLocation=null,geoStatus='idle',foodPois=[],foodLoading=false,foodError='',selectedFood=null,foodQuery='',foodSearchTimer=null,lastOverpassAt=0;
+let userLocation=null,locationTimestamp=0,geoStatus='idle',foodPois=[],foodLoading=false,foodError='',selectedFood=null,foodQuery='',foodSearchTimer=null,lastOverpassAt=0;
 let exploreCategory='attractions',explorePois=[],exploreLoading=false,exploreError='',selectedExplore=null,map=null,userMapMarker=null,poiMarkers=[];
 let expenseTab='overview',ledger={members:[],expenses:[],splits:[],settlements:[]},cloudStatus='local',fxRate=null;
 
@@ -521,15 +556,15 @@ const I18N={
  zh:{
   nav_home:'首页',nav_food:'美食',nav_explore:'探索',nav_expenses:'花费',switch_lang:'切换为英文',
   morning:'早上好，',afternoon:'下午好，',evening:'晚上好，',home_line:'和家人，一起看更大的世界。',hero_1:'成都，',hero_2:'刚刚好。',
-  weather_loading:'天气更新中',sunny:'晴',partly:'晴间多云',cloudy:'多云',fog:'雾',rain:'有雨',snow:'有雪',showers:'阵雨',storm:'雷雨',chengdu:'成都',
-  food_title:'附近美食',food_sub:'我现在在这里，附近有什么值得吃？',search_food:'搜索附近店铺',range:'范围',retry:'重试',location_title:'需要当前位置',location_body:'允许一次定位，才能查找真正位于你附近的店。应用不会持续追踪位置。',locate:'获取当前位置',locating:'正在寻找你的位置…',location_denied:'无法取得位置',location_denied_body:'你可以在浏览器设置中允许定位，然后再试一次。',
+  weather_loading:'天气更新中',sunny:'晴',partly:'晴间多云',cloudy:'多云',fog:'雾',rain:'有雨',snow:'有雪',showers:'阵雨',storm:'雷雨',chengdu:'成都',chongqing:'重庆',
+  food_title:'附近美食',food_sub:'我现在在这里，附近有什么值得吃？',search_food:'搜索附近店铺',range:'范围',retry:'重试',location_title:'需要当前位置',location_body:'允许一次定位，才能查找真正位于你附近的店。应用不会持续追踪位置。',locate:'获取当前位置',locating:'正在寻找你的位置…',location_denied:'定位权限未开启',location_denied_body:'请在浏览器设置中允许定位，然后再试一次。',location_insecure:'需要安全连接',location_insecure_body:'请使用 HTTPS，或在本机用 localhost / 127.0.0.1 打开后重试。',location_unavailable:'暂时无法获取位置',location_unavailable_body:'这通常不是因为你不在成都。请确认设备定位已开启，稍后重试。',
   all:'全部',sichuan:'川菜',hotpot:'火锅',snacks:'小吃',noodles:'面食',coffee:'咖啡',dessert:'甜品',more:'更多',
   nothing_food:'附近还没找到合适的店。',wider:'换个距离再看看。',service_down:'附近搜索暂时不可用。',cached:'正在显示上次缓存的结果。',smart_score:'推荐分',limited:'数据有限',high_conf:'高可信',open:'营业中',hours_listed:'有营业时间资料',walk:'步行约 {n} 分钟',
-  food_detail:'店铺详情',category:'类别',distance:'距离',walking:'步行',status:'状态',price:'价格',unknown:'暂无资料',navigate:'高德导航',search_dp:'大众点评搜索',search_red:'小红书搜索',view_map:'在地图查看',
-  explore_title:'探索',explore_sub:'我现在在这里，附近有什么？',attractions:'景点',convenience:'便利店',toilets:'厕所',pharmacy:'药房',shopping:'商场',hotels:'酒店',food:'美食',recenter:'回到当前位置',map_unavailable:'地图暂时无法加载',map_list:'仍可使用附近地点列表。',nearby_loading:'正在查找附近地点…',nothing_nearby:'附近暂时没有找到地点。',open_food:'在美食页查看',
+  food_detail:'店铺详情',category:'类别',distance:'距离',walking:'步行',status:'状态',price:'价格',unknown:'暂无资料',navigate:'高德导航',search_dp:'大众点评搜索',search_red:'小红书搜索',view_map:'在地图查看',amap_nearby:'打开高德搜索附近',
+  explore_title:'探索',explore_sub:'我现在在这里，附近有什么？',attractions:'景点',convenience:'便利店',toilets:'厕所',pharmacy:'药房',shopping_places:'商场',hotels:'酒店',food:'美食',recenter:'回到当前位置',map_unavailable:'地图暂时无法加载',map_list:'仍可使用附近地点列表。',nearby_loading:'正在查找附近地点…',nothing_nearby:'附近暂时没有找到地点。',open_food:'在美食页查看',
   expenses_title:'花费',expenses_sub:'旅行账本与家庭分账',overview:'总览',bills:'账单',split:'分账',members:'成员',local_mode:'本机模式：数据只保存在这个浏览器。配置 Supabase 后即可与家人同步。',cloud_mode:'家庭共享已开启',syncing:'正在同步',sync_failed:'同步失败，已保留本机数据',refresh:'刷新',
   actual_spend:'我的实际花费',i_paid:'我已付款',owed_to_me:'别人欠我',i_owe:'我欠别人',unsettled:'尚未结清',no_me:'请先在“成员”中选择“这是我”。',no_expenses:'还没有账单。',start_today:'第一笔就从今天开始吧。',add_expense:'新增账单',record_payment:'记录还款',settled:'已结清',mark_settled:'标记已结清',
-  food_cat:'餐饮',transport:'交通',tickets:'门票',lodging:'住宿',other:'其他',amount:'金额',description:'说明 / 备注',optional:'可选',paid_by:'谁付款',participants:'参与成员',split_method:'分账方式',equal:'平均分',exact:'指定金额',percentage:'百分比',shares:'按份数',save:'保存',cancel:'取消',invalid_total:'分账合计必须等于账单金额。',select_participant:'请至少选择一位参与成员。',saved:'已保存',
+  food_cat:'餐饮',transport:'交通',tickets:'门票',shopping_expense:'购物',lodging:'住宿',other:'其他',amount:'金额',description:'说明 / 备注',optional:'可选',paid_by:'谁付款',participants:'参与成员',split_method:'分账方式',equal:'平均分',exact:'指定金额',percentage:'百分比',shares:'按份数',save:'保存',cancel:'取消',invalid_total:'分账合计必须等于账单金额。',select_participant:'请至少选择一位参与成员。',saved:'已保存',queued_offline:'已保存到本机，联网后会自动同步',
   paid_total:'已付款',allocated:'应承担',net_balance:'净余额',from:'付款人',to:'收款人',payment_amount:'还款金额',no_balances:'目前没有需要结清的款项。',
   add_member:'添加成员',member_name:'成员姓名',this_is_me:'这是我',rename:'重命名',deactivate:'停用',activate:'启用',inactive_label:'已停用',member_needed:'请先添加家庭成员。',member_exists:'这个名字已经存在。',cannot_deactivate_me:'请先选择另一位“这是我”的成员。',
   skip:'跳过',brand:'我们的<br>成都故事',family_journey:'一家人的旅程',landing_note:'慢一点，<br>和家人在一起。',landing_dates:'2026年10月15–20日 · 家庭旅行',enter:'开启我们的成都之旅',before:'成都之前',after:'旅程之后',
@@ -538,15 +573,15 @@ const I18N={
  en:{
   nav_home:'Home',nav_food:'Food',nav_explore:'Explore',nav_expenses:'Expenses',switch_lang:'Switch to Chinese',
   morning:'Good morning,',afternoon:'Good afternoon,',evening:'Good evening,',home_line:'See a bigger world, together as a family.',hero_1:'Chengdu.',hero_2:'Just right.',
-  weather_loading:'Weather updating',sunny:'Sunny',partly:'Partly cloudy',cloudy:'Cloudy',fog:'Fog',rain:'Rain',snow:'Snow',showers:'Showers',storm:'Thunderstorms',chengdu:'Chengdu',
-  food_title:'Nearby Food',food_sub:'What is worth eating near me right now?',search_food:'Search nearby places',range:'Distance',retry:'Retry',location_title:'Location needed',location_body:'Allow one location check to find places truly near you. The app does not track continuously.',locate:'Use My Location',locating:'Finding your location…',location_denied:'Location unavailable',location_denied_body:'Allow location in your browser settings, then try again.',
+  weather_loading:'Weather updating',sunny:'Sunny',partly:'Partly cloudy',cloudy:'Cloudy',fog:'Fog',rain:'Rain',snow:'Snow',showers:'Showers',storm:'Thunderstorms',chengdu:'Chengdu',chongqing:'Chongqing',
+  food_title:'Nearby Food',food_sub:'What is worth eating near me right now?',search_food:'Search nearby places',range:'Distance',retry:'Retry',location_title:'Location needed',location_body:'Allow one location check to find places truly near you. The app does not track continuously.',locate:'Use My Location',locating:'Finding your location…',location_denied:'Location permission is off',location_denied_body:'Allow location in your browser settings, then try again.',location_insecure:'Secure connection required',location_insecure_body:'Open the app over HTTPS, or use localhost / 127.0.0.1 when running it locally.',location_unavailable:'Location is temporarily unavailable',location_unavailable_body:'This is not caused by being outside Chengdu. Check that device location is on, then try again.',
   all:'All',sichuan:'Sichuan',hotpot:'Hot Pot',snacks:'Snacks',noodles:'Noodles',coffee:'Coffee',dessert:'Dessert',more:'More',
   nothing_food:'Nothing suitable nearby yet.',wider:'Try a wider radius.',service_down:'Nearby search is temporarily unavailable.',cached:'Showing the last cached results.',smart_score:'Smart Score',limited:'Limited data',high_conf:'High confidence',open:'Open',hours_listed:'Hours available',walk:'~{n} min walk',
-  food_detail:'Place Details',category:'Category',distance:'Distance',walking:'Walking',status:'Status',price:'Price',unknown:'Not available',navigate:'Navigate',search_dp:'Search Dianping',search_red:'Search Xiaohongshu',view_map:'View on Map',
-  explore_title:'Explore',explore_sub:'What is around me?',attractions:'Attractions',convenience:'Convenience',toilets:'Toilets',pharmacy:'Pharmacy',shopping:'Shopping',hotels:'Hotels',food:'Food',recenter:'Recenter',map_unavailable:'Map unavailable',map_list:'You can still use the nearby-place list.',nearby_loading:'Finding nearby places…',nothing_nearby:'Nothing nearby in this category yet.',open_food:'Open in Food',
+  food_detail:'Place Details',category:'Category',distance:'Distance',walking:'Walking',status:'Status',price:'Price',unknown:'Not available',navigate:'Navigate',search_dp:'Search Dianping',search_red:'Search Xiaohongshu',view_map:'View on Map',amap_nearby:'Search Nearby in AMap',
+  explore_title:'Explore',explore_sub:'What is around me?',attractions:'Attractions',convenience:'Convenience',toilets:'Toilets',pharmacy:'Pharmacy',shopping_places:'Shopping',hotels:'Hotels',food:'Food',recenter:'Recenter',map_unavailable:'Map unavailable',map_list:'You can still use the nearby-place list.',nearby_loading:'Finding nearby places…',nothing_nearby:'Nothing nearby in this category yet.',open_food:'Open in Food',
   expenses_title:'Expenses',expenses_sub:'Trip spending and family splitting',overview:'Overview',bills:'Expenses',split:'Split',members:'Members',local_mode:'Local mode: data stays in this browser. Configure Supabase to share with family.',cloud_mode:'Family sharing is active',syncing:'Syncing',sync_failed:'Sync failed; local data is safe',refresh:'Refresh',
   actual_spend:'My Actual Spend',i_paid:'I Paid',owed_to_me:'Owed to Me',i_owe:'I Owe',unsettled:'Unsettled',no_me:'Choose “This is me” under Members first.',no_expenses:'No expenses yet.',start_today:"Start with today's first one.",add_expense:'Add Expense',record_payment:'Record Payment',settled:'Settled',mark_settled:'Mark Settled',
-  food_cat:'Food',transport:'Transport',tickets:'Tickets',lodging:'Lodging',other:'Other',amount:'Amount',description:'Description / note',optional:'Optional',paid_by:'Paid by',participants:'Participants',split_method:'Split method',equal:'Split equally',exact:'Exact amounts',percentage:'Percentage',shares:'Shares',save:'Save',cancel:'Cancel',invalid_total:'The split total must equal the expense amount.',select_participant:'Select at least one participant.',saved:'Saved',
+  food_cat:'Food',transport:'Transport',tickets:'Tickets',shopping_expense:'Shopping',lodging:'Lodging',other:'Other',amount:'Amount',description:'Description / note',optional:'Optional',paid_by:'Paid by',participants:'Participants',split_method:'Split method',equal:'Split equally',exact:'Exact amounts',percentage:'Percentage',shares:'Shares',save:'Save',cancel:'Cancel',invalid_total:'The split total must equal the expense amount.',select_participant:'Select at least one participant.',saved:'Saved',queued_offline:'Saved locally; it will sync when you are online',
   paid_total:'Paid total',allocated:'Allocated share',net_balance:'Net balance',from:'From',to:'To',payment_amount:'Payment amount',no_balances:'Nothing needs settling right now.',
   add_member:'Add Member',member_name:'Member name',this_is_me:'This is me',rename:'Rename',deactivate:'Deactivate',activate:'Activate',inactive_label:'Inactive',member_needed:'Add a family member first.',member_exists:'That name already exists.',cannot_deactivate_me:'Choose another “This is me” member first.',
   skip:'SKIP',brand:'Our<br>Chengdu Story',family_journey:'A FAMILY JOURNEY',landing_note:'Slower steps.<br>Richer memories.',landing_dates:'15–20 October 2026 · Family journey',enter:'Begin our Chengdu journey',before:'Before Chengdu',after:'After the journey',
@@ -554,10 +589,10 @@ const I18N={
  }
 };
 const PLACE_EN={
- '初见成都':'First Chengdu','熊猫都江':'Pandas & Dujiangyan','九寨仙境':'Jiuzhaigou','山水慢游':'Waterside Wandering','古蜀一日':'Ancient Shu','带回成都':'Chengdu, Homeward',
- '飞往上海':'Fly to Shanghai','飞往成都':'Fly to Chengdu','抵达酒店':'Arrive at Hotel','春熙路':'Chunxi Road','人民公园':"People's Park",'IFS':'IFS','太古里':'Taikoo Li','宽窄巷子':'Kuanzhai Alley','熊猫基地':'Chengdu Research Base of Giant Panda Breeding','都江堰':'Dujiangyan','灌县古城':'Guanxian Ancient City','九寨沟':'Jiuzhaigou','五花海':'Five Flower Lake','长海':'Long Lake','珍珠滩瀑布':'Pearl Shoal Waterfall','熊猫谷':'Panda Valley','仰天窝':'Yangtianwo','午餐自由':'Lunch at Leisure','晚餐自由':'Dinner at Leisure','三星堆博物馆':'Sanxingdui Museum','东郊记忆':'Eastern Suburb Memory','玉林路':'Yulin Road','九眼桥':'Jiuyan Bridge','前往机场':'To the Airport','值机·休息':'Check-in & Rest','天府机场':'Tianfu International Airport','成都起飞':'Depart Chengdu','上海浦东':'Shanghai Pudong','回到槟城':'Back in Penang','上海转机':'Shanghai Transit','飞回槟城':'Fly Home to Penang'
+ '初见山城':'Hello Chongqing','山城漫游':'Mountain City','渝蓉之间':'Chongqing to Chengdu','熊猫都江':'Pandas & Dujiangyan','成都慢游':'Slow Chengdu','带回成都':'Homeward',
+ '天府机场':'Tianfu International Airport','高铁前往重庆':'High-Speed Rail to Chongqing','抵达重庆':'Arrive in Chongqing','自由活动':'Free Time','山城步道':'Shancheng Trail','十八梯':'Shibati','下浩里':'Xiahaoli','解放碑':'Jiefangbei','朝天门广场':'Chaotianmen Square','洪崖洞':'Hongya Cave','磁器口':'Ciqikou Ancient Town','李子坝':'Liziba','八一路好吃街':'Bayi Road Food Street','返回成都':'Return to Chengdu','熊猫基地':'Panda Base','花花':'Hua Hua','都江堰':'Dujiangyan','灌县古城':'Guanxian Ancient City','钟书阁':'Zhongshuge','南桥':'Nanqiao Bridge','蓝眼泪夜景':'Blue Tears Night View','成都自由日':'Free Day in Chengdu','酒店出发':'Leave Hotel','返程':'Journey Home'
 };
-const CAT_KEYS={餐饮:'food_cat',交通:'transport',门票:'tickets',购物:'shopping',住宿:'lodging',其他:'other'};
+const CAT_KEYS={餐饮:'food_cat',交通:'transport',门票:'tickets',购物:'shopping_expense',住宿:'lodging',其他:'other'};
 const L=(k,v={})=>{let s=(I18N[lang]&&I18N[lang][k])||I18N.zh[k]||k;Object.entries(v).forEach(([a,b])=>s=s.replaceAll(`{${a}}`,b));return s};
 const proper=s=>lang==='en'?(PLACE_EN[s]||s):s;
 const catLabel=c=>L(CAT_KEYS[c]||c);
@@ -567,7 +602,13 @@ const money=n=>`¥ ${Number(n||0).toLocaleString('en-US',{minimumFractionDigits:
 const mem={};
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
 lang=store.get('chengduLang')==='en'?'en':'zh';
-const CFG=DATA.config||{}, CLOUD=!!(CFG.supabase_url&&CFG.supabase_key), TRIP_ID=CFG.trip_id||'chengdu-family-2026';
+const CFG=DATA.config||{};
+function browserSafeSupabaseKey(key){
+  const k=String(key||'');if(!k||k.toLowerCase().startsWith('sb_secret_')||k.toLowerCase().includes('service_role'))return false;
+  if(k.split('.').length===3)try{const p=JSON.parse(atob(k.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));if(p.role==='service_role')return false}catch(e){}
+  return true;
+}
+const CLOUD=!!(CFG.supabase_url&&browserSafeSupabaseKey(CFG.supabase_key)), TRIP_ID=CFG.trip_id||'chengdu-family-2026';
 const uid=()=>globalThis.crypto&&crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function toast(msg){const old=$('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2300)}
@@ -575,7 +616,7 @@ function toggleLang(){lang=lang==='zh'?'en':'zh';store.set('chengduLang',lang);a
 function applyLanguage(){
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
   document.body.classList.toggle('lang-en',lang==='en');
-  [...foodPois,...explorePois].forEach(p=>{const n=osmName(p.tags);p.name=n===L('unknown')&&explorePois.includes(p)?L(exploreCategory):n;p.status=p.tags.opening_hours==='24/7'?L('open'):(p.tags.opening_hours?L('hours_listed'):'');p.confidence=(p.tags.rating||p.tags.review_count)&&p.tags.opening_hours?L('high_conf'):L('limited')});
+  [...foodPois,...explorePois].forEach(p=>{const n=osmName(p.tags);p.name=n===L('unknown')&&explorePois.includes(p)?L(exploreCategory==='shopping'?'shopping_places':exploreCategory):n;p.status=p.tags.opening_hours==='24/7'?L('open'):(p.tags.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited')});
   const keep=openIdx;renderHome();openIdx=-1;if(keep>=0)setOpen(keep);
   nav();renderLandingText();
   if(currentPage==='food')renderFood();
@@ -793,43 +834,20 @@ function art(d){
 /* ───── approved scenic route for Home accordion only ─────
    Time remains internal for panda progress; the UI only shows place + image. */
 const HOME_ROUTE={
-  1:[
-    ["15:00","IFS","ifs_panda"],
-    ["16:00","太古里","taikoo_day"],
-    ["17:00","人民公园","people_park"],
-    ["18:30","宽窄巷子","kuanzhai"]
-  ],
-  2:[
-    ["09:00","熊猫基地","panda_base"],
-    ["14:00","都江堰","dujiangyan"],
-    ["17:00","灌县古城","guanxian"]
-  ],
-  3:[
-    ["08:00","九寨沟","jiuzhai_nuorilang"],
-    ["11:00","五花海","jiuzhai_five"],
-    ["14:00","长海","jiuzhai_long"],
-    ["17:00","珍珠滩瀑布","jiuzhai_waterfall"]
-  ],
-  4:[
-    ["08:00","熊猫谷","panda_base_alt"],
-    ["11:00","仰天窝","panda_base_gate"],
-    ["15:00","灌县古城","guanxian"],
-    ["18:30","南桥","dujiangyan"]
-  ],
-  5:[
-    ["09:00","三星堆博物馆","sanxingdui_mask"],
-    ["13:30","东郊记忆","dongjiao"],
-    ["17:00","玉林路","yulin_street"],
-    ["20:00","九眼桥","anshun_2026"]
-  ],
-  6:[
-    ["08:00","天府机场","airport_hall"],
-    ["12:30","成都起飞","airport"],
-    ["15:15","上海浦东","pudong_t2"],
-    ["23:00","回到槟城","penang_home"]
-  ]
+  1:[["天府机场","airport"],["高铁前往重庆","chongqing_train"],["抵达重庆","chongqing_city"],["自由活动","chongqing_night"]],
+  2:[["山城步道","shancheng_trail"],["十八梯","shibati"],["下浩里","xiahaoli"],["解放碑","jiefangbei"],["朝天门广场","chaotianmen"],["洪崖洞","hongya"]],
+  3:[["磁器口","ciqikou"],["李子坝","liziba"],["八一路好吃街","bayi"],["返回成都","chongqing_train"]],
+  4:[["熊猫基地","panda_base"],["花花","panda_huahua"],["都江堰","dujiangyan_waterworks"],["灌县古城","guanxian"],["钟书阁","zhongshuge"],["南桥","nanqiao"],["蓝眼泪夜景","blue_tears"]],
+  5:[["成都自由日","people_park"]],
+  6:[["酒店出发","taikoo_day"],["天府机场","airport_hall"],["返程","airport"]]
 };
-const routeStops=d=>HOME_ROUTE[d.day]||d.nodes;
+// Visual progress anchors only — update when confirmed transport/activity times are available.
+const INTERNAL_ROUTE_TIMES={
+  1:["09:00","11:30","14:00","16:00"],2:["09:00","10:30","12:30","15:00","17:30","20:00"],
+  3:["09:00","12:00","14:30","17:30"],4:["08:00","10:00","13:00","15:30","17:00","18:30","20:00"],
+  5:[],6:["08:00","10:00","12:00"]
+};
+const routeStops=d=>(HOME_ROUTE[d.day]||[]).map((x,i)=>[INTERNAL_ROUTE_TIMES[d.day]?.[i]||"12:00",x[0],x[1]]);
 
 
 /* ───── route geometry ───── */
@@ -868,6 +886,11 @@ function routeGeom(d){
   return{n,pr,pts,base,done,target:bez(segs[k],u),stops};
 }
 function routeHTML(d,quiet){
+  if(d.day===5){
+    const traveler=DATA.traveler_panda?`<img src="${DATA.traveler_panda}" alt="${lang==='zh'?'休息中的背包熊猫':'Backpack panda taking a rest'}">`:PANDA;
+    const copy=lang==='zh'?'今天没有固定路线。\n睡到自然醒，\n想去哪，就去哪。':'No fixed route today.\nTake it slow,\nand go wherever you feel like.';
+    return `<div class="free-day-scene"><img class="free-day-photo" src="${thumbUrl(DATA.images.people_park)}" alt="${proper('成都自由日')}" loading="lazy"><div class="free-day-copy"><b>${proper('成都自由日')}</b><span>${copy}</span></div><div class="free-day-panda">${traveler}</div></div>`;
+  }
   const g=routeGeom(d),{pr,pts,n,stops}=g;
   const nodes=stops.map((nd,i)=>{
     const st=pr.st==='past'?'done':pr.st==='future'?'':(pr.idx>=n-1?'done':i<Math.floor(pr.idx)?'done':i===Math.floor(pr.idx)?'cur':'');
@@ -904,15 +927,24 @@ function wxIcon(c){
   if(c>=51)return `<svg viewBox="0 0 40 40">${cloud}<path d="M14 33l-1.5 4M20 33l-1.5 4M26 33l-1.5 4" stroke="#5b9bc4" stroke-width="2" stroke-linecap="round"/></svg>`;
   return `<svg viewBox="0 0 40 40"><circle cx="14" cy="13" r="6" fill="#f2a33a"/>${cloud}</svg>`;
 }
+// Collapsed chapter covers follow each day's actual route theme.
+// The original embedded watercolor covers remain as an offline fallback.
+const CHAPTER_COVER_KEYS={
+  1:'chongqing_city', 2:'hongya', 3:'liziba',
+  4:'panda_base', 5:'people_park', 6:'airport_hall'
+};
 function stripHTML(d,i){
-  const cover=(DATA.covers&&DATA.covers[d.day])?`<img src="${DATA.covers[d.day]}" alt="" aria-hidden="true">`:art(d.day);
-  return `<div class="strip" data-i="${i}" role="button" tabindex="0" aria-expanded="false" aria-label="${L('day',{n:d.day})} ${proper(d.vt)} ${d.date}"><div class="cover">${cover}</div><div class="head"><div class="marker">${marker(d.day)}</div><div class="vt">${proper(d.vt)}</div></div><div class="panel"></div></div>`;
+  const key=CHAPTER_COVER_KEYS[d.day],fallback=DATA.covers&&DATA.covers[d.day];
+  const cover=key&&DATA.images[key]
+    ? `<img src="${thumbUrl(DATA.images[key])}" alt="" aria-hidden="true" ${fallback?`onerror="this.onerror=null;this.src='${fallback}'"`:''}>`
+    : (fallback?`<img src="${fallback}" alt="" aria-hidden="true">`:art(d.day));
+  return `<div class="strip" data-i="${i}" data-day="${d.day}" role="button" tabindex="0" aria-expanded="false" aria-label="${L('day',{n:d.day})} ${proper(d.vt)} ${d.date}"><div class="cover">${cover}</div><div class="head"><div class="marker">${marker(d.day)}</div><div class="vt">${proper(d.vt)}</div></div><div class="panel"></div></div>`;
 }
 function renderHome(){
   const hero=DATA.images.panda_portrait.replace(/w=\d+/,'w=1000');
   $('#home').innerHTML=`
    <div class="home-top"><div><div class="greeting" id="greet">${greeting()}</div><div class="greeting-en" id="greetEn"></div><div class="home-poem">${L('home_line')}</div></div>
-     <div class="home-tools"><button class="lang-toggle" onclick="toggleLang()" aria-label="${L('switch_lang')}"><span style="${lang==='zh'?'font-weight:800':'opacity:.55'}">中</span> | <span style="${lang==='en'?'font-weight:800':'opacity:.55'}">EN</span></button><div class="wx"><div class="wx-row" id="wxIcon">${wxIcon(wx?wx.code:null)}<span class="wx-temp" id="wxTemp">${wx?Math.round(wx.t)+'°C':'—°C'}</span></div><small id="wxPlace">${L('chengdu')} · ${wx?weatherCN(wx.code):L('weather_loading')}</small></div></div></div>
+     <div class="home-tools"><button class="lang-toggle" onclick="toggleLang()" aria-label="${L('switch_lang')}"><span style="${lang==='zh'?'font-weight:800':'opacity:.55'}">中</span> | <span style="${lang==='en'?'font-weight:800':'opacity:.55'}">EN</span></button><div class="wx"><div class="wx-row" id="wxIcon">${wxIcon(wx?wx.code:null)}<span class="wx-temp" id="wxTemp">${wx?Math.round(wx.t)+'°C':'—°C'}</span></div><small id="wxPlace">${L(wx?.city||weatherContext().key)} · ${wx?weatherCN(wx.code):L('weather_loading')}</small></div></div></div>
    <div class="hero"><img src="${hero}" alt="${lang==='zh'?'竹林中的大熊猫':'A giant panda resting on a wooden log'}" onerror="this.style.display='none'"><div class="hero-copy"><div class="cn1">${L('hero_1')}</div><div class="cn2">${L('hero_2')}</div></div></div>
    <div class="sheet"><div class="journey-seam"></div><div class="acc" id="acc">${days.map(stripHTML).join('')}</div></div>`;
   sizeAcc();
@@ -928,7 +960,7 @@ function fillPanel(i,quiet){
   p.classList.toggle('quiet',!!quiet);
   const heads=Array.from({length:d.day},()=>`<svg viewBox="-10 -10 20 20" aria-hidden="true">${pandaHead(0,0,9.3)}</svg>`).join('');
    p.innerHTML=`<button class="close" aria-label="${L('close')}">${icon('close','sm')}</button><div class="p-head"><div class="p-heads" role="img" aria-label="${L('day',{n:d.day})}">${heads}</div><div class="p-title"><b>${proper(d.vt)}</b></div></div><div class="p-note"></div><div class="route"><div class="rz count-${d.nodes.length}">${routeHTML(d,quiet)}</div></div>`;
-  if(!quiet){
+  if(!quiet&&d.day!==5){
     const g=routeGeom(d),pd=p.querySelector('.panda');
     setTimeout(()=>{if(openIdx===i&&pd){pd.style.left=g.target.x+'%';pd.style.top=Math.min(91,g.target.y+6.5)+'%'}},520);
   }
@@ -953,31 +985,47 @@ document.addEventListener('keydown',e=>{
 });
 async function loadWeather(){
   try{
-    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.66&longitude=104.06&current=temperature_2m,weather_code&timezone=Asia%2FShanghai');
-    const j=await r.json();wx={t:j.current.temperature_2m,code:j.current.weather_code};
+    const c=weatherContext(),r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code&timezone=Asia%2FShanghai`);
+    const j=await r.json();wx={t:j.current.temperature_2m,code:j.current.weather_code,city:c.key};
     const t=$('#wxTemp'),ic=$('#wxIcon svg');
-    if(t){t.textContent=Math.round(wx.t)+'°C';ic.outerHTML=wxIcon(wx.code);const p=$('#wxPlace');if(p)p.textContent=L('chengdu')+' · '+weatherCN(wx.code)}
+    if(t){t.textContent=Math.round(wx.t)+'°C';ic.outerHTML=wxIcon(wx.code);const p=$('#wxPlace');if(p)p.textContent=L(wx.city)+' · '+weatherCN(wx.code)}
   }catch(e){}
 }
 
+function weatherContext(){
+  const n=chinaNow(),d=currentDay(),minutes=n.h*60+n.m;
+  const cq=d===2||(d===1&&minutes>=14*60)||(d===3&&minutes<17*60+30);
+  return cq?{key:'chongqing',lat:29.5630,lon:106.5516}:{key:'chengdu',lat:30.5728,lon:104.0668};
+}
+
 /* ───── Location + Overpass shared engine ───── */
-const FOOD_FILTERS=['all','sichuan','hotpot','snacks','noodles','coffee','dessert','more'];
+const FOOD_FILTERS=['all','sichuan','hotpot','snacks','noodles','coffee','dessert'];
 const EXPLORE_CATS=['attractions','convenience','toilets','coffee','pharmacy','shopping','hotels','food'];
 const rad=x=>x*Math.PI/180;
 function distanceM(a,b,c,d){const R=6371000,p=rad(c-a),q=rad(d-b),h=Math.sin(p/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(q/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function distanceText(m){return m<1000?`${Math.round(m/10)*10} m`:`${(m/1000).toFixed(m<3000?1:0)} km`}
+function outOfChina(lat,lon){return lon<72.004||lon>137.8347||lat<0.8293||lat>55.8271}
+function gcjTransformLat(x,y){let r=-100+2*x+3*y+.2*y*y+.1*x*y+.2*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*Math.PI)+20*Math.sin(2*x*Math.PI))*2/3;r+=(20*Math.sin(y*Math.PI)+40*Math.sin(y/3*Math.PI))*2/3;r+=(160*Math.sin(y/12*Math.PI)+320*Math.sin(y*Math.PI/30))*2/3;return r}
+function gcjTransformLon(x,y){let r=300+x+2*y+.1*x*x+.1*x*y+.1*Math.sqrt(Math.abs(x));r+=(20*Math.sin(6*x*Math.PI)+20*Math.sin(2*x*Math.PI))*2/3;r+=(20*Math.sin(x*Math.PI)+40*Math.sin(x/3*Math.PI))*2/3;r+=(150*Math.sin(x/12*Math.PI)+300*Math.sin(x/30*Math.PI))*2/3;return r}
+function wgs84ToGcj02(lat,lon){if(outOfChina(lat,lon))return{lat,lon};const a=6378245,ee=.006693421622965943,dLat=gcjTransformLat(lon-105,lat-35),dLon=gcjTransformLon(lon-105,lat-35),radLat=lat/180*Math.PI,magic=1-ee*Math.sin(radLat)**2,sqrt=Math.sqrt(magic);return{lat:lat+(dLat*180)/((a*(1-ee))/(magic*sqrt)*Math.PI),lon:lon+(dLon*180)/(a/sqrt*Math.cos(radLat)*Math.PI)}}
+function amapNavigationUrl(p){const c=wgs84ToGcj02(p.lat,p.lon),q=encodeURIComponent(p.name);return`https://uri.amap.com/navigation?to=${c.lon.toFixed(6)},${c.lat.toFixed(6)},${q}&mode=walk&policy=1&src=chengdu-story&callnative=1`}
+function amapNearbyUrl(kind='all'){if(!userLocation)return'https://uri.amap.com/';const c=wgs84ToGcj02(userLocation.lat,userLocation.lon),names={food:lang==='zh'?'美食':'Food',attractions:lang==='zh'?'景点':'Attractions',convenience:lang==='zh'?'便利店':'Convenience Store',toilets:lang==='zh'?'厕所':'Toilets',coffee:lang==='zh'?'咖啡':'Coffee',pharmacy:lang==='zh'?'药房':'Pharmacy',shopping:lang==='zh'?'商场':'Shopping',hotels:lang==='zh'?'酒店':'Hotels',all:lang==='zh'?'附近':'Nearby'};return`https://uri.amap.com/search?keyword=${encodeURIComponent(names[kind]||names.all)}&center=${c.lon.toFixed(6)},${c.lat.toFixed(6)}&view=map&src=chengdu-story&callnative=1`}
 function cacheRead(k,maxAge=30*60*1000){try{const x=JSON.parse(store.get(k)||'null');return x&&Date.now()-x.ts<maxAge?x.data:null}catch(e){return null}}
 function cacheAny(k){try{const x=JSON.parse(store.get(k)||'null');return x?x.data:null}catch(e){return null}}
 function cacheWrite(k,data){store.set(k,JSON.stringify({ts:Date.now(),data}))}
 function locCache(){return userLocation?`${Math.round(userLocation.lat*500)}:${Math.round(userLocation.lon*500)}`:'none'}
+const LOCATION_MAX_AGE=12*60*1000;
+const locationFresh=()=>!!(userLocation&&locationTimestamp&&Date.now()-locationTimestamp<=LOCATION_MAX_AGE);
+function expireLocationIfNeeded(){if(userLocation&&!locationFresh()){userLocation=null;locationTimestamp=0;geoStatus='idle';foodPois=[];explorePois=[];selectedFood=null;selectedExplore=null}}
 function requestLocation(source='food'){
   const redraw=()=>{if(currentPage==='food')renderFood();else if(currentPage==='explore')renderExplore(false)};
-  if(!navigator.geolocation){geoStatus='denied';redraw();return}
+  if(!window.isSecureContext){geoStatus='insecure';redraw();return}
+  if(!navigator.geolocation){geoStatus='unavailable';redraw();return}
   geoStatus='pending';redraw();
   navigator.geolocation.getCurrentPosition(async p=>{
-    userLocation={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy};geoStatus='ready';store.set('chengduLastLocation',JSON.stringify(userLocation));
+    locationTimestamp=Date.now();userLocation={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,ts:locationTimestamp};geoStatus='ready';store.set('chengduLastLocation',JSON.stringify(userLocation));
     if(currentPage==='explore'){renderExplore(false);await loadExplorePois(true)}else if(currentPage==='food'){await loadFoodPois(true)}else if(source==='explore'){await loadExplorePois(true)}else{await loadFoodPois(true)}
-  },()=>{geoStatus='denied';redraw()},{enableHighAccuracy:false,timeout:10000,maximumAge:10*60*1000});
+  },e=>{geoStatus=e&&e.code===1?'denied':'unavailable';redraw()},{enableHighAccuracy:false,timeout:10000,maximumAge:0});
 }
 async function fetchOverpass(query,key){
   const fresh=cacheRead(key);if(fresh)return{data:fresh,cached:false};
@@ -990,8 +1038,8 @@ function osmPhoto(t){if(t.image&&/^https?:/i.test(t.image))return t.image;if(t.w
 function osmName(t){return t[lang==='zh'?'name:zh':'name:en']||t.name||t['name:zh']||t['name:en']||L('unknown')}
 function foodCategoryOf(t){const c=(t.cuisine||'').toLowerCase(),a=t.amenity||'';if(a==='cafe')return'coffee';if(a==='ice_cream'||/dessert|ice_cream|cake/.test(c))return'dessert';if(/hot_pot|hotpot/.test(c))return'hotpot';if(/noodle|ramen/.test(c))return'noodles';if(a==='fast_food'||a==='food_court')return'snacks';if(/sichuan|chinese/.test(c))return'sichuan';return'more'}
 function foodLabel(k){return L(k)}
-function smartScore(p){let s=58;s+=Math.max(0,18-Math.round(p.distance/180));if(p.tags.opening_hours)s+=5;if(p.tags.website||p.tags.phone||p.tags['contact:phone'])s+=4;if(p.tags.cuisine)s+=4;if(p.photo)s+=3;const r=parseFloat(p.tags.rating||p.tags['rating:google']||0);if(r)s+=Math.round(Math.min(5,r)*2);return Math.max(55,Math.min(96,s))}
-function normalizePois(elements,kind){return elements.map(e=>{const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(lat==null||lon==null)return null;let name=osmName(t);if(name===L('unknown')&&kind!=='food')name=L(exploreCategory);const p={id:String(e.type)+e.id,lat,lon,tags:t,name,photo:osmPhoto(t),distance:userLocation?distanceM(userLocation.lat,userLocation.lon,lat,lon):0};p.foodCat=foodCategoryOf(t);p.score=smartScore(p);p.walk=Math.max(1,Math.ceil(p.distance/78));p.status=t.opening_hours==='24/7'?L('open'):(t.opening_hours?L('hours_listed'):'');p.confidence=(t.rating||t.review_count)&&t.opening_hours?L('high_conf'):L('limited');return p}).filter(p=>p&&(kind!=='food'||p.name!==L('unknown'))).sort((a,b)=>kind==='food'?b.score-a.score:a.distance-b.distance)}
+function smartScore(p){const r=parseFloat(p.tags.rating||p.tags['rating:google']||0),reviews=parseInt(p.tags.review_count||p.tags['reviews']||0,10),evidence=Number.isFinite(r)&&r>0;let s=50+Math.max(0,10-Math.round(p.distance/300));if(p.tags.opening_hours)s+=4;if(p.tags.website||p.tags.phone||p.tags['contact:phone'])s+=4;if(p.tags.cuisine)s+=3;if(p.photo)s+=2;if(evidence)s+=Math.round(Math.min(5,r)*5)+(reviews>=20?5:reviews>=5?2:0);p.hasRatingEvidence=evidence;p.reviewEvidence=reviews;return Math.max(50,Math.min(evidence?94:76,s))}
+function normalizePois(elements,kind){return elements.map(e=>{const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(lat==null||lon==null)return null;let name=osmName(t);if(name===L('unknown')&&kind!=='food')name=L(exploreCategory==='shopping'?'shopping_places':exploreCategory);const p={id:String(e.type)+e.id,lat,lon,tags:t,name,photo:osmPhoto(t),distance:userLocation?distanceM(userLocation.lat,userLocation.lon,lat,lon):0};p.foodCat=foodCategoryOf(t);p.score=smartScore(p);p.walk=Math.max(1,Math.ceil(p.distance/78));p.status=t.opening_hours==='24/7'?L('open'):(t.opening_hours?L('hours_listed'):'');p.confidence=p.hasRatingEvidence&&p.reviewEvidence>=5?L('high_conf'):L('limited');return p}).filter(p=>p&&(kind!=='food'||p.name!==L('unknown'))).sort((a,b)=>kind==='food'?b.score-a.score:a.distance-b.distance)}
 
 /* ───── Food ───── */
 function foodQueryText(){const a=`(around:${Math.round(foodRadius*1000)},${userLocation.lat},${userLocation.lon})`;let s='';if(foodCategory==='coffee')s=`nwr["amenity"="cafe"]${a};`;else if(foodCategory==='dessert')s=`nwr["amenity"~"ice_cream|cafe"]["cuisine"~"dessert|ice_cream|cake",i]${a};`;else if(foodCategory==='hotpot')s=`nwr["amenity"="restaurant"]["cuisine"~"hot_pot|hotpot",i]${a};`;else if(foodCategory==='noodles')s=`nwr["amenity"~"restaurant|fast_food"]["cuisine"~"noodle|ramen",i]${a};`;else if(foodCategory==='sichuan')s=`nwr["amenity"="restaurant"]["cuisine"~"sichuan|chinese",i]${a};`;else if(foodCategory==='snacks')s=`nwr["amenity"~"fast_food|food_court"]${a};`;else s=`nwr["amenity"~"restaurant|fast_food|cafe|food_court|ice_cream"]${a};`;return`[out:json][timeout:20];(${s});out center tags;`}
@@ -1000,7 +1048,12 @@ function selectFoodCategory(k){foodCategory=k;userLocation?loadFoodPois():render
 function setFoodRadius(r){foodRadius=r;userLocation?loadFoodPois():renderFood()}
 function setFoodSearch(v){foodQuery=v.trim().toLowerCase();clearTimeout(foodSearchTimer);foodSearchTimer=setTimeout(renderFood,180)}
 function foodCard(p){const photo=p.photo?`<img class="food-photo" src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;food-placeholder&quot;>🍜</div>'">`:`<div class="food-placeholder">🍜</div>`;return`<article class="food-card live paper-card" onclick="openFoodSheet('${esc(p.id)}')">${photo}<div><h3>${esc(p.name)}</h3><div class="score">${p.score}</div><div class="food-line">${foodLabel(p.foodCat)} · ${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</div><div class="food-bottom"><span class="smart">${L('smart_score')} ${p.score}</span>${p.status?`<span class="open-label">${p.status}</span>`:''}<span class="confidence">${p.confidence}</span></div></div></article>`}
-function locationState(source){if(geoStatus==='pending')return`<div class="state-card paper-card"><div class="spinner"></div><h3>${L('locating')}</h3></div>`;const denied=geoStatus==='denied';return`<div class="state-card paper-card"><div class="state-icon">${icon('locate','lg')}</div><h3>${L(denied?'location_denied':'location_title')}</h3><p>${L(denied?'location_denied_body':'location_body')}</p><button class="primary-btn" onclick="requestLocation('${source}')">${L(denied?'retry':'locate')}</button></div>`}
+function locationState(source){
+  if(geoStatus==='pending')return`<div class="state-card paper-card"><div class="spinner"></div><h3>${L('locating')}</h3></div>`;
+  const states={denied:['location_denied','location_denied_body'],insecure:['location_insecure','location_insecure_body'],unavailable:['location_unavailable','location_unavailable_body']};
+  const copy=states[geoStatus]||['location_title','location_body'];
+  return`<div class="state-card paper-card"><div class="state-icon">${icon('locate','lg')}</div><h3>${L(copy[0])}</h3><p>${L(copy[1])}</p><button class="primary-btn" onclick="requestLocation('${source}')">${L(geoStatus==='idle'?'locate':'retry')}</button></div>`
+}
 function renderFood(){
   const shown=foodPois.filter(p=>!foodQuery||p.name.toLowerCase().includes(foodQuery));
   $('#food').className='page app-page'+(currentPage==='food'?' active':'');
@@ -1008,33 +1061,31 @@ function renderFood(){
   <div class="tool-row"><div class="search-box">${icon('search','sm')}<input value="${esc(foodQuery)}" oninput="setFoodSearch(this.value)" placeholder="${L('search_food')}"></div></div>
   <div class="filter-scroll">${FOOD_FILTERS.map(k=>`<button class="filter-chip ${k===foodCategory?'active':''}" onclick="selectFoodCategory('${k}')">${L(k)}</button>`).join('')}</div>
   <div class="radius-select"><span class="radius-label">${L('range')}</span>${[.5,1,2,5].map(r=>`<button class="${r===foodRadius?'active':''}" onclick="setFoodRadius(${r})">${r<1?'500m':r+'km'}</button>`).join('')}</div>
-  ${!userLocation?locationState('food'):foodLoading?`<div class="state-card paper-card"><div class="spinner"></div><h3>${L('nearby_loading')}</h3></div>`:`${foodError?`<div class="local-note">${L(foodError==='cached'?'cached':'service_down')} ${foodError==='failed'?`<button class="mini-btn" onclick="loadFoodPois(true)">${L('retry')}</button>`:''}</div>`:''}<div class="food-list">${shown.map(foodCard).join('')||`<div class="state-card paper-card"><h3>${L('nothing_food')}</h3><p>${L('wider')}</p></div>`}</div>`}`;
-  if(currentPage==='food'&&!userLocation&&geoStatus==='idle')setTimeout(()=>requestLocation('food'),80);
+  ${!userLocation?locationState('food'):foodLoading?`<div class="state-card paper-card"><div class="spinner"></div><h3>${L('nearby_loading')}</h3></div>`:`${foodError?`<div class="local-note">${L(foodError==='cached'?'cached':'service_down')} ${foodError==='failed'?`<button class="mini-btn" onclick="loadFoodPois(true)">${L('retry')}</button> <a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl('food')}">${L('amap_nearby')}</a>`:''}</div>`:''}<div class="food-list">${shown.map(foodCard).join('')||`<div class="state-card paper-card"><h3>${L('nothing_food')}</h3><p>${L('wider')}</p></div>`}</div>`}`;
   if(currentPage==='food'&&userLocation&&!foodLoading&&!foodPois.length&&!foodError)setTimeout(()=>loadFoodPois(),80);
 }
-function openFoodSheet(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedFood=p;const img=p.photo?`<img class="detail-photo" src="${esc(p.photo)}" alt="${esc(p.name)}" onerror="this.outerHTML='<div class=&quot;detail-placeholder&quot;>🍜</div>'">`:`<div class="detail-placeholder">🍜</div>`;const q=encodeURIComponent(p.name),pos=`${p.lon},${p.lat}`;showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${foodLabel(p.foodCat)} · ${distanceText(p.distance)}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div>${img}<div class="detail-grid"><div class="detail-stat"><small>${L('smart_score')}</small><b>${p.score}</b></div><div class="detail-stat"><small>${L('walking')}</small><b>${L('walk',{n:p.walk})}</b></div><div class="detail-stat"><small>${L('status')}</small><b>${p.status||L('unknown')}</b></div><div class="detail-stat"><small>${L('price')}</small><b>${esc(p.tags['price:range']||L('unknown'))}</b></div></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="https://uri.amap.com/navigation?to=${pos},${q}&mode=walk&policy=1&src=chengdu-story&callnative=1">${L('navigate')}</a><a target="_blank" rel="noopener" href="https://m.dianping.com/search?keyword=${q}">${L('search_dp')}</a><a target="_blank" rel="noopener" href="https://www.xiaohongshu.com/search_result?keyword=${q}">${L('search_red')}</a><button onclick="focusExplore('${esc(p.id)}')">${L('view_map')}</button></div>`)}
+function openFoodSheet(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedFood=p;const img=p.photo?`<img class="detail-photo" src="${esc(p.photo)}" alt="${esc(p.name)}" onerror="this.outerHTML='<div class=&quot;detail-placeholder&quot;>🍜</div>'">`:`<div class="detail-placeholder">🍜</div>`;const q=encodeURIComponent(p.name);showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${foodLabel(p.foodCat)} · ${distanceText(p.distance)}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div>${img}<div class="detail-grid"><div class="detail-stat"><small>${L('smart_score')}</small><b>${p.score}</b></div><div class="detail-stat"><small>${L('walking')}</small><b>${L('walk',{n:p.walk})}</b></div><div class="detail-stat"><small>${L('status')}</small><b>${p.status||L('unknown')}</b></div><div class="detail-stat"><small>${L('price')}</small><b>${esc(p.tags['price:range']||L('unknown'))}</b></div></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="${amapNavigationUrl(p)}">${L('navigate')}</a><a target="_blank" rel="noopener" href="https://m.dianping.com/search?keyword=${q}">${L('search_dp')}</a><a target="_blank" rel="noopener" href="https://www.xiaohongshu.com/search_result?keyword=${q}">${L('search_red')}</a><button onclick="focusExplore('${esc(p.id)}')">${L('view_map')}</button></div>`)}
 function showModal(html){closeModal();document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><div class="sheet-modal"><div class="sheet-grab"></div>${html}</div></div>`)}
 function closeModal(){const m=$('#modalBackdrop');if(m)m.remove()}
 
 /* ───── Explore ───── */
 function exploreQueryText(){const a=`(around:2000,${userLocation.lat},${userLocation.lon})`,q={attractions:`nwr["tourism"~"attraction|museum|viewpoint|gallery"]${a};nwr["historic"]${a};`,convenience:`nwr["shop"="convenience"]${a};`,toilets:`nwr["amenity"="toilets"]${a};`,coffee:`nwr["amenity"="cafe"]${a};`,pharmacy:`nwr["amenity"="pharmacy"]${a};`,shopping:`nwr["shop"~"mall|department_store"]${a};`,hotels:`nwr["tourism"~"hotel|guest_house"]${a};`,food:`nwr["amenity"~"restaurant|fast_food|food_court"]${a};`}[exploreCategory];return`[out:json][timeout:20];(${q});out center tags;`}
 async function loadExplorePois(force=false){if(!userLocation)return;exploreLoading=true;exploreError='';renderExplore(false);const key=`chengduPoi:map:${locCache()}:${exploreCategory}`;if(force)store.set(key,'');try{const r=await fetchOverpass(exploreQueryText(),key);explorePois=normalizePois(r.data,'map').filter(p=>p.distance<=2000).slice(0,80);exploreError=r.cached?'cached':''}catch(e){explorePois=[];exploreError='failed'}exploreLoading=false;renderExplore(false)}
-function selectExploreCategory(k){exploreCategory=k;userLocation?loadExplorePois():renderExplore(false)}
+function selectExploreCategory(k){exploreCategory=k;selectedExplore=null;userLocation?loadExplorePois():renderExplore(false)}
 function mapIcon(){return{attractions:'⌂',convenience:'▣',toilets:'●',coffee:'☕',pharmacy:'✚',shopping:'◇',hotels:'⌂',food:'●'}[exploreCategory]||'●'}
 function renderExplore(fetchIfNeeded=true){
   if(map){try{map.remove()}catch(e){}map=null}poiMarkers=[];
   $('#explore').className='page app-page'+(currentPage==='explore'?' active':'');
-  $('#explore').innerHTML=`<div class="app-head"><div><h1>${L('explore_title')}</h1><p>${L('explore_sub')}</p></div></div><div class="map-cats">${EXPLORE_CATS.map(k=>`<button class="map-cat ${k===exploreCategory?'active':''}" onclick="selectExploreCategory('${k}')">${icon(k==='attractions'?'landmark':k==='toilets'?'toilet':k==='pharmacy'?'pharmacy':k==='hotels'?'hotel':k==='food'?'food':k==='coffee'?'coffee':'shopping')} ${L(k)}</button>`).join('')}</div>
-  ${!userLocation?locationState('explore'):`<div class="real-map"><div id="mapCanvas"></div><div class="map-toolbar"><div class="map-note">${exploreLoading?L('nearby_loading'):exploreError?L(exploreError==='cached'?'cached':'service_down'):`${distanceText(userLocation.accuracy||0)} · ${L(exploreCategory)}`}</div><button class="map-control" onclick="recenterMap()" aria-label="${L('recenter')}">${icon('locate')}</button></div></div><div id="mapFallback" class="map-fallback-list">${explorePois.slice(0,12).map(p=>poiRow(p)).join('')}</div>`}`;
-  if(currentPage==='explore'&&!userLocation&&geoStatus==='idle')setTimeout(()=>requestLocation('explore'),80);
+  $('#explore').innerHTML=`<div class="app-head"><div><h1>${L('explore_title')}</h1><p>${L('explore_sub')}</p></div></div><div class="map-cats">${EXPLORE_CATS.map(k=>`<button class="map-cat ${k===exploreCategory?'active':''}" onclick="selectExploreCategory('${k}')">${icon(k==='attractions'?'landmark':k==='toilets'?'toilet':k==='pharmacy'?'pharmacy':k==='hotels'?'hotel':k==='food'?'food':k==='coffee'?'coffee':'shopping')} ${L(k==='shopping'?'shopping_places':k)}</button>`).join('')}</div>
+  ${!userLocation?locationState('explore'):`<div class="real-map"><div id="mapCanvas"></div><div class="map-toolbar"><div class="map-note">${exploreLoading?L('nearby_loading'):exploreError?L(exploreError==='cached'?'cached':'service_down'):`${distanceText(userLocation.accuracy||0)} · ${L(exploreCategory==='shopping'?'shopping_places':exploreCategory)}`}</div><button class="map-control" onclick="recenterMap()" aria-label="${L('recenter')}">${icon('locate')}</button></div></div><div id="mapFallback" class="map-fallback-list">${exploreError==='failed'?`<div class="local-note"><a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl(exploreCategory)}">${L('amap_nearby')}</a></div>`:''}${explorePois.slice(0,12).map(p=>poiRow(p)).join('')}</div>`}`;
   if(userLocation)setTimeout(initMap,40);
   if(userLocation&&fetchIfNeeded&&!exploreLoading&&!explorePois.length)setTimeout(()=>loadExplorePois(),80);
 }
-function initMap(){const el=$('#mapCanvas');if(!el||!userLocation)return;if(!globalThis.maplibregl){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')}</div>`);return}try{map=new maplibregl.Map({container:'mapCanvas',style:'https://tiles.openfreemap.org/styles/liberty',center:selectedExplore?[selectedExplore.lon,selectedExplore.lat]:[userLocation.lon,userLocation.lat],zoom:selectedExplore?16:14,attributionControl:true,localIdeographFontFamily:'Noto Sans SC, sans-serif'});map.addControl(new maplibregl.NavigationControl({showCompass:false}),'bottom-right');const ue=document.createElement('div');ue.className='user-marker';userMapMarker=new maplibregl.Marker({element:ue}).setLngLat([userLocation.lon,userLocation.lat]).addTo(map);map.on('load',()=>{drawPoiMarkers();if(selectedExplore)openExploreSheet(selectedExplore.id)})}catch(e){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')}</div>`)}}
+function initMap(){const el=$('#mapCanvas');if(!el||!userLocation)return;const amap=`<a class="mini-btn" target="_blank" rel="noopener" href="${amapNearbyUrl(exploreCategory)}">${L('amap_nearby')}</a>`;if(!globalThis.maplibregl){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')} ${amap}</div>`);return}try{map=new maplibregl.Map({container:'mapCanvas',style:'https://tiles.openfreemap.org/styles/liberty',center:selectedExplore?[selectedExplore.lon,selectedExplore.lat]:[userLocation.lon,userLocation.lat],zoom:selectedExplore?16:14,attributionControl:true,localIdeographFontFamily:'Noto Sans SC, sans-serif'});map.addControl(new maplibregl.NavigationControl({showCompass:false}),'bottom-right');const ue=document.createElement('div');ue.className='user-marker';userMapMarker=new maplibregl.Marker({element:ue}).setLngLat([userLocation.lon,userLocation.lat]).addTo(map);map.on('load',()=>{drawPoiMarkers();if(selectedExplore)openExploreSheet(selectedExplore.id)})}catch(e){const f=$('#mapFallback');if(f)f.insertAdjacentHTML('afterbegin',`<div class="local-note">${L('map_unavailable')} ${L('map_list')} ${amap}</div>`)}}
 function drawPoiMarkers(){if(!map)return;poiMarkers.forEach(m=>m.remove());poiMarkers=explorePois.map(p=>{const el=document.createElement('div');el.className='poi-marker';el.innerHTML=`<span>${mapIcon()}</span>`;el.addEventListener('click',()=>openExploreSheet(p.id));return new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map)})}
 function recenterMap(){if(map&&userLocation)map.flyTo({center:[userLocation.lon,userLocation.lat],zoom:15})}
 function poiRow(p){return`<div class="poi-row paper-card" onclick="openExploreSheet('${esc(p.id)}')"><div><b>${esc(p.name)}</b><small>${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</small></div><span>›</span></div>`}
-function openExploreSheet(id){const p=explorePois.find(x=>x.id===id)||selectedExplore;if(!p)return;selectedExplore=p;if(map)map.flyTo({center:[p.lon,p.lat],zoom:16});const q=encodeURIComponent(p.name),foodAction=exploreCategory==='food'?`<button onclick="openInFood('${esc(p.id)}')">${L('open_food')}</button>`:'';showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="https://uri.amap.com/navigation?to=${p.lon},${p.lat},${q}&mode=walk&policy=1&src=chengdu-story&callnative=1">${L('navigate')} →</a>${foodAction}</div>`)}
+function openExploreSheet(id){const p=explorePois.find(x=>x.id===id)||selectedExplore;if(!p)return;selectedExplore=p;if(map)map.flyTo({center:[p.lon,p.lat],zoom:16});const foodAction=exploreCategory==='food'?`<button onclick="openInFood('${esc(p.id)}')">${L('open_food')}</button>`:'';showModal(`<div class="sheet-title"><div><h2>${esc(p.name)}</h2><p>${distanceText(p.distance)} · ${L('walk',{n:p.walk})}</p></div><button class="sheet-close" onclick="closeModal()">×</button></div><div class="sheet-actions"><a class="main" target="_blank" rel="noopener" href="${amapNavigationUrl(p)}">${L('navigate')} →</a>${foodAction}</div>`)}
 function focusExplore(id){const p=foodPois.find(x=>x.id===id);if(!p)return;selectedExplore=p;exploreCategory='food';explorePois=[p];closeModal();showPage('explore');setTimeout(()=>openExploreSheet(p.id),260)}
 function openInFood(id){const p=explorePois.find(x=>x.id===id);if(!p)return;foodCategory='all';foodPois=[p];selectedFood=p;closeModal();showPage('food');setTimeout(()=>openFoodSheet(p.id),160)}
 
@@ -1045,11 +1096,27 @@ function meId(){return store.get('chengduCurrentMember')||''}
 function activeMembers(){return ledger.members.filter(m=>m.is_active!==false)}
 function member(id){return ledger.members.find(m=>m.id===id)}
 function memberName(id){return member(id)?.display_name||L('unknown')}
-async function sbRequest(table,method='GET',query='',body=null){const base=CFG.supabase_url.replace(/\/$/,'')+`/rest/v1/${table}${query?`?${query}`:''}`,headers={apikey:CFG.supabase_key,'Content-Type':'application/json',Prefer:'return=representation'};if(String(CFG.supabase_key).split('.').length===3)headers.Authorization=`Bearer ${CFG.supabase_key}`;const r=await fetch(base,{method,headers,body:body==null?undefined:JSON.stringify(body)});if(!r.ok)throw Error(await r.text());const out=await r.text();return out?JSON.parse(out):[]}
-async function syncLedger(){if(!CLOUD){cloudStatus='local';return}cloudStatus='syncing';renderExpenses();try{const q=`trip_id=eq.${encodeURIComponent(TRIP_ID)}&order=created_at.asc`,[members,expenses,splits,settlements]=await Promise.all([sbRequest('members','GET',q),sbRequest('expenses','GET',q),sbRequest('expense_splits','GET',`trip_id=eq.${encodeURIComponent(TRIP_ID)}&order=created_at.asc`),sbRequest('settlements','GET',q)]);ledger={members,expenses,splits,settlements};saveLocalLedger();cloudStatus='cloud'}catch(e){cloudStatus='failed'}renderExpenses()}
-async function cloudInsert(table,row){if(!CLOUD)return;try{await sbRequest(table,'POST','',row);cloudStatus='cloud'}catch(e){cloudStatus='failed';throw e}}
-async function cloudPatch(table,id,row){if(!CLOUD)return;try{await sbRequest(table,'PATCH',`id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`,row);cloudStatus='cloud'}catch(e){cloudStatus='failed';throw e}}
-async function cloudDelete(table,query){if(!CLOUD)return;try{await sbRequest(table,'DELETE',query);cloudStatus='cloud'}catch(e){cloudStatus='failed';throw e}}
+async function sbRequest(table,method='GET',query='',body=null,prefer='return=representation'){const base=CFG.supabase_url.replace(/\/$/,'')+`/rest/v1/${table}${query?`?${query}`:''}`,headers={apikey:CFG.supabase_key,'Content-Type':'application/json',Prefer:prefer};if(String(CFG.supabase_key).split('.').length===3)headers.Authorization=`Bearer ${CFG.supabase_key}`;const r=await fetch(base,{method,headers,body:body==null?undefined:JSON.stringify(body)});if(!r.ok)throw Error(await r.text());const out=await r.text();return out?JSON.parse(out):[]}
+const OUTBOX_KEY='chengduLedgerOutboxV1';let outboxFlushing=false;
+function loadOutbox(){try{const q=JSON.parse(store.get(OUTBOX_KEY)||'[]');return Array.isArray(q)?q:[]}catch(e){return[]}}
+function saveOutbox(q){store.set(OUTBOX_KEY,JSON.stringify(q))}
+function queueMutation(op){const q=loadOutbox();q.push({op_id:uid(),created_at:new Date().toISOString(),...op});saveOutbox(q)}
+async function flushOutbox(){
+  if(!CLOUD||outboxFlushing)return !loadOutbox().length;
+  outboxFlushing=true;
+  try{
+    let q=loadOutbox();
+    while(q.length){const op=q[0],query=op.method==='POST'?[op.query,'on_conflict=id'].filter(Boolean).join('&'):op.query,prefer=op.method==='POST'?'resolution=merge-duplicates,return=minimal':'return=minimal';try{await sbRequest(op.table,op.method,query||'',op.body??null,prefer);q.shift();saveOutbox(q)}catch(e){cloudStatus='failed';return false}}
+    cloudStatus='cloud';return true;
+  }finally{outboxFlushing=false}
+}
+function mergeRows(remote,local){const m=new Map((remote||[]).map(x=>[x.id,x]));(local||[]).forEach(x=>m.set(x.id,x));return[...m.values()]}
+function mergeRemoteWithLocal(remote,pending){const merged={members:mergeRows(remote.members,ledger.members),expenses:mergeRows(remote.expenses,ledger.expenses),splits:mergeRows(remote.splits,ledger.splits),settlements:mergeRows(remote.settlements,ledger.settlements)};pending.filter(x=>x.method==='DELETE').forEach(op=>{const p=new URLSearchParams(op.query||''),id=(p.get('id')||'').replace(/^eq\./,''),expenseId=(p.get('expense_id')||'').replace(/^eq\./,'');const key=op.table==='expense_splits'?'splits':op.table;if(id&&merged[key])merged[key]=merged[key].filter(x=>x.id!==id);if(expenseId&&merged.splits)merged.splits=merged.splits.filter(x=>x.expense_id!==expenseId)});return merged}
+async function syncLedger(){if(!CLOUD){cloudStatus='local';return}cloudStatus='syncing';renderExpenses();await flushOutbox();try{const q=`trip_id=eq.${encodeURIComponent(TRIP_ID)}&order=created_at.asc`,[members,expenses,splits,settlements]=await Promise.all([sbRequest('members','GET',q),sbRequest('expenses','GET',q),sbRequest('expense_splits','GET',`trip_id=eq.${encodeURIComponent(TRIP_ID)}&order=created_at.asc`),sbRequest('settlements','GET',q)]),remote={members,expenses,splits,settlements},pending=loadOutbox();ledger=pending.length?mergeRemoteWithLocal(remote,pending):remote;saveLocalLedger();cloudStatus=pending.length?'failed':'cloud'}catch(e){cloudStatus='failed'}renderExpenses()}
+async function cloudBatch(ops){if(!CLOUD)return true;ops.forEach(queueMutation);const ok=await flushOutbox();if(!ok)toast(L('queued_offline'));if(currentPage==='expenses')renderExpenses();return ok}
+async function cloudInsert(table,row){return cloudBatch([{table,method:'POST',query:'',body:row}])}
+async function cloudPatch(table,id,row){return cloudBatch([{table,method:'PATCH',query:`id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`,body:row}])}
+async function cloudDelete(table,query){return cloudBatch([{table,method:'DELETE',query,body:null}])}
 function ledgerStats(){const stats={};ledger.members.forEach(m=>stats[m.id]={paid:0,share:0,net:0});ledger.expenses.forEach(e=>{if(stats[e.paid_by_member_id])stats[e.paid_by_member_id].paid+=Number(e.amount)});ledger.splits.forEach(s=>{if(stats[s.member_id])stats[s.member_id].share+=Number(s.share_amount)});Object.values(stats).forEach(x=>x.net=x.paid-x.share);ledger.settlements.forEach(s=>{if(stats[s.from_member_id])stats[s.from_member_id].net+=Number(s.amount);if(stats[s.to_member_id])stats[s.to_member_id].net-=Number(s.amount)});const creditors=Object.entries(stats).filter(([,x])=>x.net>.005).map(([id,x])=>({id,amt:x.net})).sort((a,b)=>b.amt-a.amt),debtors=Object.entries(stats).filter(([,x])=>x.net<-.005).map(([id,x])=>({id,amt:-x.net})).sort((a,b)=>b.amt-a.amt),transfers=[];let i=0,j=0;while(i<debtors.length&&j<creditors.length){const a=Math.min(debtors[i].amt,creditors[j].amt);if(a>.005)transfers.push({from:debtors[i].id,to:creditors[j].id,amount:Math.round(a*100)/100});debtors[i].amt-=a;creditors[j].amt-=a;if(debtors[i].amt<.005)i++;if(creditors[j].amt<.005)j++}return{stats,transfers}}
 function fxText(n){return fxRate?`RM ${(Number(n)*fxRate).toFixed(2)}`:''}
 async function loadFx(){const c=cacheRead('chengduFxCnyMyr',12*60*60*1000)||cacheAny('chengduFxCnyMyr');if(c?.rate)fxRate=c.rate;try{const r=await fetch('https://open.er-api.com/v6/latest/CNY'),j=await r.json();if(j?.rates?.MYR){fxRate=Number(j.rates.MYR);cacheWrite('chengduFxCnyMyr',{rate:fxRate})}}catch(e){}if(currentPage==='expenses')renderExpenses()}
@@ -1073,8 +1140,8 @@ function participantIds(){return $$('.participant-check:checked').map(x=>x.value
 function updateSplitFields(){const box=$('#splitFields');if(!box)return;const ids=participantIds(),amt=Math.round((parseFloat($('#billAmount')?.value)||0)*100)/100,method=$('#billMethod')?.value||'equal',pctBase=Math.floor(10000/Math.max(1,ids.length))/100;box.innerHTML=ids.map((id,i)=>{let val='';if(method==='equal')val=ids.length?(amt/ids.length).toFixed(2):'0.00';else if(method==='percentage')val=(i===ids.length-1?100-pctBase*(ids.length-1):pctBase).toFixed(2);else if(method==='shares')val='1';return`<div class="split-line"><span>${esc(memberName(id))}</span><input class="split-value" data-member="${id}" value="${val}" ${method==='equal'?'disabled':''} inputmode="decimal" oninput="validateSplitPreview()"></div>`}).join('');validateSplitPreview()}
 function collectSplits(){const rawAmount=Number($('#billAmount').value),amount=Math.round(rawAmount*100),ids=participantIds(),method=$('#billMethod').value;if(!Number.isFinite(rawAmount)||!(amount>0)||!ids.length)return{ok:false};if(method==='equal'){const base=Math.floor(amount/ids.length),rem=amount-base*ids.length;return{ok:true,rows:ids.map((id,i)=>({member_id:id,cents:base+(i<rem?1:0)}))}}const vals=$$('.split-value').map(x=>({id:x.dataset.member,v:Number(x.value)}));if(vals.some(x=>!Number.isFinite(x.v)||x.v<0))return{ok:false};if(method==='exact'){const cents=vals.map(x=>Math.round(x.v*100)),sum=cents.reduce((a,b)=>a+b,0);return{ok:Math.abs(sum-amount)<=1,rows:vals.map((x,i)=>({member_id:x.id,cents:cents[i]}))}}if(method==='percentage'){const sum=vals.reduce((s,x)=>s+x.v,0);if(Math.abs(sum-100)>.01)return{ok:false};let used=0;const rows=vals.map((x,i)=>{const c=i===vals.length-1?amount-used:Math.round(amount*x.v/100);used+=c;return{member_id:x.id,cents:c}});return{ok:true,rows}}const total=vals.reduce((s,x)=>s+x.v,0);if(total<=0)return{ok:false};let used=0;const rows=vals.map((x,i)=>{const c=i===vals.length-1?amount-used:Math.round(amount*x.v/total);used+=c;return{member_id:x.id,cents:c}});return{ok:true,rows}}
 function validateSplitPreview(){const v=$('#billValidation');if(!v)return;const r=collectSplits();v.textContent=r.ok?'':L(participantIds().length?'invalid_total':'select_participant')}
-async function saveExpense(){const result=collectSplits();if(!result.ok){validateSplitPreview();return}const amount=Math.round(parseFloat($('#billAmount').value)*100)/100,expense={id:uid(),trip_id:TRIP_ID,amount,currency:'CNY',category:$('#billCategory').value,description:$('#billNote').value.trim(),paid_by_member_id:$('#billPayer').value,created_at:new Date().toISOString(),created_by_member_id:meId()||null},splits=result.rows.map(r=>({id:uid(),trip_id:TRIP_ID,expense_id:expense.id,member_id:r.member_id,share_amount:r.cents/100,created_at:expense.created_at}));ledger.expenses.push(expense);ledger.splits.push(...splits);saveLocalLedger();closeModal();renderExpenses();toast(L('saved'));if(CLOUD)try{await cloudInsert('expenses',expense);await cloudInsert('expense_splits',splits)}catch(e){toast(L('sync_failed'))}}
-async function deleteExpense(id){if(!confirm(L('confirm_delete_expense')))return;ledger.expenses=ledger.expenses.filter(e=>e.id!==id);ledger.splits=ledger.splits.filter(s=>s.expense_id!==id);saveLocalLedger();renderExpenses();if(CLOUD)try{await cloudDelete('expense_splits',`expense_id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`);await cloudDelete('expenses',`id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`)}catch(e){toast(L('sync_failed'))}}
+async function saveExpense(){const result=collectSplits();if(!result.ok){validateSplitPreview();return}const amount=Math.round(parseFloat($('#billAmount').value)*100)/100,expense={id:uid(),trip_id:TRIP_ID,amount,currency:'CNY',category:$('#billCategory').value,description:$('#billNote').value.trim(),paid_by_member_id:$('#billPayer').value,created_at:new Date().toISOString(),created_by_member_id:meId()||null},splits=result.rows.map(r=>({id:uid(),trip_id:TRIP_ID,expense_id:expense.id,member_id:r.member_id,share_amount:r.cents/100,created_at:expense.created_at}));ledger.expenses.push(expense);ledger.splits.push(...splits);saveLocalLedger();closeModal();renderExpenses();toast(L('saved'));if(CLOUD)await cloudBatch([{table:'expenses',method:'POST',query:'',body:expense},{table:'expense_splits',method:'POST',query:'',body:splits}])}
+async function deleteExpense(id){if(!confirm(L('confirm_delete_expense')))return;ledger.expenses=ledger.expenses.filter(e=>e.id!==id);ledger.splits=ledger.splits.filter(s=>s.expense_id!==id);saveLocalLedger();renderExpenses();if(CLOUD)await cloudBatch([{table:'expense_splits',method:'DELETE',query:`expense_id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`,body:null},{table:'expenses',method:'DELETE',query:`id=eq.${encodeURIComponent(id)}&trip_id=eq.${encodeURIComponent(TRIP_ID)}`,body:null}])}
 function openSettlementSheet(prefFrom='',prefTo='',prefAmount=''){const ms=activeMembers();if(ms.length<2){toast(L('member_needed'));return}showModal(`<div class="sheet-title"><h2>${L('record_payment')}</h2><button class="sheet-close" onclick="closeModal()">×</button></div><div class="form-grid"><div class="field"><label>${L('from')}</label><select id="settleFrom">${ms.map(m=>`<option value="${m.id}" ${m.id===prefFrom?'selected':''}>${esc(m.display_name)}</option>`).join('')}</select></div><div class="field"><label>${L('to')}</label><select id="settleTo">${ms.map(m=>`<option value="${m.id}" ${m.id===prefTo?'selected':''}>${esc(m.display_name)}</option>`).join('')}</select></div><div class="field"><label>${L('payment_amount')}</label><input id="settleAmount" inputmode="decimal" value="${prefAmount||''}" placeholder="¥ 0.00"></div><button class="primary-btn full" onclick="saveSettlement()">${L('save')}</button></div>`)}
 function settleDebt(from,to,amount){openSettlementSheet(from,to,amount.toFixed(2))}
 async function saveSettlement(){const from=$('#settleFrom').value,to=$('#settleTo').value,raw=Number($('#settleAmount').value),amount=Math.round(raw*100)/100;if(from===to||!Number.isFinite(raw)||!(amount>0)){toast(L('invalid_total'));return}const s={id:uid(),trip_id:TRIP_ID,from_member_id:from,to_member_id:to,amount,created_at:new Date().toISOString()};ledger.settlements.push(s);saveLocalLedger();closeModal();renderExpenses();toast(L('saved'));try{await cloudInsert('settlements',s)}catch(e){toast(L('sync_failed'))}}
@@ -1086,6 +1153,7 @@ function nav(){
   $$('.nav-btn').forEach(b=>{b.dataset.icon=ic[b.dataset.page]});
 }
 function showPage(name,rerender=true){
+  if(name==='food'||name==='explore')expireLocationIfNeeded();
   currentPage=name;
   $$('.page').forEach(p=>p.classList.toggle('active',p.id===name));
   $$('.nav-btn').forEach(b=>{
@@ -1101,8 +1169,8 @@ function settleAtTop(){scrollHome();requestAnimationFrame(()=>{scrollHome();requ
 /* ───── Landing ───── */
 function landingMessage(){
   const p=phase(),d=currentDay();
-  const zh={1:'终于来啦。今天先慢慢认识成都吧。',2:'今天会看到很多可爱的家伙哦 ♡',3:'九寨沟是今天的主角，慢慢看，慢慢记住。',4:'把山水和小惊喜收进回忆里。',5:'最后一个完整的成都日，也要好好玩呀。',6:'回家的路上，也别太想我哦 ♡'};
-  const en={1:'At last. Let Chengdu unfold slowly.',2:'Some very cute friends are waiting. ♡',3:'Today belongs to Jiuzhaigou.',4:'Keep every little wonder.',5:'One more full Chengdu day.',6:'Take the memories home. ♡'};
+  const zh={1:'今天先去山城。<br>重庆见 ♡',2:'慢慢走，<br>山城的故事藏在高低之间。',3:'再看一眼重庆，<br>然后回成都啦。',4:'今天会看到可爱的家伙，<br>也会看到蓝色的夜。',5:'今天没有行程表。<br>想去哪，就去哪。',6:'把这趟旅程，<br>一起带回家。'};
+  const en={1:'First stop: the mountain city.<br>See you in Chongqing. ♡',2:'Take it slow.<br>Chongqing unfolds between every climb and turn.',3:'One last look at Chongqing,<br>then back to Chengdu.',4:'Pandas by day,<br>blue lights by night.',5:'No schedule today.<br>Go wherever the day takes you.',6:'Take the journey<br>home with you.'};
   if(p==='before')return{msg:lang==='zh'?'我在成都等着你哦 ♡':"I'll be waiting for you in Chengdu.",phase:L('before')};
   if(p==='after')return{msg:lang==='zh'?'我在成都很想你。下次再回来，好不好？':'Come back when Chengdu calls again.',phase:L('after')};
   return{msg:(lang==='zh'?zh:en)[d],phase:lang==='zh'?`第${d}天 · ${days[d-1].date}`:`Day ${d} · ${days[d-1].date}`};
@@ -1145,10 +1213,12 @@ function fitFrame(){try{if(window.frameElement)window.frameElement.style.height=
 
 /* ───── boot ───── */
 ledger=loadLocalLedger();
-try{const savedLoc=JSON.parse(store.get('chengduLastLocation')||'null');if(savedLoc&&Number.isFinite(savedLoc.lat)&&Number.isFinite(savedLoc.lon)){userLocation=savedLoc;geoStatus='ready'}}catch(e){}
+try{const savedLoc=JSON.parse(store.get('chengduLastLocation')||'null');if(savedLoc&&Number.isFinite(savedLoc.lat)&&Number.isFinite(savedLoc.lon)&&Number.isFinite(savedLoc.ts)&&Date.now()-savedLoc.ts<=LOCATION_MAX_AGE){userLocation=savedLoc;locationTimestamp=savedLoc.ts;geoStatus='ready'}}catch(e){}
 prepareLanding();nav();renderHome();renderExpenses();showPage('home');fitFrame();loadWeather();loadFx();if(CLOUD)syncLedger();
 window.addEventListener('resize',()=>{fitFrame();sizeAcc()});
+window.addEventListener('online',()=>{if(CLOUD)syncLedger()});
 setInterval(()=>{if(openIdx>=0&&$('#home').classList.contains('active'))fillPanel(openIdx,true);const g=$('#greet'),ge=$('#greetEn');if(g)g.textContent=greeting();if(ge)ge.textContent=greetingEN()},60000);
+setInterval(loadWeather,15*60*1000);
 </script>
 </body>
 </html>'''.replace("__DATA__", PAYLOAD)
