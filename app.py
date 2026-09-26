@@ -1036,7 +1036,7 @@ function completeSwipe(direction){
   if(swipeAnimating||swipeFlipped)return;
   const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;
   swipeAnimating=true;setStackReveal(direction);const distance=(window.innerWidth||430)*1.35*direction;
-  top.classList.remove('dragging');top.classList.add('throwing');top.style.transform=`translate(${distance}px,${Math.abs(distance)*.045}px) rotate(${distance*.06}deg)`;top.style.opacity='0';animateLower(1);
+  top.classList.remove('dragging');top.classList.add('throwing');top.style.transform=`translate(${distance}px,${Math.abs(distance)*.045}px) rotate(${distance*.06}deg)`;top.style.opacity='0';animateLower(1,direction);
   setTimeout(()=>{swipeDayIdx=(swipeDayIdx+(direction>0?1:-1)+days.length)%days.length;store.set('chengduSwipeDay',String(swipeDayIdx));swipeAnimating=false;resetLower();renderSwipeStack(swipeDayIdx)},320)
 }
 function springBack(){const top=$('#swipeStage .swipe-card[data-depth="0"]');if(top){top.classList.remove('dragging');top.style.transform='';top.style.opacity=''}resetLower()}
