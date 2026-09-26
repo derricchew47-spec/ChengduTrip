@@ -292,50 +292,197 @@ main{min-height:100dvh}
 .sheet{position:relative;z-index:3;margin-top:6px;background:transparent;padding:0 0 10px}
 .journey-seam{height:0}
 
-/* ───── SWIPE CARD STACK ───── */
-.sheet{padding:8px 0 14px}
+/* ───── SWIPE CARD STACK — approved reference-card style ───── */
+.sheet{padding:7px 0 14px}
 .swipe-shell{position:relative;width:min(100%,430px);margin:0 auto;padding:0 12px 8px}
-.swipe-stage{position:relative;height:clamp(430px,112vw,510px);perspective:1500px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.swipe-card{position:absolute;inset:0 10px;border-radius:26px;transform-origin:50% 88%;will-change:transform,opacity;transition:transform .34s cubic-bezier(.22,.9,.24,1),opacity .28s ease;filter:drop-shadow(0 18px 28px rgba(39,57,45,.14))}
+.swipe-stage{
+  position:relative;height:clamp(438px,114vw,520px);
+  perspective:1500px;touch-action:pan-y;user-select:none;-webkit-user-select:none
+}
+.swipe-card{
+  position:absolute;inset:0 11px;border-radius:21px;transform-origin:50% 88%;
+  will-change:transform,opacity;
+  transition:transform .34s cubic-bezier(.22,.9,.24,1),opacity .28s ease;
+  filter:drop-shadow(0 18px 26px rgba(42,52,45,.16))
+}
 .swipe-card[data-depth="0"]{z-index:30;transform:translateY(0) scale(1)}
 .swipe-card[data-depth="1"]{z-index:20;transform:translateY(12px) scale(.94)}
 .swipe-card[data-depth="2"]{z-index:10;transform:translateY(24px) scale(.90)}
-.swipe-card.dragging{transition:none}.swipe-card.throwing{transition:transform .34s cubic-bezier(.18,.72,.2,1),opacity .28s ease}
-.swipe-card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .62s cubic-bezier(.2,.75,.2,1)}
+.swipe-card.dragging{transition:none}
+.swipe-card.throwing{transition:transform .34s cubic-bezier(.18,.72,.2,1),opacity .28s ease}
+.swipe-card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .58s cubic-bezier(.2,.75,.2,1)}
 .swipe-card.flipped .swipe-card-inner{transform:rotateY(180deg)}
-.swipe-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:26px;border:1px solid rgba(75,100,80,.17);background:radial-gradient(circle at 16% 7%,rgba(131,157,128,.08),transparent 23%),linear-gradient(180deg,#fffdf5 0%,#f8f4e8 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.swipe-face{
+  position:absolute;inset:0;overflow:hidden;border-radius:21px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border:1px solid rgba(91,83,64,.20);
+  background:
+    radial-gradient(circle at 18% 7%,rgba(156,135,93,.08),transparent 23%),
+    linear-gradient(180deg,#fffdf5 0%,#faf5e8 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 0 32px rgba(161,138,92,.035)
+}
+.swipe-face:after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:20;opacity:.26;
+  background:
+    radial-gradient(circle at 10% 20%,rgba(119,104,76,.035) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 82% 68%,rgba(119,104,76,.028) 0 1px,transparent 1.5px);
+  background-size:13px 13px,17px 17px
+}
 .swipe-back{transform:rotateY(180deg)}
-.card-front-head{position:absolute;left:20px;right:20px;top:17px;z-index:5;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.day-kicker{font:700 12px/1 var(--serif);letter-spacing:.14em;color:#566b5d}
-.card-front-title{margin-top:5px;font:700 clamp(28px,7vw,34px)/1.05 var(--cn-serif);color:#183126;letter-spacing:.03em}
-.lang-en .card-front-title{font-family:var(--serif);font-size:clamp(25px,6vw,31px);letter-spacing:0}
-.card-date{font:500 11px/1.2 var(--serif);color:#7a877f;text-align:right}
-.card-cover-art{position:absolute;left:0;right:0;top:70px;bottom:88px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.94) 0%,#000 68%,rgba(0,0,0,.72) 87%,transparent 100%);mask-image:linear-gradient(180deg,rgba(0,0,0,.94) 0%,#000 68%,rgba(0,0,0,.72) 87%,transparent 100%)}
-.card-cover-art svg{width:100%;height:100%;display:block;filter:saturate(.94) contrast(.99)}
-.card-front-bottom{position:absolute;left:20px;right:20px;bottom:14px;z-index:5;text-align:center}
-.card-route-summary{font:500 11px/1.45 var(--cn-serif);color:#3d5145;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lang-en .card-route-summary{font-family:var(--sans);font-size:10px}
-.flip-hint{margin-top:8px;display:inline-flex;align-items:center;gap:7px;font:600 11px/1 var(--cn-serif);color:#234a38}
-.lang-en .flip-hint{font-family:var(--sans)}.flip-hint svg{width:16px;height:16px}
-.swipe-back-head{position:absolute;top:15px;left:18px;right:18px;z-index:6;display:flex;justify-content:space-between;align-items:flex-start}
-.back-title b{display:block;font:700 19px/1.05 var(--cn-serif);color:#183126}.lang-en .back-title b{font-family:var(--serif)}
-.back-title small{display:block;margin-top:4px;font:500 10px var(--sans);color:#748078}
-.flip-back{border:0;background:rgba(248,246,236,.86);border-radius:999px;width:30px;height:30px;display:grid;place-items:center;color:#315d48;padding:0}
-.card-route-map{position:absolute;left:12px;right:12px;top:58px;bottom:16px;overflow:hidden;border-radius:18px;background:radial-gradient(circle at 12% 12%,rgba(126,157,129,.08),transparent 24%),linear-gradient(180deg,#fffdf7,#f4f4e7)}
-.card-route-bg{position:absolute;inset:-8% -3%;opacity:.13;filter:saturate(.75) blur(.25px)}.card-route-bg svg{width:100%;height:100%}
-.card-route-line{position:absolute;inset:0;width:100%;height:100%;z-index:2}.card-route-line path{fill:none;stroke:#5d8a6d;stroke-width:1.6;stroke-linecap:round;stroke-dasharray:2.7 4.8;vector-effect:non-scaling-stroke;opacity:.78}
-.route-stop{position:absolute;z-index:4;width:43%;transform:translate(-50%,-50%)}.route-stop.right{text-align:left}.route-stop.left{text-align:right}
-.route-stop b{display:inline-block;max-width:100%;padding:5px 7px 6px;border-radius:9px;font:600 11px/1.15 var(--cn-serif);color:#243c2f;background:rgba(250,247,237,.90);border:1px solid rgba(77,110,86,.10);box-shadow:0 3px 10px rgba(53,70,58,.06)}
-.lang-en .route-stop b{font-family:var(--sans);font-size:10px}
-.route-stop i{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;margin-top:-3.5px;background:#f8f3e4;border:1.5px solid #547d62;box-shadow:0 0 0 2px rgba(248,243,228,.75)}
+.card-front-head{
+  position:absolute;left:19px;right:19px;top:15px;z-index:8;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px
+}
+.day-kicker{font:800 11px/1 var(--serif);letter-spacing:.13em;color:#172f26;text-transform:uppercase}
+.card-front-title{
+  margin-top:5px;font:700 clamp(28px,7vw,34px)/1.02 var(--cn-serif);
+  color:#142c23;letter-spacing:.025em;text-shadow:0 1px 0 rgba(255,255,255,.6)
+}
+.lang-en .card-front-title{font-family:var(--serif);font-size:clamp(24px,6vw,30px);letter-spacing:0}
+.card-date{font:600 10.5px/1.2 var(--serif);color:#7d786b;text-align:right;padding-top:1px}
+
+/* Front: polished travel-postcard photo treatment matching the approved reference composition. */
+.card-cover-art{
+  position:absolute;left:12px;right:12px;top:76px;bottom:91px;overflow:hidden;
+  border-radius:13px 13px 17px 17px;background:#ece6d8
+}
+.cover-main{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
+  filter:saturate(.84) contrast(.96) brightness(1.035) sepia(.08);
+  transform:scale(1.015)
+}
+.cover-main.day1{object-position:center 47%}
+.cover-main.day2{object-position:center 55%}
+.cover-main.day3{object-position:center 53%}
+.cover-main.day4{object-position:center 48%}
+.cover-main.day5{object-position:center 47%}
+.cover-main.day6{object-position:center 50%}
+.card-cover-art:before{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(255,250,237,.28),transparent 18%,transparent 72%,rgba(250,244,226,.26)),
+    radial-gradient(ellipse at center,transparent 58%,rgba(247,239,216,.25) 100%);
+  mix-blend-mode:screen
+}
+.card-cover-art:after{
+  content:"";position:absolute;inset:-1px;z-index:3;pointer-events:none;
+  box-shadow:inset 0 0 18px 8px rgba(250,246,233,.22);border-radius:inherit
+}
+.cover-inset{
+  position:absolute;right:11px;bottom:11px;z-index:4;width:31%;height:31%;
+  border:5px solid rgba(252,247,232,.94);border-radius:8px;overflow:hidden;
+  transform:rotate(1.8deg);box-shadow:0 5px 12px rgba(55,48,38,.18)
+}
+.cover-inset img{width:100%;height:100%;object-fit:cover;filter:saturate(.82) contrast(.96) sepia(.05)}
+.cover-panda{
+  position:absolute;left:10px;bottom:-3px;z-index:5;width:88px;height:122px;
+  filter:drop-shadow(0 7px 7px rgba(29,42,35,.18))
+}
+.cover-panda img{width:100%;height:100%;object-fit:contain}
+.card-front-bottom{position:absolute;left:18px;right:18px;bottom:14px;z-index:8;text-align:center}
+.card-route-summary{
+  font:600 10.8px/1.35 var(--cn-serif);color:#3a493f;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.lang-en .card-route-summary{font-family:var(--sans);font-size:9.8px}
+.flip-hint{
+  margin-top:7px;display:inline-flex;align-items:center;gap:6px;
+  font:600 10.5px/1 var(--cn-serif);color:#1f4a38
+}
+.lang-en .flip-hint{font-family:var(--sans)}
+.flip-hint svg{width:15px;height:15px}
+
+/* Back: travel-route postcard with alternating landmark photos and backpack panda. */
+.swipe-back-head{
+  position:absolute;top:14px;left:17px;right:17px;z-index:12;
+  display:flex;justify-content:space-between;align-items:flex-start
+}
+.back-title b{display:block;font:700 18.5px/1.05 var(--cn-serif);color:#162f25}
+.lang-en .back-title b{font-family:var(--serif)}
+.back-title small{display:block;margin-top:4px;font:600 9.5px var(--sans);color:#827d70}
+.flip-back{
+  border:1px solid rgba(64,87,72,.11);background:rgba(250,246,234,.90);
+  border-radius:999px;width:31px;height:31px;display:grid;place-items:center;
+  color:#315d48;padding:0;z-index:14
+}
+.card-route-map{
+  position:absolute;left:11px;right:11px;top:57px;bottom:12px;overflow:hidden;
+  border-radius:15px;
+  background:
+    radial-gradient(circle at 16% 10%,rgba(112,145,115,.08),transparent 26%),
+    radial-gradient(circle at 86% 74%,rgba(112,145,115,.06),transparent 28%),
+    linear-gradient(180deg,#fffdf6,#f6f1e3)
+}
+.card-route-map:before,.card-route-map:after{
+  content:"";position:absolute;z-index:0;pointer-events:none;opacity:.11;
+  background-repeat:no-repeat;background-size:contain
+}
+.card-route-map:before{
+  left:-3px;top:6px;width:74px;height:170px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 180'%3E%3Cg fill='none' stroke='%236d8d72' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 180C24 120 20 70 31 0M43 180C38 121 49 70 48 5'/%3E%3C/g%3E%3Cg fill='%238ca789'%3E%3Cellipse cx='22' cy='28' rx='18' ry='5' transform='rotate(-29 22 28)'/%3E%3Cellipse cx='38' cy='54' rx='17' ry='5' transform='rotate(24 38 54)'/%3E%3Cellipse cx='25' cy='88' rx='17' ry='5' transform='rotate(-26 25 88)'/%3E%3Cellipse cx='47' cy='121' rx='18' ry='5' transform='rotate(27 47 121)'/%3E%3Cellipse cx='31' cy='150' rx='17' ry='5' transform='rotate(-26 31 150)'/%3E%3C/g%3E%3C/svg%3E")
+}
+.card-route-map:after{
+  right:-10px;bottom:-7px;width:90px;height:155px;transform:scaleX(-1);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 180'%3E%3Cg fill='none' stroke='%236d8d72' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 180C24 120 20 70 31 0M43 180C38 121 49 70 48 5'/%3E%3C/g%3E%3Cg fill='%238ca789'%3E%3Cellipse cx='22' cy='28' rx='18' ry='5' transform='rotate(-29 22 28)'/%3E%3Cellipse cx='38' cy='54' rx='17' ry='5' transform='rotate(24 38 54)'/%3E%3Cellipse cx='25' cy='88' rx='17' ry='5' transform='rotate(-26 25 88)'/%3E%3Cellipse cx='47' cy='121' rx='18' ry='5' transform='rotate(27 47 121)'/%3E%3Cellipse cx='31' cy='150' rx='17' ry='5' transform='rotate(-26 31 150)'/%3E%3C/g%3E%3C/svg%3E")
+}
+.card-route-line{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.card-route-line path{
+  fill:none;stroke:#63836d;stroke-width:1.35;stroke-linecap:round;
+  stroke-dasharray:2.4 4.1;vector-effect:non-scaling-stroke;opacity:.78
+}
+.route-stop{
+  position:absolute;z-index:5;width:42%;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;gap:4px
+}
+.route-stop.right{align-items:flex-start}
+.route-stop.left{align-items:flex-end}
+.route-stop-photo{
+  width:88px;height:55px;overflow:hidden;background:#ece7d9;
+  border:4px solid rgba(252,248,236,.96);border-radius:9px;
+  box-shadow:0 5px 10px rgba(55,48,38,.13)
+}
+.route-stop.right .route-stop-photo{transform:rotate(1.4deg)}
+.route-stop.left .route-stop-photo{transform:rotate(-1.4deg)}
+.route-stop-photo img{
+  width:100%;height:100%;object-fit:cover;
+  filter:saturate(.82) contrast(.95) brightness(1.035) sepia(.06)
+}
+.route-stop b{
+  display:inline-block;max-width:102px;padding:2px 5px 3px;border-radius:5px;
+  font:600 10.3px/1.12 var(--cn-serif);color:#263d31;background:rgba(250,247,236,.92)
+}
+.lang-en .route-stop b{font-family:var(--sans);font-size:9.3px}
+.route-stop i{
+  position:absolute;top:50%;width:7px;height:7px;border-radius:50%;margin-top:-3.5px;
+  background:#f9f4e7;border:1.4px solid #567862;box-shadow:0 0 0 2px rgba(249,244,231,.8)
+}
 .route-stop.right i{left:-12px}.route-stop.left i{right:-12px}
-.route-panda{position:absolute;z-index:6;width:68px;height:100px;transform:translate(-50%,-84%);filter:drop-shadow(0 7px 7px rgba(30,50,40,.20));transition:left .9s ease,top .9s ease}
+.card-route-map.count-6 .route-stop-photo,.card-route-map.count-7 .route-stop-photo{width:76px;height:46px}
+.card-route-map.count-6 .route-stop b,.card-route-map.count-7 .route-stop b{font-size:9.4px}
+.lang-en .card-route-map.count-6 .route-stop b,.lang-en .card-route-map.count-7 .route-stop b{font-size:8.5px}
+.route-panda{
+  position:absolute;z-index:9;width:64px;height:95px;transform:translate(-50%,-84%);
+  filter:drop-shadow(0 6px 6px rgba(30,50,40,.20));transition:left .9s ease,top .9s ease
+}
 .route-panda img,.route-panda svg{width:100%;height:100%;object-fit:contain}
-.stack-dots{display:flex;justify-content:center;gap:7px;margin-top:10px;height:9px}.stack-dots button{width:7px;height:7px;border-radius:50%;padding:0;border:0;background:#bdc2b8;transition:all .25s}.stack-dots button.active{width:18px;border-radius:5px;background:#1f5842}
-.stack-help{text-align:center;margin-top:7px;font:500 10px/1.2 var(--cn-serif);color:#7a857c}.lang-en .stack-help{font-family:var(--sans)}
-.stack-arrow{position:absolute;top:48%;z-index:60;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:1px solid rgba(54,88,66,.13);background:rgba(255,253,247,.78);backdrop-filter:blur(4px);display:grid;place-items:center;color:#285440;padding:0;opacity:.82}
+.stack-dots{display:flex;justify-content:center;gap:7px;margin-top:9px;height:9px}
+.stack-dots button{width:7px;height:7px;border-radius:50%;padding:0;border:0;background:#c5c1b4;transition:all .25s}
+.stack-dots button.active{width:18px;border-radius:5px;background:#184f3b}
+.stack-help{text-align:center;margin-top:7px;font:500 10px/1.2 var(--cn-serif);color:#7b796f}
+.lang-en .stack-help{font-family:var(--sans)}
+.stack-arrow{
+  position:absolute;top:48%;z-index:60;transform:translateY(-50%);
+  width:34px;height:34px;border-radius:50%;border:1px solid rgba(54,88,66,.13);
+  background:rgba(255,253,247,.82);backdrop-filter:blur(4px);
+  display:grid;place-items:center;color:#285440;padding:0;opacity:.86
+}
 .stack-arrow.prev{left:1px}.stack-arrow.next{right:1px}.stack-arrow svg{width:17px;height:17px}
-@media(max-width:390px){.swipe-stage{height:430px}.swipe-card{inset:0 8px}.card-front-title{font-size:28px}}
+@media(max-width:390px){
+  .swipe-stage{height:438px}.swipe-card{inset:0 8px}
+  .card-front-title{font-size:28px}.route-stop-photo{width:82px;height:51px}
+}
 
 /* ───── BOTTOM NAV ───── */
 .bottom-nav{position:fixed;z-index:80;left:50%;bottom:0;transform:translateX(-50%);width:min(100vw,460px);height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 10px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(253,252,247,.95);backdrop-filter:blur(16px);border-top:1px solid rgba(60,75,65,.1)}
@@ -836,27 +983,70 @@ const SWIPE_THRESHOLD=.35;
 let dragState=null,swipeAnimating=false;
 
 function daySummary(d){return (HOME_ROUTE[d.day]||[]).map(x=>proper(x[0])).join(' · ')}
+const DAY_COVER={
+  1:{main:'chongqing_city',inset:'chongqing_train',panda:false},
+  2:{main:'hongya',inset:'shibati',panda:false},
+  3:{main:'liziba',inset:'ciqikou',panda:false},
+  4:{main:'dujiangyan_waterworks',inset:'panda_base',panda:true},
+  5:{main:'sanxingdui_mask',inset:null,panda:false},
+  6:{main:'airport_hall',inset:null,panda:true}
+};
 function cardFrontHTML(d){
+  const c=DAY_COVER[d.day]||{main:(HOME_ROUTE[d.day]?.[0]?.[1]||'panda_portrait'),inset:null,panda:false};
+  const main=DATA.images[c.main]||DATA.images.panda_portrait;
+  const inset=c.inset&&DATA.images[c.inset]?`<div class="cover-inset"><img src="${DATA.images[c.inset]}" alt="" loading="lazy"></div>`:'';
+  const panda=c.panda&&DATA.traveler_panda?`<div class="cover-panda"><img src="${DATA.traveler_panda}" alt=""></div>`:'';
   return `<div class="swipe-face swipe-front">
-    <div class="card-front-head"><div><div class="day-kicker">DAY ${d.day}</div><div class="card-front-title">${esc(proper(d.vt))}</div></div><div class="card-date">${esc(d.date)}</div></div>
-    <div class="card-cover-art">${art(d.day)}</div>
-    <div class="card-front-bottom"><div class="card-route-summary">${esc(daySummary(d))}</div><div class="flip-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5a2 2 0 1 1 4 0v5.5-1.3a2 2 0 1 1 4 0v4.8l2.3 2.2a3.7 3.7 0 0 1 .7 4.5L19.3 22H10l-5-6.2A2 2 0 0 1 8 13l1 1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${lang==='zh'?'轻触查看路线':'Tap to view route'}</span></div></div>
+    <div class="card-front-head">
+      <div><div class="day-kicker">DAY ${d.day}</div><div class="card-front-title">${esc(proper(d.vt))}</div></div>
+      <div class="card-date">${esc(d.date)}</div>
+    </div>
+    <div class="card-cover-art">
+      <img class="cover-main day${d.day}" src="${main}" alt="${esc(proper(d.vt))}" loading="lazy" onerror="this.style.opacity=.18">
+      ${inset}${panda}
+    </div>
+    <div class="card-front-bottom">
+      <div class="card-route-summary">${esc(daySummary(d))}</div>
+      <div class="flip-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5a2 2 0 1 1 4 0v5.5-1.3a2 2 0 1 1 4 0v4.8l2.3 2.2a3.7 3.7 0 0 1 .7 4.5L19.3 22H10l-5-6.2A2 2 0 0 1 8 13l1 1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${lang==='zh'?'轻触查看路线':'Tap to view route'}</span></div>
+    </div>
   </div>`
 }
 function cardRouteBackHTML(d){
-  const stops=routeStops(d),n=stops.length,top=14,bottom=84;
-  const pts=stops.map((_,i)=>({x:i%2===0?38:64,y:n===1?50:top+i*((bottom-top)/(n-1))}));
-  const path=pts.length<2?'':`M${pts[0].x} ${pts[0].y}`+pts.slice(1).map((p,i)=>{const a=pts[i],my=(a.y+p.y)/2;return` C${a.x} ${my} ${p.x} ${my} ${p.x} ${p.y}`}).join('');
+  const stops=routeStops(d),n=stops.length,top=n>=6?11:13,bottom=n>=6?86:84;
+  const pts=stops.map((_,i)=>({
+    x:i%2===0?(n>=6?35:36):(n>=6?65:64),
+    y:n===1?50:top+i*((bottom-top)/(n-1))
+  }));
+  const path=pts.length<2?'':`M${pts[0].x} ${pts[0].y}`+pts.slice(1).map((p,i)=>{
+    const a=pts[i],my=(a.y+p.y)/2;
+    return` C${a.x} ${my} ${p.x} ${my} ${p.x} ${p.y}`
+  }).join('');
   const pr=progress(d),k=Math.min(Math.floor(pr.idx),Math.max(0,n-2)),u=pr.idx>=n-1?1:pr.idx-k;
   let px=pts[0]?.x||50,py=pts[0]?.y||82;
   if(n>1){const a=pts[k],b=pts[Math.min(k+1,n-1)];px=a.x+(b.x-a.x)*u;py=a.y+(b.y-a.y)*u}
-  if(pr.st==='future'){px=pts[0]?.x||50;py=(pts[0]?.y||82)+6}
-  if(pr.st==='past'){px=pts[n-1]?.x||50;py=(pts[n-1]?.y||18)+6}
-  const nodes=stops.map((s,i)=>`<div class="route-stop ${i%2===0?'right':'left'}" style="left:${pts[i].x}%;top:${pts[i].y}%"><i></i><b>${esc(proper(s[1]))}</b></div>`).join('');
-  const traveler=DATA.traveler_panda?`<img src="${DATA.traveler_panda}" alt="${lang==='zh'?'背包熊猫':'Backpack panda'}">`:PANDA;
+  if(pr.st==='future'){px=pts[0]?.x||50;py=(pts[0]?.y||82)+5}
+  if(pr.st==='past'){px=pts[n-1]?.x||50;py=(pts[n-1]?.y||18)+5}
+  const nodes=stops.map((s,i)=>{
+    const key=s[2],photo=DATA.images[key]||DATA.images.panda_portrait;
+    return `<div class="route-stop ${i%2===0?'right':'left'}" style="left:${pts[i].x}%;top:${pts[i].y}%">
+      <i></i>
+      <div class="route-stop-photo"><img src="${photo}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+      <b>${esc(proper(s[1]))}</b>
+    </div>`
+  }).join('');
+  const traveler=DATA.traveler_panda
+    ?`<img src="${DATA.traveler_panda}" alt="${lang==='zh'?'背包熊猫':'Backpack panda'}">`
+    :PANDA;
   return `<div class="swipe-face swipe-back">
-    <div class="swipe-back-head"><div class="back-title"><b>${esc(proper(d.vt))}</b><small>${lang==='zh'?`第 ${d.day} 天路线`:`Day ${d.day} Route`}</small></div><button class="flip-back" onclick="event.stopPropagation();flipTopCard()" aria-label="${lang==='zh'?'翻回正面':'Flip back'}">${icon('refresh','sm')}</button></div>
-    <div class="card-route-map"><div class="card-route-bg">${art(d.day)}</div><svg class="card-route-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${path}"/></svg>${nodes}<div class="route-panda" style="left:${px}%;top:${Math.min(93,py+5)}%">${traveler}</div></div>
+    <div class="swipe-back-head">
+      <div class="back-title"><b>${esc(proper(d.vt))}</b><small>${lang==='zh'?`第 ${d.day} 天路线`:`Day ${d.day} Route`}</small></div>
+      <button class="flip-back" onclick="event.stopPropagation();flipTopCard(false)" aria-label="${lang==='zh'?'翻回正面':'Flip back'}">${icon('refresh','sm')}</button>
+    </div>
+    <div class="card-route-map count-${n}">
+      <svg class="card-route-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${path}"/></svg>
+      ${nodes}
+      <div class="route-panda" style="left:${px}%;top:${Math.min(93,py+4)}%">${traveler}</div>
+    </div>
   </div>`
 }
 function stackCardHTML(idx,depth){
@@ -866,8 +1056,9 @@ function stackCardHTML(idx,depth){
 function initialSwipeIndex(){
   const saved=Number(store.get('chengduSwipeDay')),now=chinaNow();
   if(now.iso>=days[0].iso&&now.iso<=days[days.length-1].iso)return currentDay()-1;
+  if(now.iso<days[0].iso)return 0;
   if(Number.isInteger(saved)&&saved>=0&&saved<days.length)return saved;
-  return now.iso<days[0].iso?0:days.length-1
+  return days.length-1
 }
 function renderSwipeStack(index=swipeDayIdx){
   swipeDayIdx=(index+days.length)%days.length;store.set('chengduSwipeDay',String(swipeDayIdx));swipeFlipped=false;
@@ -891,11 +1082,47 @@ function completeSwipe(direction){
 function springBack(){const top=$('#swipeStage .swipe-card[data-depth="0"]');if(top){top.classList.remove('dragging');top.style.transform='';top.style.opacity=''}resetLower()}
 function bindSwipeTop(){
   const top=$('#swipeStage .swipe-card[data-depth="0"]');if(!top)return;
-  const start=e=>{if(swipeAnimating||swipeFlipped)return;const p=e.touches?e.touches[0]:e;dragState={x:p.clientX,y:p.clientY,lastX:p.clientX,moved:false};top.classList.add('dragging')};
-  const move=e=>{if(!dragState||swipeFlipped)return;const p=e.touches?e.touches[0]:e,dx=p.clientX-dragState.x,dy=p.clientY-dragState.y;dragState.lastX=p.clientX;if(Math.abs(dx)>6)dragState.moved=true;if(Math.abs(dx)>Math.abs(dy)&&e.cancelable)e.preventDefault();top.style.transform=`translateX(${dx}px) rotate(${(dx*.06).toFixed(2)}deg)`;animateLower(Math.min(1,Math.abs(dx)/(top.clientWidth*SWIPE_THRESHOLD)))};
-  const end=()=>{if(!dragState)return;const dx=dragState.lastX-dragState.x,moved=dragState.moved;dragState=null;if(Math.abs(dx)>top.clientWidth*SWIPE_THRESHOLD){completeSwipe(dx>0?1:-1);return}springBack();if(!moved)setTimeout(()=>flipTopCard(),0)};
-  if(window.PointerEvent){top.addEventListener('pointerdown',start);top.addEventListener('pointermove',move);top.addEventListener('pointerup',end);top.addEventListener('pointercancel',()=>{dragState=null;springBack()})}
-  else{top.addEventListener('touchstart',start,{passive:true});top.addEventListener('touchmove',move,{passive:false});top.addEventListener('touchend',end);top.addEventListener('mousedown',start);window.addEventListener('mousemove',move);window.addEventListener('mouseup',end)}
+  const start=e=>{
+    if(swipeAnimating)return;
+    const p=e.touches?e.touches[0]:e;
+    dragState={x:p.clientX,y:p.clientY,lastX:p.clientX,lastY:p.clientY,moved:false,wasFlipped:swipeFlipped};
+    if(!swipeFlipped)top.classList.add('dragging')
+  };
+  const move=e=>{
+    if(!dragState)return;
+    const p=e.touches?e.touches[0]:e,dx=p.clientX-dragState.x,dy=p.clientY-dragState.y;
+    dragState.lastX=p.clientX;dragState.lastY=p.clientY;
+    if(Math.hypot(dx,dy)>7)dragState.moved=true;
+    if(dragState.wasFlipped)return;
+    if(Math.abs(dx)>Math.abs(dy)&&e.cancelable)e.preventDefault();
+    top.style.transform=`translateX(${dx}px) rotate(${(dx*.06).toFixed(2)}deg)`;
+    animateLower(Math.min(1,Math.abs(dx)/(top.clientWidth*SWIPE_THRESHOLD)))
+  };
+  const end=()=>{
+    if(!dragState)return;
+    const dx=dragState.lastX-dragState.x,moved=dragState.moved,wasFlipped=dragState.wasFlipped;
+    dragState=null;
+    if(wasFlipped){
+      if(!moved)flipTopCard(false);
+      return
+    }
+    if(Math.abs(dx)>top.clientWidth*SWIPE_THRESHOLD){completeSwipe(dx>0?1:-1);return}
+    springBack();
+    if(!moved)setTimeout(()=>flipTopCard(true),0)
+  };
+  if(window.PointerEvent){
+    top.addEventListener('pointerdown',start);
+    top.addEventListener('pointermove',move);
+    top.addEventListener('pointerup',end);
+    top.addEventListener('pointercancel',()=>{dragState=null;springBack()})
+  }else{
+    top.addEventListener('touchstart',start,{passive:true});
+    top.addEventListener('touchmove',move,{passive:false});
+    top.addEventListener('touchend',end);
+    top.addEventListener('mousedown',start);
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end)
+  }
 }
 function renderHome(forcedIndex=null){
   const hero=DATA.images.panda_portrait.replace(/w=\d+/,'w=1000');
