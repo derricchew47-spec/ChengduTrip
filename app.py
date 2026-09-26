@@ -316,11 +316,12 @@ main{min-height:100dvh}
 .swipe-stage[data-reveal="prev"] .swipe-card[data-role="prev"],.swipe-stage[data-reveal="next"] .swipe-card[data-role="next"]{opacity:1}
 .swipe-card.dragging{transition:none}
 .swipe-card.throwing{transition:transform .34s cubic-bezier(.18,.72,.2,1),opacity .28s ease}
-.swipe-card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .58s cubic-bezier(.2,.75,.2,1)}
-.swipe-card.flipped .swipe-card-inner{transform:rotateY(180deg)}
+.swipe-card-inner{position:absolute;inset:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform .58s cubic-bezier(.2,.75,.2,1);-webkit-transition:-webkit-transform .58s cubic-bezier(.2,.75,.2,1)}
+.swipe-card.flipped .swipe-card-inner{transform:rotateY(180deg);-webkit-transform:rotateY(180deg)}
 .swipe-face{
   position:absolute;inset:0;overflow:hidden;border-radius:21px;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;
+  transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
   border:1px solid rgba(91,83,64,.20);
   background:
     radial-gradient(circle at 18% 7%,rgba(156,135,93,.08),transparent 23%),
@@ -336,7 +337,13 @@ main{min-height:100dvh}
     radial-gradient(circle at 82% 68%,rgba(119,104,76,.028) 0 1px,transparent 1.5px);
   background-size:13px 13px,17px 17px
 }
-.swipe-back{transform:rotateY(180deg)}
+.swipe-front{transform:rotateY(0deg) translateZ(.1px);-webkit-transform:rotateY(0deg) translateZ(.1px)}
+.swipe-back{transform:rotateY(180deg) translateZ(.1px);-webkit-transform:rotateY(180deg) translateZ(.1px)}
+.swipe-face>*{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+@supports (-webkit-touch-callout:none){
+  .swipe-card.flipped .swipe-front{visibility:hidden;transition:visibility 0s linear .29s}
+  .swipe-card:not(.flipped) .swipe-back{visibility:hidden;transition:visibility 0s linear .29s}
+}
 .card-front-head{
   position:absolute;left:19px;right:19px;top:15px;z-index:8;
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px
